@@ -1,0 +1,14 @@
+<?php
+namespace {0} {{
+	$actualFile = preg_replace('/Test/', '', __FILE__);
+	$autoLoaderPath = strstr($actualFile, 'fw_library', true).'fw_library/aae/std/AutoLoader.php';
+	require_once $autoLoaderPath;
+	require_once $actualFile;
+
+	class {1}Test extends \PHPUnit_Framework_TestCase {{
+		public function test___construct() {{
+			$obj = new {1}();
+		}}
+		/* @cursor */
+	}}
+}}

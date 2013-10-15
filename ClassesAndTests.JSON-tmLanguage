@@ -1,0 +1,116 @@
+{
+ "name": "ClassesAndTests",
+ "scopeName": "source.cat",
+ "fileTypes": [],
+ "patterns":
+ 	[
+		{
+		     "match": "\\b(Axel Ancona Esselmann)\\b",
+		     "name": "credits"
+		},
+		{	// (?<=Executing\s)[\s\w\,\d\.\:]+(?=[AP]M\:)[AP]M:
+		     "match": "(?<=Executing\\s)[\\s\\w\\,\\d\\.\\:]+(?=[AP]M\\:)[AP]M:",
+		     "name": "date"
+		},
+		{	// ^\$[\s\/\w\"]+(?=\w")\w"
+		     "match": "^\\$[\\s\\/\\w\\\"]+(?=\\w\")\\w\"",
+		     "name": "command"
+		},
+
+
+
+		{
+		     "match": "\\b(Result:|Executing)\\b",
+		     "name": "actions"
+		},
+		{	// \d+(?=\s\/)|(?<=\/\s)\d+
+		     "match": "\\d+(?=\\s\\/)|(?<=\\/\\s)\\d+",
+		     "name": "numbers_tests_run"
+		},
+		{	// (?<=\()\s+\d+%(?=\))
+		     "match": "(?<=\\()\\s+\\d+%(?=\\))",
+		     "name": "percentages"
+		},
+		{	// (?<=\w:)\d+(?=\s)
+		     "match": "(?<=\\w:)\\d+(?=\\s)",
+		     "name": "line_numbers"
+		},
+		{	// [/\w]+/(?=\w+\.\w+)
+		     "match": "[/\\w]+/(?=\\w+\\.\\w+)",
+		     "name": "folder"
+		},
+		{	// (?<=\/)\w+\.\w+
+		     "match": "(?<=\\/)\\w+\\.\\w+",
+		     "name": "file"
+		},
+
+
+
+		{	// (?<=Failed\sasserting\sthat\s).+(?=\smatches\s)
+		     "match": "(?<=Failed\\sasserting\\sthat\\s).+(?=\\smatches\\sexpected\\s)",
+		     "name": "wrong_value"
+		},
+		{	// (?<=\smatches\sexpected\s).+(?=\.\s)
+		     "match": "(?<=\\smatches\\sexpected\\s).+(?=\\.\\s)",
+		     "name": "expected_value"
+		},
+		{	// ^Time:\s\d+\s\w+,\sMemory:\s\d+\.\d+\w+
+		     "match": "^Time:\\s\\d+\\s\\w+,\\sMemory:\\s\\d+\\.\\d+\\w+",
+		     "name": "statistics"
+		},
+		{
+		     "match": "^FAILURES\\!",
+		     "name": "failure_statement"
+		},
+		{
+		     "match": "^PHPUnit\\s\\d+\\.\\d+\\.\\d+\\sby\\sSebastian\\sBergmann.",
+		     "name": "php_unit"
+		},
+		{
+		     "match": "^ClassesAndTests\\s\\d+\\.\\d+\\.\\d+",
+		     "name": "classes_and_tests"
+		},
+
+
+
+
+		{
+		     "match": "^\\d+\\)",
+		     "name": "numbers"
+		},
+		{
+		     "match": "[\\w\\\\]+(?=\\\\\\w+::)",
+		     "name": "namespace"
+		},
+		{
+		     "match": "\\w+(?=::)",
+		     "name": "class_name"
+		},
+		{	// (?<=::)\w+(?=\s)
+		     "match": "(?<=::)\\w+(?=\\s)",
+		     "name": "function_name"
+		},
+		{
+		     "match": "^OK[\\s\\(\\d\\w\\,\\)]+",
+		     "name": "passed"
+		},
+		{
+			// \.+(?=F)|^\.+(?=\s\d+\s\/\s\d+\s\(\s\d+%\))|^\.+(?=\s)|(?<=[F])\.+(?=\s)
+		     "match": "\\.+(?=F)|^\\.+(?=\\s\\d+\\s\\/\\s\\d+\\s\\(\\s\\d+%\\))|^\\.+(?=\\s)|(?<=[F])\\.+(?=\\s)",
+		     "name": "green"
+		},
+		{	// F+(?=\.)|\s\sF+\s\s|(?<=\.)F+(?!\w)
+		     "match": "F+(?=\\.)|\\s\\sF+\\s\\s|(?<=\\.)F+(?!\\w)",
+		     "name": "failed"
+		},
+		{
+		     "match": "\\b(Failures[a-z,: 0-9]*)",
+		     "name": "failed"
+		},
+		{
+		     "match": "\\b::\\b",
+		     "name": "resolution_operator"
+		}
+	],
+ "uuid": "47fc9162-d2d9-427a-b400-f2714eec92c1"
+}

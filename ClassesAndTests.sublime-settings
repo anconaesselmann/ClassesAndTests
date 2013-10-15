@@ -1,0 +1,162 @@
+{
+
+// ================================================================= //
+//                                                                   //
+//      Folder and file related setting                              //
+//                                                                   //
+// ================================================================= //
+
+    /*
+     * The base_path is the default starting point for the creation
+     * of class and test files. Point the base_folder to your code base.
+     */
+	"base_path": "/Users",
+
+    /*
+     * Set a more fine grained default. current_path should have
+     * base_paht as a parent/grandparent... folder. This setting is
+     * convenient to bypass name-space related folders that never or
+     * seldom hold any actual code.
+     */
+    "current_path": "",
+
+    /*
+     * [",", "r"] builds unit tests in the parent folder of the
+     * current file. [",", ",", "r"] builds the folder set by
+     * current_php_test_suite_dir. Set this folder to trigger
+     * all tests in your test suite to be build.
+     */
+    "current_php_test_suite_dir": "/Users",
+
+    /*
+     * When creating new files with [",", "n"] the file extension
+     * can be omitted if default_file_extension is set
+     */
+    "default_file_extension": "php",
+
+    /*
+     * If the phpUnits binary is somewhere other than in /opt/local/bin/
+     * use this setting to point to the correct directory.
+     */
+    "php_unit_binary_dir": "/opt/local/bin/",
+
+// ================================================================= //
+// 																	 //
+// 		These settings are available within template files.			 //
+// 																	 //
+// ================================================================= //
+
+    "author": "Please set an author in the settings",
+    "license": "",
+
+// ================================================================= //
+//                                                                   //
+//      These settings change the file creation behavior when        //
+//      working with test files and class files.                     //
+//                                                                   //
+// ================================================================= //
+
+    /*
+     * If "search_for_test_folder" is set to true, test files will be
+     * placed in a shadowed directory tree (if it exists.)
+     *
+     *      Example:
+     *
+     *          both of these directories exist:
+     *              /MyProject/Library
+     *              /MyProject/LibraryTest
+     *
+     *          The test file for
+     *              /MyProject/Library/mvc/Controller.php
+     *          will be:
+     *              /MyProject/LibraryTest/mvc/ControllerTest.php
+     *
+     * WARNING: With this setting set to true, don't end a directory
+     *          name with "Test" or "DB_Test" unless you intend it as
+     *          a directory for your tests.
+     */
+    "search_for_test_folder": true,
+
+    /*
+     * If "create_tests_for_source_files" is set to true, a corresponding
+     * test file will be created automatically for each manually created
+     * source file.
+     */
+    "create_tests_for_source_files": true,
+
+    /*
+     * If "create_source_for_test_files" is set to true, a corresponding
+     * source file will be created automatically for each manually
+     * created test file.
+     */
+    "create_source_for_test_files": true,
+
+
+// ================================================================= //
+// 																	 //
+// 		These settings change the window behavior when working 	 	 //
+// 		with test files and class files.							 //
+// 																	 //
+// ================================================================= //
+
+    /*
+     * If "seperate_tests_and_sources_by_split_view" is set to true,
+     * tests and source files will open in opposite windows in a split
+     * view. The default is for tests to be on the right and classes
+     * to be on the left.
+     *
+     * Example:
+     *  +-----------------------+-----------------------+
+     *  |                       |                       |
+     *  |      Class file       |      Source file      |
+     *  |                       |                       |
+     *  +-----------------------+-----------------------+
+     */
+    "seperate_tests_and_sources_by_split_view": true,
+
+    /*
+     * Set this to false for tests to be on the left and classes
+     * to be on the right.
+     * Please note: This setting only has an effect when
+     * "seperate_tests_and_sources_by_split_view" is set to true.
+     */
+    "tests_on_right": true,
+
+    /*
+     * Sets the default column width for the split view.
+     * A value from 0 to 1 describes the size of the left column
+     * proportional to the right column.
+     * Please note: This setting only has an effect when
+     * "seperate_tests_and_sources_by_split_view" is set to true
+     *
+     * Example:
+     *
+     *    left_column_size = 0.5     left_column_size = 0.7
+     *    +---------+---------+      +-------------+-----+
+     *    |         |         |      |             |     |
+     *    |         |         |      |             |     |
+     *    |         |         |      |             |     |
+     *    +---------+---------+      +-------------+-----+
+     */
+    "left_column_size": 0.6,
+
+    /*
+     * When executing unit tests and show_executed_command is true,
+     * the time of execution and the command that was executed are
+     * output before the output of the executed command.
+     */
+    "show_executed_command": true,
+
+    /*
+     *  Controls the font size in the output panel that displays
+     *  unit test results.
+     */
+    "output_font_size": 10,
+
+    /*
+     * Changing the color theme requires a restart of Sublime Text.
+     * Valid parameters for "color_theme" are:
+     *      null, "color"
+     */
+    "color_theme": "color"
+}

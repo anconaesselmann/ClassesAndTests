@@ -1,0 +1,104 @@
+[
+	{ 	"keys": ["f2"], "command": "classes_and_tests" },
+	{ 	"keys": ["ctrl+shift+t"], "command": "toggle_source_test" },
+
+
+	{
+		"keys": [",", "n"],
+		"command": "classes_and_tests",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+		"keys": [",", "t"],
+		"command": "toggle_source_test",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+		"keys": [",", "r"],
+		"command": "run_php_unit_tests",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+		"keys": [",", ",", "r"],
+		"command": "run_php_unit_tests", "args": {"run_test_suite": true},
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+		"keys": [",", "r"],
+		"command": "hide_panel", "args": {"cancel": true},
+		"context":
+		[
+			{ "key": "panel_visible", "operator": "equal", "operand": true }/*,
+			{ "key": "setting.php_unit_output_panel", "operator": "equal"}*/
+		]
+	}
+
+/* 	copy these into user
+	"Sublime Text 2"->"Preferences"->"Key Bindings - User"
+	to work in vintage mode
+
+	{
+        "keys": [",", "n"],
+        "command": "classes_and_tests",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
+    {
+        "keys": [",", "t"],
+        "command": "toggle_source_test",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
+    {
+        "keys": [",", "r"],
+        "command": "run_php_unit_tests",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
+    {
+        "keys": [",", ",", "r"],
+        "command": "run_php_unit_tests", "args": {"run_test_suite": true},
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
+    {
+        "keys": [",", "r"],
+        "command": "hide_panel", "args": {"cancel": true},
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"},
+                { "key": "panel_visible", "operator": "equal", "operand": true }
+            ]
+    }
+
+*/
+]
