@@ -3,7 +3,7 @@ import os, fileinput, subprocess, re, sublime, sublime_plugin
 #from src.FileCreator import FileCreator
 
 PACKAGE_NAME = "ClassesAndTests"
-PACKAGE_VERSION = "0.0.1"
+PACKAGE_VERSION = "0.1.0"
 PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
 settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 TEMPLATES_DIR = PACKAGE_DIR + "/templates"
@@ -360,10 +360,13 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                             if window is not None:
                                 window.run_command("replace_input_panel_content", {"replacementString": newCommandString})
                                 command_string = command_string[len(basePath):]
-                    #self.inputPanelView.set_status("ClassesAndTests", "Creating file: " + fc.getFileDir())
-                    sublime.status_message("Creating file: " + fc.getFileDir())
+                    statusMessage = "Creating file: " + fc.getFileDir()
+                    self.view = self.window.active_view()
+                    self.view.set_status("ClassesAndTests", statusMessage)
+                    #sublime.status_message(statusMessage)
 
     def on_cancel(self):
+        self.view.erase_status("ClassesAndTests")
         pass
 
     def printToConsole(self, out):
