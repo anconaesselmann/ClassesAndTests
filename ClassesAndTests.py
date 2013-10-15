@@ -378,9 +378,10 @@ class SublimeWindowFunctions():
         self.windowInstance = windowInstance
     def getCurrentDirectory(self):
         view = self.windowInstance.active_view()
-        fileFolder = os.path.dirname(view.file_name())
+        fileFolder = view.file_name()
         result = None
         if fileFolder is not None:
+            fileFolder = os.path.dirname(fileFolder)
             fc = FileCreator(settings.get('base_path'), "", "", TEMPLATES_DIR)
             fc.kind = FileCreator.KIND_IS_TEST
             fc2 = FileCreator(fileFolder, "", "", TEMPLATES_DIR)
