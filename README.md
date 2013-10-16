@@ -1,6 +1,10 @@
 Classes and Tests (beta) 
 A file creator and test runner for PSR-0 name-spaced class and test files (Templates supplied are for php and phpUnit)
 
+Inline-style: 
+![alt text](https://github.com/anconaesselmann/ClassesAndTests/blob/master/images/demo1.gif "Demo of simultaneous Class and Test creation")
+
+
 Add to user key bindings to activate vintage mode key bindings:
 
     {
