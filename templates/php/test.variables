@@ -1,0 +1,6 @@
+[
+	{
+		"variable": "php_autoloader_path",
+		"command": "get_php_autoloader"
+	}
+]

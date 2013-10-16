@@ -17,9 +17,9 @@ else:
     TEST_WINDOW  = 0
 
 class FileCreator:
-    KIND_IS_CLASS   = 1
-    KIND_IS_TEST    = 2
-    KIND_IS_DB_TEST = 3
+    KIND_IS_CLASS   = "class"
+    KIND_IS_TEST    = "test"
+    KIND_IS_DB_TEST = "dbTest"
 
     def __init__(self, basePath, relativeFileName, defaultFileExtension, templatesDir):
         self.determineVersion(relativeFileName)
@@ -169,11 +169,10 @@ class FileCreator:
         return replacementString
 
     def getReplacementLine(self, keyWord, replacementString, line):
-        replacement = self.getReplacementString(keyWord, replacementString)
         searchString = '/* @' + keyWord + ' */'
-        if len(replacement) > 0:
+        if len(replacementString) > 0:
             index = line.find(searchString)
-            result = line[0:index] + replacement + line[index + len(searchString):]
+            result = line[0:index] + replacementString + line[index + len(searchString):]
         else:
             result = ""
         return result
@@ -183,12 +182,48 @@ class FileCreator:
         if fileDir is None:
             print "File Opening Failed."
             return
-        cursorString  = '/* @cursor */'
-        authorString  = '/* @author */'
-        licenseString = '/* @license */'
+        cursorString     = '/* @cursor */'
+        authorString     = '/* @author */'
+        licenseString    = '/* @license */'
+        autoLoaderString = '/* @autoLoader */'
+
         line = 0
         column = 0
         i = 0
+
+
+
+
+
+
+
+
+        f = FileCreator("", fileDir, "", TEMPLATES_DIR)
+
+        fileExtension = f.fileExtension[1:]
+        templateVariablesDir = FileCreator.getStandardizedPath(TEMPLATES_DIR) + fileExtension + "/" + f.kind + ".variables"
+        if os.path.isfile(templateVariablesDir):
+            import json
+            from pprint import pprint
+            jsonData = open(templateVariablesDir)
+            templateVariables = json.load(jsonData)
+            jsonData.close()
+            #pprint(templateVariables)
+            replacements = dict()
+            for templateVar in templateVariables:
+                variableName = templateVar["variable"]
+                variableValue = settings.get(variableName)
+                variableCommand = templateVar["command"]
+
+                commandResult = eval(variableCommand + "(\"" + variableValue + "\", \"" + variableName + "\")")
+                replacements[variableName] = commandResult
+                print commandResult
+
+
+
+
+
+
         for lineTemp in fileinput.input(fileDir, inplace=True):
             i += 1
             if cursorString in lineTemp:
@@ -196,12 +231,17 @@ class FileCreator:
                 column = lineTemp.find(cursorString)
                 print lineTemp[0:column] + lineTemp[column + len(cursorString):],
                 column += 1
-            elif authorString in lineTemp:
-                print self.getReplacementLine('author',  settings.get('author'),  lineTemp),
-            elif licenseString in lineTemp:
-                print self.getReplacementLine('license', settings.get('license'), lineTemp),
             else:
-                print lineTemp,
+                replaced = False
+                for variableName, replacementString in replacements.items():
+                    searchString = "/* @" + variableName + " */"
+                    if searchString in lineTemp:
+                        replaced = True
+                        if len(replacementString) > 0:
+                            index = lineTemp.find(searchString)
+                            print lineTemp[0:index] + replacementString + lineTemp[index + len(searchString):],
+                if replaced == False:
+                    print lineTemp,
         openStatement = "%s:%d:%d" % (fileDir, line, column)
         import sublime
 
@@ -495,7 +535,7 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
         if run_test_suite == False:
             testsPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
         else:
-            testsPath = settings.get("current_php_test_suite_dir")
+            testsPath = FileCreator.getStandardizedPath(settings.get("current_php_test_suite_dir"))
         self.runTests(testsPath)
 
     def runTests(self, testsPath):
@@ -517,3 +557,17 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
 
         scriptResponse = Command(commandString).runAndGetOutputString()
         op.printToPanel(scriptResponse)
+
+def get_doc_block_tag(value, name):
+    return "@" + name + " " + value
+
+def get_php_autoloader(value, name):
+    if value is not None:
+        if value[0:1] == "/":
+            result = "require_once \"" + value + "\";"
+        else:
+            result = "require_once strstr(__FILE__, 'Test', true).'/" + value + "';"
+    else:
+        result = ""
+    return result
+

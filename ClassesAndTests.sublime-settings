@@ -40,6 +40,20 @@
      */
     "php_unit_binary_dir": "/opt/local/bin/",
 
+
+    /*
+     * A file name without a leading directory character will be
+     * resolved relative to "current_php_test_suite_dir".
+     *
+     * A file name with a leading directory character will insert a
+     * hard-coded directory to the autoloader (not advisable, tests
+     * will break on other systems.)
+     *
+     * Set php_autoloader_path to null if you bootstrap your auto-loader
+     *
+     */
+    "php_autoloader_path": null,
+
 // ================================================================= //
 // 																	 //
 // 		These settings are available within template files.			 //

@@ -1,0 +1,10 @@
+[
+	{
+		"variable": "author",
+		"command": "get_doc_block_tag"
+	},
+	{
+		"variable": "license",
+		"command": "get_doc_block_tag"
+	}
+]
