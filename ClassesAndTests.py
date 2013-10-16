@@ -492,13 +492,29 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
             if SPLIT_VIEW is True:
                 sublime.active_window().run_command("focus_group", { "group": TEST_WINDOW })
 
-        fileDir = fc.createFromTemplate()
+
+        fileDir = fc.getFileDir()
+
+
+
+        if fileDir is not None:
+            if os.path.isfile(fileDir) != True:
+                createdFile = fc.createFromTemplate()
+                if createdFile is not None:
+                    fc.initialOpenFile(self.window, fileDir)
+            else:
+                fc.openFile(self.window, fileDir)
+                self.window.run_command("exit_insert_mode")
+        else:
+            print "toggle_source_test experienced an error."
+        sublime.active_window().run_command("hide_panel", {"panel": "console"})
+        """fileDir = fc.createFromTemplate()
         if fileDir is not None:
             fc.openFile(self.window, fileDir)
             self.window.run_command("exit_insert_mode")
         else:
             print "toggle_source_test experienced an error."
-        sublime.active_window().run_command("hide_panel", {"panel": "console"})
+        sublime.active_window().run_command("hide_panel", {"panel": "console"})"""
 
 
 class OutputPanel():
