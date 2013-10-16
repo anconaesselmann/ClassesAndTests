@@ -35,3 +35,7 @@ To enable vintage mode key bindings add these to your user-key-bindings:
 
 Known issues:
 Currently only key-bindings for Mac exist.
+
+If this plugin is useful to you, please considder supporting me with a donation!
+
+<a href='https://pledgie.com/campaigns/22419'><img alt='Click here to lend your support to: Support the software you use! and make a donation at www.pledgie.com !' src='/images/donate.png?skin_name=chrome' border='0' ></a>
