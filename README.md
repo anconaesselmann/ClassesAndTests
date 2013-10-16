@@ -1,9 +1,20 @@
-Classes and Tests (beta) 
+#Classes and Tests (beta) 
 
-A file creator and test runner for PSR-0 name-spaced class and test files (Templates supplied are for php and phpUnit)
+####A file creator and test runner for PSR-0 name-spaced class and test files
+(For now Smart Templates supplied are for php and phpUnit)
 
-![alt text](/images/demo1.gif "Demo of simultaneous Class and Test creation")
+###Features
+Create new class files with their corresponding test files from "smart templates".  
+Type `,`, `n` to open the file creation panel and enter the new file name. Folders are created automatically.
+![alt text](/images/demo_01_create_class_and_test.gif "Demo of simultaneous Class and Test creation")
+If your test files live in a separate directory tree that mirrors your source code directory tree, 
+the test files are automatically placed in the correctdirectory-branch.
 
+![alt text](/images/demo_02_create_test.gif "Demo of simultaneous Class and Test creation")
+
+![alt text](/images/demo_03_run_tests.gif "Demo of simultaneous Class and Test creation")
+
+![alt text](/images/demo_04_run_test_suite.gif "Demo of simultaneous Class and Test creation")
 
 
 To enable vintage mode key bindings add these to your user-key-bindings:
