@@ -30,9 +30,11 @@
   ![alt text](/images/demo_02_create_test.gif "Creating a Test file from a Class")
   
 ####Unit Testing
-* Run tests for this class without leaving the editor
+* Run tests for this class without leaving the editor by pressing `,`, `r`.
   ![alt text](/images/demo_03_run_tests.gif "Demo of simultaneous Class and Test creation")
-* Run a test suite without leaving the editor
+
+
+* Run a test suite without leaving the editor by pressing `,`, `,`, `r`.
   ![alt text](/images/demo_04_run_test_suite.gif "Demo of simultaneous Class and Test creation")
 
 
