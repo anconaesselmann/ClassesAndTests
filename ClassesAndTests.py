@@ -49,7 +49,7 @@ class FileCreator:
 
         if slashInFront == True:
             if path[0:1] != "/":
-                print path[0:1]
+                print(path[0:1])
                 path = "/" + path
         elif slashInFront == False:
             if path[0:1] == "/":
@@ -126,7 +126,7 @@ class FileCreator:
             dirArray = self.tempBasePath.split("/")
             for (i, item) in enumerate(dirArray):
                 tempDir = ""
-                for x in xrange(1,i):
+                for x in range(1,i):
                     tempDir += "/" + dirArray[x]
                     pass
                 tempDir += "Test"
@@ -144,7 +144,7 @@ class FileCreator:
         className = self.getClassName()
         if len(className) < 1:
             fileDir = None
-            print "You entered a folder. File could not be created."
+            print("You entered a folder. File could not be created.")
             return fileDir
         try:
             if data == None:
@@ -152,7 +152,7 @@ class FileCreator:
             fileDir = self.getFileDir()
             self.createFolder(fileDir)
             self.saveFile(fileDir, data)
-        except Exception, e:
+        except Exception as e:
             fileDir = None
         return fileDir
 
@@ -160,7 +160,7 @@ class FileCreator:
         className = self.getClassName()
         if len(className) < 1:
             fileDir = None
-            print "You entered a folder. File could not be created."
+            print("You entered a folder. File could not be created.")
             return fileDir
         try:
             data = self.getClassTemplate()
@@ -168,7 +168,7 @@ class FileCreator:
             fileDir = self.getFileDir()
             self.createFolder(fileDir)
             self.saveFile(fileDir, data)
-        except Exception, e:
+        except Exception as e:
             fileDir = None
         return fileDir
 
@@ -189,7 +189,7 @@ class FileCreator:
     def initialOpenFile(self, window, fileDir):
         leftColumnSize = settings.get("left_column_size")
         if fileDir is None:
-            print "File Opening Failed."
+            print("File Opening Failed.")
             return
 
 
@@ -224,7 +224,7 @@ class FileCreator:
             if cursorString in lineTemp:
                 line = i
                 column = lineTemp.find(cursorString)
-                print lineTemp[0:column] + lineTemp[column + len(cursorString):],
+                print(lineTemp[0:column] + lineTemp[column + len(cursorString):]),
                 column += 1
             else:
                 replaced = False
@@ -234,12 +234,12 @@ class FileCreator:
                         replaced = True
                         if replacementString is not None:
                             index = lineTemp.find(searchString)
-                            print lineTemp[0:index] + replacementString + lineTemp[index + len(searchString):],
+                            print(lineTemp[0:index] + replacementString + lineTemp[index + len(searchString):]),
                         else:
                             #column -= 1
                             pass
                 if replaced == False:
-                    print lineTemp,
+                    print(lineTemp),
         openStatement = "%s:%d:%d" % (fileDir, line, column)
         import sublime
 
@@ -287,8 +287,8 @@ class FileCreator:
         try:
             classTemplateDir = templateDirFull + self.getTemplateFileName()
             classTemplateFile = open(classTemplateDir, "r")
-        except Exception, e:
-            print "No templates for source code ending with " + self.fileExtension
+        except Exception as e:
+            print("No templates for source code ending with " + self.fileExtension)
             raise e
         else:
             pass
@@ -306,7 +306,7 @@ class FileCreator:
         return classTemplateFileName;
 
     def printToConsole(self, out):
-        print "- FileCreator: " + out
+        print("- FileCreator: " + out)
 
 
 class Command():
@@ -328,7 +328,7 @@ class Command():
         return scriptResponse
 
     def runAndPrintAllOutput(self):
-        print self.runAndGetOutputString()
+        print(self.runAndGetOutputString())
 
 
 class UserSettings():
@@ -349,12 +349,12 @@ class UserSettings():
 
             settingsVariables[variable] = value
             jsonData = json.dumps(settingsVariables)
-            print jsonData
+            print(jsonData)
             fileHandle = open(self.fileName, "wb")
             fileHandle.write(jsonData);
             fileHandle.close()
-        except Exception, e:
-            print "Error when calling UserSettings.set():\n" + str(e)
+        except Exception as e:
+            print("Error when calling UserSettings.set():\n" + str(e))
 
     def deleteAll(self):
         os.remove(self.fileName)
@@ -393,7 +393,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if userSettingsExist == True:
             self.captureInput(self.userInputCaption[self.currentInput], "")
         else:
-            print "Error trying to write to " + userSettingsDir
+            print("Error trying to write to " + userSettingsDir)
 
     def captureInput(self, caption, initial):
         if self.currentInput != None:
@@ -411,7 +411,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if self.currentInput < len(self.userInput):
             self.captureInput(self.userInputCaption[self.currentInput], "")
         else:
-            for x in xrange(0,len(self.userInput)):
+            for x in range(0,len(self.userInput)):
                 if len(self.userInputResponse[x]) > 0:
                     self.userSettings.set(self.userInput[x], self.userInputResponse[x])
             view = self.window.active_view()
@@ -495,7 +495,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         pass
 
     def printToConsole(self, out):
-        print "- " + PACKAGE_NAME + ": " + out
+        print("- " + PACKAGE_NAME + ": " + out)
 
 
 class SublimeWindowFunctions():
@@ -586,7 +586,7 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
                 fc.openFile(self.window, fileDir)
                 self.window.run_command("exit_insert_mode")
         else:
-            print "toggle_source_test experienced an error."
+            print("toggle_source_test experienced an error.")
         sublime.active_window().run_command("hide_panel", {"panel": "console"})
 
 
