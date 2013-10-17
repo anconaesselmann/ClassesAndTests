@@ -9,6 +9,9 @@ settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 TEMPLATES_DIR = PACKAGE_DIR + "/templates"
 SPLIT_VIEW = settings.get("seperate_tests_and_sources_by_split_view")
 
+USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path", "current_php_test_suite_dir"]
+USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code base directory:", "Enter unit-test-suite directory:"]
+
 if settings.get("tests_on_right") == True:
     CLASS_WINDOW = 0
     TEST_WINDOW  = 1
@@ -133,16 +136,18 @@ class FileCreator:
             result = self.tempBasePath
         return result
 
-    def create(self):
+    def create(self, data = None):
         className = self.getClassName()
         if len(className) < 1:
             fileDir = None
             print "You entered a folder. File could not be created."
             return fileDir
         try:
+            if data == None:
+                data = ""
             fileDir = self.getFileDir()
             self.createFolder(fileDir)
-            self.saveFile(fileDir, "")
+            self.saveFile(fileDir, data)
         except Exception, e:
             fileDir = None
         return fileDir
@@ -191,13 +196,6 @@ class FileCreator:
         column = 0
         i = 0
 
-
-
-
-
-
-
-
         f = FileCreator("", fileDir, "", TEMPLATES_DIR)
 
         fileExtension = f.fileExtension[1:]
@@ -213,16 +211,12 @@ class FileCreator:
             for templateVar in templateVariables:
                 variableName = templateVar["variable"]
                 variableValue = settings.get(variableName)
-                variableCommand = templateVar["command"]
-
-                commandResult = eval(variableCommand + "(\"" + variableValue + "\", \"" + variableName + "\")")
+                if variableValue is not None:
+                    variableCommand = templateVar["command"]
+                    commandResult = eval(variableCommand + "(\"" + variableValue + "\", \"" + variableName + "\")")
+                else:
+                    commandResult = None
                 replacements[variableName] = commandResult
-                print commandResult
-
-
-
-
-
 
         for lineTemp in fileinput.input(fileDir, inplace=True):
             i += 1
@@ -237,9 +231,12 @@ class FileCreator:
                     searchString = "/* @" + variableName + " */"
                     if searchString in lineTemp:
                         replaced = True
-                        if len(replacementString) > 0:
+                        if replacementString is not None:
                             index = lineTemp.find(searchString)
                             print lineTemp[0:index] + replacementString + lineTemp[index + len(searchString):],
+                        else:
+                            #column -= 1
+                            pass
                 if replaced == False:
                     print lineTemp,
         openStatement = "%s:%d:%d" % (fileDir, line, column)
@@ -332,9 +329,44 @@ class Command():
     def runAndPrintAllOutput(self):
         print self.runAndGetOutputString()
 
+class UserSettings():
+    def __init__(self, fileName):
+        self.fileName = fileName
+        userSettingsExist = os.path.isfile(fileName)
+        if userSettingsExist != True:
+            fc = FileCreator("", fileName, "", "")
+            fc.create("{\n}")
+
+    def set(self, variable, value):
+        try:
+            import json
+            from pprint import pprint
+            jsonData = open(self.fileName)
+            settingsVariables = json.load(jsonData)
+            jsonData.close()
+
+            settingsVariables[variable] = value
+            jsonData = json.dumps(settingsVariables)
+            print jsonData
+            fileHandle = open(self.fileName, "wb")
+            fileHandle.write(jsonData);
+            fileHandle.close()
+        except Exception, e:
+            print "Error when calling UserSettings.set():\n" + str(e)
+
+
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def run(self):
+        userSettingsDir = FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
+        userSettingsExist = os.path.isfile(userSettingsDir)
+        if userSettingsExist != True:
+            self.userSettings = UserSettings(userSettingsDir)
+            self.setUserSettings()
+        else:
+            self.displayNewFilePannel()
+
+    def displayNewFilePannel(self):
         currentPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
 
         caption = "Type in the name of a new file."
@@ -347,7 +379,55 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         self.inputPanelView.set_name("InputPannel")
         self.inputPanelView.settings().set("caret_style", "solid")
 
+    def setUserSettings(self):
+        userSettingsDir = FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
+        userSettingsExist = os.path.isfile(userSettingsDir)
+        self.userInput = USER_SETTINGS_TO_BE_INITIALIZED
+        self.userInputResponse = []
+        self.userInputCaption = USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS
+        self.currentInput = 0
+        if userSettingsExist == True:
+            self.captureInput(self.userInputCaption[self.currentInput], "")
+        else:
+            print "Error trying to write to " + userSettingsDir
+
+    def captureInput(self, caption, initial):
+        if self.currentInput != None:
+            self.inputPanelView = self.window.show_input_panel(
+                caption, initial,
+                self.settingEntered, self.settingEnteringChange, self.settingEnteringAbort
+            )
+            self.inputPanelView.set_name("InputPannel")
+            self.inputPanelView.settings().set("caret_style", "solid")
+            pass
+
+    def settingEntered(self, command_string):
+        self.userInputResponse.append(command_string)
+        self.currentInput += 1
+        if self.currentInput < len(self.userInput):
+            self.captureInput(self.userInputCaption[self.currentInput], "")
+        else:
+            for x in xrange(0,len(self.userInput)):
+                if len(self.userInputResponse[x]) > 0:
+                    self.userSettings.set(self.userInput[x], self.userInputResponse[x])
+            view = self.window.active_view()
+            view.erase_status("ClassesAndTests")
+            self.displayNewFilePannel()
+
+    def settingEnteringChange(self, command_string):
+        view = self.window.active_view()
+        view.set_status("ClassesAndTests", command_string)
+        print "settingEnteringChange"
+
+    def settingEnteringAbort(self):
+        print ","
+        view = self.window.active_view()
+        view.erase_status("ClassesAndTests")
+
     def on_done(self, command_string):
+        view = self.window.active_view()
+        view.erase_status("ClassesAndTests")
+
         fc = FileCreator(settings.get('base_path'), command_string, settings.get('default_file_extension'), TEMPLATES_DIR)
         fileDir = fc.createFromTemplate()
         if fileDir is None:
@@ -368,6 +448,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 fileDir = fc.createFromTemplate()
                 fc.initialOpenFile(self.window, fileDir)
 
+    # TODO: Has an issue when clearing the whole input line....
     def detectBackOneFolder(self, newInputPanelContent):
         result = False
         if hasattr(self, 'inputPanelView'):
@@ -401,12 +482,13 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                                 window.run_command("replace_input_panel_content", {"replacementString": newCommandString})
                                 command_string = command_string[len(basePath):]
                     statusMessage = "Creating file: " + fc.getFileDir()
-                    self.view = self.window.active_view()
-                    self.view.set_status("ClassesAndTests", statusMessage)
+                    view = self.window.active_view()
+                    view.set_status("ClassesAndTests", statusMessage)
                     #sublime.status_message(statusMessage)
 
     def on_cancel(self):
-        self.view.erase_status("ClassesAndTests")
+        view = self.window.active_view()
+        view.erase_status("ClassesAndTests")
         pass
 
     def printToConsole(self, out):
@@ -491,12 +573,7 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
             fc.kind = fc.KIND_IS_TEST
             if SPLIT_VIEW is True:
                 sublime.active_window().run_command("focus_group", { "group": TEST_WINDOW })
-
-
         fileDir = fc.getFileDir()
-
-
-
         if fileDir is not None:
             if os.path.isfile(fileDir) != True:
                 createdFile = fc.createFromTemplate()
@@ -508,13 +585,6 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
         else:
             print "toggle_source_test experienced an error."
         sublime.active_window().run_command("hide_panel", {"panel": "console"})
-        """fileDir = fc.createFromTemplate()
-        if fileDir is not None:
-            fc.openFile(self.window, fileDir)
-            self.window.run_command("exit_insert_mode")
-        else:
-            print "toggle_source_test experienced an error."
-        sublime.active_window().run_command("hide_panel", {"panel": "console"})"""
 
 
 class OutputPanel():
@@ -575,7 +645,8 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
         op.printToPanel(scriptResponse)
 
 def get_doc_block_tag(value, name):
-    return "@" + name + " " + value
+    if value is not None:
+        return "@" + name + " " + value
 
 def get_php_autoloader(value, name):
     if value is not None:
