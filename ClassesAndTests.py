@@ -360,6 +360,55 @@ class UserSettings():
         os.remove(self.fileName)
 
 
+class InputPanel():
+    def __init__(self, sublimeViewInstance ,sublimeEditInstance):
+        self.view = sublimeViewInstance
+        self.region = None
+        self.edit = sublimeEditInstance
+
+    def selectAll(self):
+        result = False
+        for region in self.view.sel():
+            if region.empty():
+                self.region = self.view.line(region)
+                result = True
+        return result
+
+    def getTextFromSelection(self):
+        result = None
+        if self.region is not None:
+            result = self.view.substr(self.region)
+        return result
+
+    def getAllText(self):
+        self.selectAll()
+        lineText = self.getTextFromSelection()
+        return lineText
+
+    def replaceAllText(self, newText):
+        self.selectAll()
+        self.replaceSelectedText(newText)
+
+    def replaceSelectedText(self, newLine):
+        result = False
+        if self.region is not None:
+            self.view.replace(self.edit, self.region, newLine)
+            self.newLine = newLine
+            result = True
+        return result
+
+    # returns the new new line
+    def deleteUntil(self, needle):
+        lineText = self.getAllText()
+        result = lineText
+        if lineText is not None:
+            index = lineText.rfind(needle);
+            newLine = lineText[0:index + len(needle)]
+            self.replaceSelectedText(newLine)
+            result = newLine
+        return result
+
+
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def run(self):
         userSettingsDir = FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
@@ -372,6 +421,8 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
 
     def displayNewFilePannel(self):
         currentPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
+        if currentPath == "":
+            currentPath = FileCreator.getStandardizedPath(settings.get("base_path"))
 
         caption = "Type in the name of a new file."
         initial = currentPath
@@ -464,30 +515,30 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         return result
 
     def on_change(self, command_string):
-        if hasattr(self, 'inputPanelView'):
-            if self.inputPanelView is not None:
-                backOneFolder = self.detectBackOneFolder(command_string)
-                if backOneFolder == True:
-                    window = self.inputPanelView.window()
-                    self.inputPanelView.tempInputPanelContent = ""
-                    window.run_command("manipulate_input_panel")
-                else:
-                    self.inputPanelView.tempInputPanelContent = command_string
-                    basePath = settings.get("base_path")
-                    fc = FileCreator(basePath, command_string, settings.get("default_file_extension"))
-                    if len(command_string) > len(basePath):
-                        possiblyBasePath = command_string[0:len(basePath)]
-                        sublime.status_message(possiblyBasePath + " " + basePath)
-                        if possiblyBasePath == basePath:
-                            newCommandString = command_string[len(basePath):]
-                            window = self.inputPanelView.window()
-                            if window is not None:
-                                window.run_command("replace_input_panel_content", {"replacementString": newCommandString})
-                                command_string = command_string[len(basePath):]
-                    statusMessage = "Creating file: " + fc.getFileDir()
-                    view = self.window.active_view()
-                    view.set_status("ClassesAndTests", statusMessage)
-                    #sublime.status_message(statusMessage)
+        #listening = "noting"
+        if hasattr(self, 'inputPanelView') and self.inputPanelView.window() is not None:
+            if command_string == "":
+                replacementString = FileCreator.getStandardizedPath(settings.get("base_path"))
+                self.window.run_command("replace_input_panel_content", {"replacementString": replacementString})
+                return
+            backOneFolder = self.detectBackOneFolder(command_string)
+            if backOneFolder == True:
+                self.inputPanelView.tempInputPanelContent = ""
+                self.window.run_command("remove_last_folder_from_input_panel")
+            else:
+                self.inputPanelView.tempInputPanelContent = command_string
+                basePath = FileCreator.getStandardizedPath(settings.get("base_path"))
+                fc = FileCreator(basePath, command_string, settings.get("default_file_extension"))
+                if len(command_string) > len(basePath):
+                    possiblyBasePath = command_string[0:len(basePath)]
+                    sublime.status_message(possiblyBasePath + " " + basePath)
+                    if possiblyBasePath == basePath:
+                        newCommandString = command_string[len(basePath):]
+                        self.window.run_command("replace_input_panel_content", {"replacementString": newCommandString})
+                        command_string = command_string[len(basePath):]
+                statusMessage = "Creating file: " + fc.getFileDir()
+                view = self.window.active_view()
+                view.set_status("ClassesAndTests", statusMessage)
 
     def on_cancel(self):
         view = self.window.active_view()
@@ -534,27 +585,18 @@ class SublimeWindowFunctions():
         return result
 
 
-class ManipulateInputPanelCommand(sublime_plugin.TextCommand):
+class RemoveLastFolderFromInputPanelCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        for region in self.view.sel():
-            if region.empty():
-                lineRegion = self.view.line(region)
-                lineText = self.view.substr(lineRegion)
-                if len(lineText) > 0:
-                    index = lineText.rfind('/');
-                    newLine = lineText[0:index + 1]
-                    if len(newLine) < 1:
-                        newLine = settings.get('base_path')
-                    self.view.replace(edit, lineRegion, newLine)
-                    self.newLine = newLine
-
+        ip = InputPanel(self.view, edit)
+        newLine = ip.deleteUntil("/")
+        if len(newLine) < 1:
+            replacementString = FileCreator.getStandardizedPath(settings.get("base_path"))
+            ip.replaceAllText(replacementString)
 
 class ReplaceInputPanelContentCommand(sublime_plugin.TextCommand):
     def run(self, edit, replacementString):
-        for region in self.view.sel():
-            if region.empty():
-                lineRegion = self.view.line(region)
-                self.view.replace(edit, lineRegion, replacementString)
+        ip = InputPanel(self.view, edit)
+        ip.replaceAllText(replacementString)
 
 
 class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
