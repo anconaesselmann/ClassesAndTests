@@ -329,6 +329,7 @@ class Command():
     def runAndPrintAllOutput(self):
         print self.runAndGetOutputString()
 
+
 class UserSettings():
     def __init__(self, fileName):
         self.fileName = fileName
@@ -354,6 +355,8 @@ class UserSettings():
         except Exception, e:
             print "Error when calling UserSettings.set():\n" + str(e)
 
+    def deleteAll(self):
+        os.remove(self.fileName)
 
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
@@ -420,7 +423,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         print "settingEnteringChange"
 
     def settingEnteringAbort(self):
-        print ","
+        self.userSettings.deleteAll()
         view = self.window.active_view()
         view.erase_status("ClassesAndTests")
 
