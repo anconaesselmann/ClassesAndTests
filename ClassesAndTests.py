@@ -24,11 +24,13 @@ class FileCreator:
     KIND_IS_TEST    = "test"
     KIND_IS_DB_TEST = "dbTest"
 
-    def __init__(self, basePath, relativeFileName, defaultFileExtension, templatesDir):
-        self.determineVersion(relativeFileName)
+    def __init__(self, basePath, relativeFileName = None, defaultFileExtension = "", templatesDir = ""):
+        self.determineVersion(basePath, relativeFileName)
         self.set(basePath, relativeFileName, defaultFileExtension, templatesDir)
 
     def set(self, basePath, relativeFileName, defaultFileExtension, templatesDir):
+        if relativeFileName is None:
+            relativeFileName = basePath
         self.templatesDir = self.getStandardizedPath(templatesDir)
         self.tempBasePath = self.getStandardizedPath(basePath)
         if relativeFileName[0:1] == "/":
@@ -108,7 +110,9 @@ class FileCreator:
             result = True
         return result
 
-    def determineVersion(self, relativeFileName):
+    def determineVersion(self, basePath, relativeFileName):
+        if relativeFileName is None:
+            relativeFileName = basePath
         fileName, fileExtension = os.path.splitext(relativeFileName)
         if self.isDB_Test(fileName):
             self.kind = FileCreator.KIND_IS_DB_TEST
@@ -187,16 +191,9 @@ class FileCreator:
         if fileDir is None:
             print "File Opening Failed."
             return
-        cursorString     = '/* @cursor */'
-        authorString     = '/* @author */'
-        licenseString    = '/* @license */'
-        autoLoaderString = '/* @autoLoader */'
 
-        line = 0
-        column = 0
-        i = 0
 
-        f = FileCreator("", fileDir, "", TEMPLATES_DIR)
+        f = FileCreator(fileDir)
 
         fileExtension = f.fileExtension[1:]
         templateVariablesDir = FileCreator.getStandardizedPath(TEMPLATES_DIR) + fileExtension + "/" + f.kind + ".variables"
@@ -218,6 +215,10 @@ class FileCreator:
                     commandResult = None
                 replacements[variableName] = commandResult
 
+        cursorString = '/* @cursor */'
+        line = 0
+        column = 0
+        i = 0
         for lineTemp in fileinput.input(fileDir, inplace=True):
             i += 1
             if cursorString in lineTemp:
@@ -335,7 +336,7 @@ class UserSettings():
         self.fileName = fileName
         userSettingsExist = os.path.isfile(fileName)
         if userSettingsExist != True:
-            fc = FileCreator("", fileName, "", "")
+            fc = FileCreator(fileName)
             fc.create("{\n}")
 
     def set(self, variable, value):
@@ -420,7 +421,6 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def settingEnteringChange(self, command_string):
         view = self.window.active_view()
         view.set_status("ClassesAndTests", command_string)
-        print "settingEnteringChange"
 
     def settingEnteringAbort(self):
         self.userSettings.deleteAll()
@@ -474,7 +474,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 else:
                     self.inputPanelView.tempInputPanelContent = command_string
                     basePath = settings.get("base_path")
-                    fc = FileCreator(basePath, command_string, settings.get('default_file_extension'), TEMPLATES_DIR)
+                    fc = FileCreator(basePath, command_string, settings.get("default_file_extension"))
                     if len(command_string) > len(basePath):
                         possiblyBasePath = command_string[0:len(basePath)]
                         sublime.status_message(possiblyBasePath + " " + basePath)
@@ -507,9 +507,9 @@ class SublimeWindowFunctions():
         result = None
         if fileFolder is not None:
             fileFolder = os.path.dirname(fileFolder)
-            fc = FileCreator(settings.get('base_path'), "", "", TEMPLATES_DIR)
+            fc = FileCreator(settings.get('base_path'), "")
             fc.kind = FileCreator.KIND_IS_TEST
-            fc2 = FileCreator(fileFolder, "", "", TEMPLATES_DIR)
+            fc2 = FileCreator("", fileFolder)
             fc2.kind = FileCreator.KIND_IS_TEST
             basePath = fc.getBasePath()
             pathName = fc2.getBasePath()
@@ -567,7 +567,7 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
 
         currentPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
         currentFileName = SublimeWindowFunctions(self.window).getCurrentFileName()
-        fc = FileCreator(settings.get('base_path'), currentPath + currentFileName, settings.get('default_file_extension'), TEMPLATES_DIR)
+        fc = FileCreator(settings.get('base_path'), currentPath + currentFileName)
         if fc.kind == fc.KIND_IS_TEST or fc.kind == fc.KIND_IS_DB_TEST:
             fc.kind = fc.KIND_IS_CLASS
             if SPLIT_VIEW is True:
@@ -630,7 +630,7 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
     def runTests(self, testsPath):
         phpUnitDir = FileCreator.getStandardizedPath(settings.get("php_unit_binary_dir"))
 
-        fc = FileCreator(settings.get('base_path'), testsPath, settings.get('default_file_extension'), TEMPLATES_DIR)
+        fc = FileCreator(settings.get('base_path'), testsPath)
         fc.kind = fc.KIND_IS_TEST
 
         testsPath = os.path.dirname(fc.getFileDir())
