@@ -1,9 +1,15 @@
-import os, fileinput, subprocess, re, sublime, sublime_plugin
+import os
+import fileinput
+import subprocess
+import re
+import sublime
+import sublime_plugin
+import threading
 
 #from src.FileCreator import FileCreator
 
 PACKAGE_NAME = "ClassesAndTests"
-PACKAGE_VERSION = "0.1.0"
+PACKAGE_VERSION = "0.2.0"
 PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
 settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 TEMPLATES_DIR = PACKAGE_DIR + "/templates"
@@ -469,6 +475,21 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             view.erase_status("ClassesAndTests")
             self.displayNewFilePannel()
 
+            # get settings that depend on other settings
+            possibleTestSuitePath = FileCreator.getStandardizedPath(settings.get("base_path"), True, False) + "Test"
+            print(possibleTestSuitePath)
+
+
+
+
+
+
+
+
+
+
+
+
     def settingEnteringChange(self, command_string):
         view = self.window.active_view()
         view.set_status("ClassesAndTests", command_string)
@@ -661,6 +682,35 @@ class OutputPanel():
         self.outputView.set_read_only(True)
 
 
+
+
+
+
+
+
+
+class PhpUnitTestThread(threading.Thread):
+    def __init__(self, commandString):
+        self.commandString = commandString
+        self.result = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        scriptResponse = Command(self.commandString).runAndGetOutputString()
+        if scriptResponse is not None:
+            self.result = scriptResponse
+        else:
+            self.result = False
+
+
+
+
+
+
+
+
+
+
 class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
     def run(self, run_test_suite = False):
         if run_test_suite == False:
@@ -678,16 +728,30 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
         testsPath = os.path.dirname(fc.getFileDir())
         commandString = phpUnitDir + "phpunit \"" + testsPath + "\""
 
-        op = OutputPanel(self.window, "php_unit_output_panel")
+        self.outputPanel = OutputPanel(self.window, "php_unit_output_panel")
 
         if settings.get("show_executed_command") == True:
             credits = PACKAGE_NAME + " " + PACKAGE_VERSION + " by Axel Ancona Esselmann"
             import datetime
             ts = datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-            op.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + commandString + "\n\nResult:\n")
+            self.outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + commandString + "\n\nResult:\n")
 
-        scriptResponse = Command(commandString).runAndGetOutputString()
-        op.printToPanel(scriptResponse)
+
+        thread = PhpUnitTestThread(commandString)
+        thread.start()
+        self.handleThread(thread)
+
+
+    def handleThread(self, thread):
+        if thread.is_alive():
+            sublime.set_timeout(lambda: self.handleThread(thread), 100)
+        else:
+            self.outputPanel.printToPanel( thread.result )
+
+
+
+
+
 
 def get_doc_block_tag(value, name):
     if value is not None:
