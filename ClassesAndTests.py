@@ -630,7 +630,7 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
 
         currentPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
         currentFileName = SublimeWindowFunctions(self.window).getCurrentFileName()
-        fc = FileCreator(settings.get('base_path'), currentPath + currentFileName)
+        fc = FileCreator(settings.get('base_path'), currentPath + currentFileName, "", TEMPLATES_DIR)
         if fc.kind == fc.KIND_IS_TEST or fc.kind == fc.KIND_IS_DB_TEST:
             fc.kind = fc.KIND_IS_CLASS
             if SPLIT_VIEW is True:
