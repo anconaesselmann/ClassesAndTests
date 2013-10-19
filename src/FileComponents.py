@@ -19,7 +19,7 @@ class FileComponents():
             self._isFile = False
             self._path = path
             self._file = None
-        if self._path[:1] == "/":
+        if self._path[:len(os.sep)] == os.sep:
             self._pathIsAbsolute = True
         else:
             self._pathIsAbsolute = False

@@ -7,6 +7,11 @@ import sublime_plugin
 import threading
 
 #from src.FileCreator import FileCreator
+from src.FileComponents import FileComponents
+from src.MirroredDirectory import MirroredDirectory
+from src.Std import Std
+from src.OutputPanel import OutputPanel
+
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
@@ -36,14 +41,20 @@ class FileCreator:
 
     def set(self, basePath, relativeFileName, defaultFileExtension, templatesDir):
         if relativeFileName is None:
-            relativeFileName = basePath
+            #ugly workaround....
+            temp = basePath
+            classNameIndex = temp.rfind('/');
+            relativeFileName = temp[classNameIndex + 1:]
+            basePath = temp[0:classNameIndex]
+            print "basePath: " + basePath
+            print "relativeFileName: " + relativeFileName
         self.templatesDir = self.getStandardizedPath(templatesDir)
         self.tempBasePath = self.getStandardizedPath(basePath)
         if relativeFileName[0:1] == "/":
             self.tempBasePath = ""
         self.fileExtension = self.getFileExtension(relativeFileName, defaultFileExtension)
         self.relativeFileName = relativeFileName
-
+    """ """
     @staticmethod
     def getStandardizedPath(path, slashInFront = True, slashInBack = True):
         if slashInBack == True:
@@ -68,10 +79,11 @@ class FileCreator:
             fileExtension = "." + defaultFileExtension
         return fileExtension
 
+    """ """
     def getFileDir(self):
         fileDir = self.getParentDir() + "/" + self.getClassName() + self.getTestEnding() + self.fileExtension
         return fileDir
-
+    """ """
     def getClassName(self):
         fileName, fileExtension = os.path.splitext(self.relativeFileName)
         classNameIndex = fileName.rfind('/');
@@ -83,9 +95,9 @@ class FileCreator:
         return className
 
     def getTestEnding(self):
-        if self.kind == FileCreator.KIND_IS_TEST:
+        if self.kind == self.KIND_IS_TEST:
             result = "Test"
-        elif self.kind == FileCreator.KIND_IS_DB_TEST:
+        elif self.kind == self.KIND_IS_DB_TEST:
             result = "DB_Test"
         else:
             result = ""
@@ -102,33 +114,34 @@ class FileCreator:
         namespace = namespace.replace('/', "\\")
         return namespace
 
+    """ """
     def isTest(self, fileName):
         result = False
         temp = fileName[-4:]
         if temp == "Test":
             result = True
         return result
-
+    """ """
     def isDB_Test(self, fileName):
         result = False
         temp = fileName[-7:]
         if temp == "DB_Test":
             result = True
         return result
-
+    """ """
     def determineVersion(self, basePath, relativeFileName):
         if relativeFileName is None:
             relativeFileName = basePath
         fileName, fileExtension = os.path.splitext(relativeFileName)
         if self.isDB_Test(fileName):
-            self.kind = FileCreator.KIND_IS_DB_TEST
+            self.kind = self.KIND_IS_DB_TEST
         elif self.isTest(fileName):
-            self.kind = FileCreator.KIND_IS_TEST
+            self.kind = self.KIND_IS_TEST
         else:
-            self.kind = FileCreator.KIND_IS_CLASS
+            self.kind = self.KIND_IS_CLASS
 
     def getBasePath(self):
-        if self.kind == FileCreator.KIND_IS_TEST or self.kind == FileCreator.KIND_IS_DB_TEST:
+        if self.kind == self.KIND_IS_TEST or self.kind == self.KIND_IS_DB_TEST:
             dirArray = self.tempBasePath.split("/")
             for (i, item) in enumerate(dirArray):
                 tempDir = ""
@@ -199,10 +212,10 @@ class FileCreator:
             return
 
 
-        f = FileCreator(fileDir)
+        f = self(fileDir)
 
         fileExtension = f.fileExtension[1:]
-        templateVariablesDir = FileCreator.getStandardizedPath(TEMPLATES_DIR) + fileExtension + "/" + f.kind + ".variables"
+        templateVariablesDir = self.getStandardizedPath(TEMPLATES_DIR) + fileExtension + "/" + f.kind + ".variables"
         if os.path.isfile(templateVariablesDir):
             import json
             from pprint import pprint
@@ -303,9 +316,9 @@ class FileCreator:
         return data
 
     def getTemplateFileName(self):
-        if self.kind == FileCreator.KIND_IS_DB_TEST:
+        if self.kind == self.KIND_IS_DB_TEST:
             classTemplateFileName = "/dbTest.template"
-        elif self.kind == FileCreator.KIND_IS_TEST:
+        elif self.kind == self.KIND_IS_TEST:
             classTemplateFileName = "/test.template"
         else:
             classTemplateFileName = "/class.template"
@@ -417,7 +430,7 @@ class InputPanel():
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def run(self):
-        userSettingsDir = FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
+        userSettingsDir =  os.path.join(sublime.packages_path(), "User", PACKAGE_NAME + ".sublime-settings")
         userSettingsExist = os.path.isfile(userSettingsDir)
         if userSettingsExist != True:
             self.userSettings = UserSettings(userSettingsDir)
@@ -437,7 +450,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             self.on_done, self.on_change, self.on_cancel
         )
         self.inputPanelView.tempInputPanelContent = currentPath
-        self.inputPanelView.set_name("InputPannel")
+        self.inputPanelView.set_name("InputPanel")
         self.inputPanelView.settings().set("caret_style", "solid")
 
     def setUserSettings(self):
@@ -458,7 +471,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 caption, initial,
                 self.settingEntered, self.settingEnteringChange, self.settingEnteringAbort
             )
-            self.inputPanelView.set_name("InputPannel")
+            self.inputPanelView.set_name("InputPanel")
             self.inputPanelView.settings().set("caret_style", "solid")
             pass
 
@@ -573,6 +586,8 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
 class SublimeWindowFunctions():
     def __init__(self, windowInstance):
         self.windowInstance = windowInstance
+
+# This function is horrible!!!!
     def getCurrentDirectory(self):
         view = self.windowInstance.active_view()
         fileFolder = view.file_name()
@@ -598,6 +613,7 @@ class SublimeWindowFunctions():
                 result = ""
         return result.replace('//', '/') # TODO: This is a lazy fix for // appearing when not current_path was provided
 
+#reexamine if still in use
     def getCurrentFileName(self):
         view = self.windowInstance.active_view()
         fileName = view.file_name()
@@ -621,26 +637,25 @@ class ReplaceInputPanelContentCommand(sublime_plugin.TextCommand):
 
 
 class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
-    def run(self):
+    def createColumns(self):
         leftColumnSize = settings.get("left_column_size")
         if SPLIT_VIEW is True:
             sublime.active_window().run_command("set_layout", { "cols": [0.0, leftColumnSize, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]] })
         else:
             sublime.active_window().run_command("set_layout", { "cols": [0.0, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1]] })
 
-        currentPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
-        currentFileName = SublimeWindowFunctions(self.window).getCurrentFileName()
-        fc = FileCreator(settings.get('base_path'), currentPath + currentFileName, "", TEMPLATES_DIR)
-        if fc.kind == fc.KIND_IS_TEST or fc.kind == fc.KIND_IS_DB_TEST:
-            fc.kind = fc.KIND_IS_CLASS
-            if SPLIT_VIEW is True:
-                sublime.active_window().run_command("focus_group", { "group": CLASS_WINDOW })
-        else:
-            fc.kind = fc.KIND_IS_TEST
+    def giveColumnFocus(self, fileName):
+        fc = MirroredDirectory(fileName)
+        if fc.getKind() == fc.KIND_IS_TEST or fc.getKind() == fc.KIND_IS_DB_TEST:
             if SPLIT_VIEW is True:
                 sublime.active_window().run_command("focus_group", { "group": TEST_WINDOW })
-        fileDir = fc.getFileDir()
+        else:
+            if SPLIT_VIEW is True:
+                sublime.active_window().run_command("focus_group", { "group": CLASS_WINDOW })
+
+    def openWindow(self, fileDir):
         if fileDir is not None:
+            fc = FileCreator(fileDir, None, "", TEMPLATES_DIR)
             if os.path.isfile(fileDir) != True:
                 createdFile = fc.createFromTemplate()
                 if createdFile is not None:
@@ -650,43 +665,28 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
                 self.window.run_command("exit_insert_mode")
         else:
             print("toggle_source_test experienced an error.")
-        sublime.active_window().run_command("hide_panel", {"panel": "console"})
+
+    def toggleFileName(self, fileName):
+        md = MirroredDirectory(fileName)
+        return md.getToggledFileName()
+
+    def getCurrentFileName(self):
+        view = self.window.active_view()
+        currentFileName = view.file_name()
+        return currentFileName
 
 
-class OutputPanel():
     def run(self):
-        pass
-    def __init__(self, window, panelName):
-        self.window = window
-        self.panelName = panelName
-        if not hasattr(self, 'outputView'):
-            packageDir = FileCreator.getStandardizedPath(PACKAGE_DIR)
-            tmLanguageDir = packageDir + PACKAGE_NAME + ".tmLanguage"
-            colorTheme = settings.get("color_theme")
-            tmThemeDir = packageDir + "colorThemes/" + PACKAGE_NAME + "_"
-            self.outputView = self.window.get_output_panel(panelName)
-            self.outputView.settings().set(panelName, True)
-            self.outputView.set_syntax_file(tmLanguageDir)
-            if colorTheme == "color":
-                tmThemeDir +=  colorTheme + ".tmTheme"
-                self.outputView.settings().set("color_scheme", tmThemeDir)
-            self.outputView.settings().set("font_size", settings.get("output_font_size"))
-            self.outputView.settings().set("line_numbers", False)
-        self.window.run_command("show_panel", {"panel": "output." + panelName})
+        currentFileName = self.getCurrentFileName()
+        if currentFileName is not None:
+            self.createColumns()
+            toogledFileName = self.toggleFileName(currentFileName)
+            self.giveColumnFocus(toogledFileName)
+            self.openWindow(toogledFileName)
+        else:
+            print("To toggle between test and class, save the current file.")
 
-    def printToPanel(self, text):
-        self.outputView.set_read_only(False)
-        edit = self.outputView.begin_edit()
-        self.outputView.insert(edit, self.outputView.size(), text)
-        self.outputView.end_edit(edit)
-        self.outputView.set_read_only(True)
-
-
-
-
-
-
-
+        sublime.active_window().run_command("hide_panel", {"panel": "console"})
 
 
 class PhpUnitTestThread(threading.Thread):
@@ -703,44 +703,33 @@ class PhpUnitTestThread(threading.Thread):
             self.result = False
 
 
-
-
-
-
-
-
-
-
-class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
+class RunPhpUnitTestsCommand(sublime_plugin.WindowCommand):
     def run(self, run_test_suite = False):
         if run_test_suite == False:
-            testsPath = SublimeWindowFunctions(self.window).getCurrentDirectory()
+            view = self.window.active_view()
+            fileName = view.file_name()
+            if fileName is not None:
+                md = MirroredDirectory(fileName)
+                testsPath = md.getTestFileDir()
+            else :
+                print("Tests can only be run on files that have been saved.")
+                return
         else:
             testsPath = FileCreator.getStandardizedPath(settings.get("current_php_test_suite_dir"))
         self.runTests(testsPath)
 
     def runTests(self, testsPath):
-        phpUnitDir = FileCreator.getStandardizedPath(settings.get("php_unit_binary_dir"))
-
-        fc = FileCreator(settings.get('base_path'), testsPath)
-        fc.kind = fc.KIND_IS_TEST
-
-        testsPath = os.path.dirname(fc.getFileDir())
+        phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir")) + os.sep
         commandString = phpUnitDir + "phpunit \"" + testsPath + "\""
-
-        self.outputPanel = OutputPanel(self.window, "php_unit_output_panel")
-
+        self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
         if settings.get("show_executed_command") == True:
             credits = PACKAGE_NAME + " " + PACKAGE_VERSION + " by Axel Ancona Esselmann"
             import datetime
             ts = datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
             self.outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + commandString + "\n\nResult:\n")
-
-
         thread = PhpUnitTestThread(commandString)
         thread.start()
         self.handleThread(thread)
-
 
     def handleThread(self, thread):
         if thread.is_alive():
@@ -748,6 +737,38 @@ class runPhpUnitTestsCommand(sublime_plugin.WindowCommand):
         else:
             self.outputPanel.printToPanel( thread.result )
 
+
+class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        self.tempFile = None
+        self.view = self.view.window().active_view()
+        fullFileName = self.view.file_name()
+        fileName, fileExtension = os.path.splitext(fullFileName)
+        if fileExtension == ".php":
+            if fileName[-4:] != "Test":
+                self.currentFileDir = fullFileName
+                self.saveContentOfCurrentViewToTempFile()
+                self.saveContentOfCurrentTestFileToTempFile()
+                print self.tempFileDir
+
+
+                #print data
+                print fileName
+
+    def saveContentOfCurrentViewToTempFile(self):
+        content = self.view.substr(sublime.Region(0, self.view.size()))
+        fc = FileCreator(FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + "/continuousTestingTemp/class/TemporaryClass.php")
+        self.tempFileDir = fc.getFileDir()
+        fc.create(content)
+
+    def saveContentOfCurrentTestFileToTempFile(self):
+        fc = FileCreator(self.currentFileDir)
+        fc.kind = FileCreator.KIND_IS_TEST
+        self.currentTestFileDir = fc.getFileDir()
+        print self.currentTestFileDir
+
+        content = open(self.currentTestFileDir)
+        print content
 
 
 

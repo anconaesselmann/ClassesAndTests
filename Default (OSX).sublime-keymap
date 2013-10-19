@@ -40,6 +40,15 @@
 			]
 	},
 	{
+		"keys": [",", ",", ",", "r"],
+		"command": "continuous_unit_testing",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
 		"keys": [",", "r"],
 		"command": "hide_panel", "args": {"cancel": true},
 		"context":
@@ -84,6 +93,15 @@
         "keys": [",", ",", "r"],
         "command": "run_php_unit_tests", "args": {"run_test_suite": true},
         "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
+    {
+		"keys": [",", ",", ",", "r"],
+		"command": "continuous_unit_testing",
+		"context":
             [
                 {"key": "setting.vintage_ctrl_keys"},
                 {"key": "setting.command_mode"}
