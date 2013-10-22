@@ -178,5 +178,17 @@
      * Valid parameters for "color_theme" are:
      *      null, "color"
      */
-    "color_theme": "color"
+    "color_theme": "color",
+
+    /*
+     * The time in milliseconds between automatic test runs
+     *
+     * You have to restart Sublime for settings go into effect.
+     */
+    "interval_between_continuous_unit_tests": 1000,
+
+    /*
+     *
+     */
+    "tab_syncronization": true
 }

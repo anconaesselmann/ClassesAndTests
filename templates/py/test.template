@@ -1,0 +1,11 @@
+import unittest
+from /* @package_name */ import /* @class_name */
+
+class /* @class_name */Test(unittest.TestCase):
+	def test___init__(self):
+		obj = /* @class_name */()
+
+	/* @cursor */
+
+if __name__ == '__main__':
+    unittest.main()

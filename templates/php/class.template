@@ -2,13 +2,13 @@
 /**
  *
  */
-namespace {0} {{
+namespace /* @namespace */ {
 	/**
 	 * /* @author */
 	 * /* @license */
-	 * @package {0}
+	 * @package /* @namespace */
 	 */
-	class {1} {{
+	class /* @class_name */ {
 		/* @cursor */
-	}}
-}}
+	}
+}

@@ -1,10 +1,5 @@
 [
 	{
-		"variable": "namespace",
-		"command": "get_php_namespace",
-		"fromSettings": ["base_path"]
-	},
-	{
 		"variable": "class_name",
 		"command": "get_class_name"
 	},

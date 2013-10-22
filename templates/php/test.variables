@@ -1,6 +1,16 @@
 [
 	{
-		"variable": "php_autoloader_path",
-		"command": "get_php_autoloader"
+		"variable": "namespace",
+		"command": "get_php_namespace",
+		"fromSettings": ["base_path"]
+	},
+	{
+		"variable": "class_name",
+		"command": "get_class_name"
+	},
+	{
+		"variable": "php_autoloader",
+		"command": "get_php_autoloader",
+		"fromSettings": ["php_autoloader_path"]
 	}
 ]

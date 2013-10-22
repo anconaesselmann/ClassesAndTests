@@ -2,7 +2,15 @@
 	{ 	"keys": ["f2"], "command": "classes_and_tests" },
 	{ 	"keys": ["ctrl+shift+t"], "command": "toggle_source_test" },
 
-
+	{
+        "keys": [",", "c"],
+        "command": "create_missing_functions",
+        "context":
+            [
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+    },
 	{
 		"keys": [",", "n"],
 		"command": "classes_and_tests",
@@ -62,6 +70,15 @@
 	"Sublime Text 2"->"Preferences"->"Key Bindings - User"
 	to work in vintage mode
 
+	{
+        "keys": [",", "c"],
+        "command": "create_missing_functions",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
 	{
         "keys": [",", "n"],
         "command": "classes_and_tests",

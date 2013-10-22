@@ -89,7 +89,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>^PHPUnit\s\d+\.\d+\.\d+\sby\sSebastian\sBergmann.</string>
+			<string>PHPUnit\s\d+\.\d+\.\d+\sby\sSebastian\sBergmann.</string>
 			<key>name</key>
 			<string>php_unit</string>
 		</dict>

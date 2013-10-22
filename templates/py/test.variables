@@ -1,0 +1,10 @@
+[
+	{
+		"variable": "class_name",
+		"command": "get_class_name"
+	},
+	{
+		"variable": "package_name",
+		"command": "get_py_package_name"
+	}
+]

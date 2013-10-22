@@ -26,3 +26,7 @@ class Std():
                 seperator = ""
             path = os.path.join(path, folder)
         return os.path.normpath(path)
+
+    @staticmethod
+    def isAllWhitespace(aString):
+        return not bool(len(aString.strip()))

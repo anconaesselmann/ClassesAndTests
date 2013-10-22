@@ -63,7 +63,7 @@
 		     "name": "failure_statement"
 		},
 		{
-		     "match": "^PHPUnit\\s\\d+\\.\\d+\\.\\d+\\sby\\sSebastian\\sBergmann.",
+		     "match": "PHPUnit\\s\\d+\\.\\d+\\.\\d+\\sby\\sSebastian\\sBergmann.",
 		     "name": "php_unit"
 		},
 		{

@@ -11,17 +11,26 @@ class MirroredDirectory():
         self.fileComponents = FileComponents(fileName)
         self._determineKind(self.fileComponents.getFile())
 
+    def getExtension(self):
+        return self.fileComponents.getExtension()
+
     def getKind(self):
         return self._kind
+
+    def getFile(self):
+        return self._getCleanFileName()
+
+    def getTestFile(self):
+        return self.fileComponents.getFile()
 
     def getFileDir(self):
         folders = Std.dirExplode(self.fileComponents.getDir())
         tempFolders = []
         for folder in folders:
             if folder[-7:] == "DB_Test":
-                folder = folder[:-7]
+                folder = folder[0:-7]
             elif folder[-4:] == "Test":
-                folder = folder[:-4]
+                folder = folder[0:-4]
 
             tempFolders.append(folder)
         return Std.dirImplode(tempFolders)
