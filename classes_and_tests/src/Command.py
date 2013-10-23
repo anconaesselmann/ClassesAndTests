@@ -19,7 +19,7 @@ class Command():
         process = subprocess.Popen([self.command, self.argument], stdout=subprocess.PIPE,
                                                                   stderr=subprocess.PIPE)
         scriptResponse, scriptError = process.communicate()
-        return scriptResponse + scriptError
+        return scriptResponse + "\n" + scriptError
 
     def runAndPrintAllOutput(self):
         print(self.runAndGetOutputString())

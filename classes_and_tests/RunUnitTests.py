@@ -48,7 +48,7 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
         self.handleCommandThread(thread)
 
     def getPyCommand(self):
-        pythonDir = os.path.normpath("/usr/bin") # TODO: get from settings
+        pythonDir = os.path.normpath(settings.get("python_dir"))
         return os.path.join(pythonDir, "python")
 
     def getPhpCommand(self):

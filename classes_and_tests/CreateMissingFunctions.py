@@ -4,6 +4,7 @@ import sublime_plugin
 
 from src.CommandExecutionThread import CommandExecutionThread
 from src.LiveUnitTest import LiveUnitTest
+from src.UnitTestFunctions import UnitTestFunctions
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
@@ -23,7 +24,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if DEBUG:
             print("Running tests to determine if all functions have been declared:")
         classView = self.classView
-        liveUnitTest = LiveUnitTest(settings.get("php_unit_binary_dir"))
+        liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
         liveUnitTest.updateTempFiles(classView)
         command = liveUnitTest.getCommand()
         argument = liveUnitTest.getArgument()

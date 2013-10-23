@@ -1,5 +1,7 @@
 import os
 import fileinput
+import json
+#from pprint import pprint
 import sublime
 import sublime_plugin
 
@@ -201,8 +203,7 @@ class FileCreator:
         fileExtension = f.fileExtension[1:]
         templateVariablesDir = self.getStandardizedPath(self.templatesDir) + fileExtension + "/" + f.kind + ".variables"
         if os.path.isfile(templateVariablesDir):
-            import json
-            from pprint import pprint
+
             jsonData = open(templateVariablesDir)
             templateVariables = json.load(jsonData)
             jsonData.close()

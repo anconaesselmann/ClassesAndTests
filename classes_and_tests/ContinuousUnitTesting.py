@@ -4,6 +4,7 @@ import sublime_plugin
 from src.OutputPanel import OutputPanel
 from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
 from src.LiveUnitTest import LiveUnitTest
+from src.UnitTestFunctions import UnitTestFunctions
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
@@ -18,7 +19,7 @@ continuousUnitTestingThread = None
 class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.outputPanel = OutputPanel(self.view.window(), "php_unit_output_panel", PACKAGE_NAME)
-        self.liveUnitTest = LiveUnitTest(settings.get("php_unit_binary_dir"))
+        self.liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
 
         self.initCommandThread()
         self.liveUnitTest.updateTempFiles(self.view)
@@ -52,7 +53,7 @@ class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
 
     def handleCommandThread(self):
         global continuousUnitTestingThread
-        if continuousUnitTestingThread.is_alive():
+        if continuousUnitTestingThread is not None and continuousUnitTestingThread.is_alive():
             if not continuousUnitTestingThread.hasRun():
                 sublime.set_timeout(lambda: self.handleCommandThread(), 100)
             else:
@@ -60,8 +61,8 @@ class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
                 #viewPosition = (0, 100)
                 #print "viewPosition: " + str(viewPosition)
                 self.outputPanel.clear()
-                #self.outputPanel.printToPanel("Tests for " + self.liveUnitTest.activeFile.getFileName() + ": ")
-                self.outputPanel.printToPanel("Tests for " + self.liveUnitTest.activeFile.getFileName() + ": "+ str(continuousUnitTestingThread.getResult()))
+                #self.outputPanel.printToPanel("Tests for " + self.liveUnitTest.getActiveFile().getFileName() + ": ")
+                self.outputPanel.printToPanel("Tests for " + self.liveUnitTest.getActiveFile().getFileName() + ": "+ str(continuousUnitTestingThread.getResult()))
                 #print "view positint is loading: " + str(self.outputPanel.outputView.is_loading())
                 self.outputPanel.setViewPosition(viewPosition)
                 continuousUnitTestingThread.reset()

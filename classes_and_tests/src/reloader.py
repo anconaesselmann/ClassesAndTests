@@ -1,4 +1,4 @@
-# Adapted from @wbond's resource loader.
+# Adapted from @skuroda,s PersistentRegexHighlight and @wbond's resource loader.
 
 import sys
 import sublime
@@ -24,6 +24,7 @@ for mod in sorted(sys.modules):
 
 mods_load_order = [
     '.src.Std',
+    '.src.UnitTestFunctions',
     '.src.SublimeFunctions',
     '.src.SublimeWindowFunctions',
     '.src.UserSettings',

@@ -46,6 +46,10 @@
      */
     "php_unit_binary_dir": "/opt/local/bin/",
 
+    /*
+     *
+     */
+    "python_dir": "/usr/bin",
 
     /*
      * A file name without a leading directory character will be
