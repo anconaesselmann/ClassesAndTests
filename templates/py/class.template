@@ -3,4 +3,4 @@
 /* @license */
 """
 class /* @class_name */():
-	/* @cursor */
+	pass/* @cursor */

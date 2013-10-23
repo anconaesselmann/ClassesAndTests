@@ -333,20 +333,68 @@ class FileCreator:
         print("- FileCreator: " + out)
 
 
+
+def getSettingNameValuePair(settings):
+    if not isinstance(settings, dict): # I could check for string, but I would break x-compatibility between python 2 and 3
+        settings = eval(settings)
+    for key, value in settings.iteritems():
+        if value is not None:
+            return key, value
+    return None, None
+
+def getRelativePath(baseDir, absDir):
+    if baseDir is None:
+        baseDir = ""
+    rc = FileComponents(MirroredDirectory(absDir).getFileDir())
+    rc.setBasePath(baseDir)
+    relPath = rc.getRelativePath()
+
+    # TODO: relative path should not return / at the front, check why it is doing this and remove this workaround
+    if relPath[0:len(os.sep)] == os.sep:
+        relPath = relPath[len(os.sep):]
+
+    return relPath
+
+def get_project_folder(args):
+    fileName = MirroredDirectory(args["dir"]).getFile()
+    varName, baseDir = getSettingNameValuePair(args["settings"])
+    relPath = getRelativePath(baseDir, args["dir"])
+    #print "inside get_project_folder:"
+    #print "relPath: " + relPath
+    result = ""
+    while 1:
+        relPath, tail = os.path.split(relPath)
+        result += ", \"..\""
+        if len(tail) < 1:
+            return result
+
+
 def get_py_package_name(args):
-    result = MirroredDirectory(args["dir"]).getFile()
+    fileName = MirroredDirectory(args["dir"]).getFile()
+
+    varName, baseDir = getSettingNameValuePair(args["settings"])
+    relPath = getRelativePath(baseDir, args["dir"])
+
+    root = os.path.basename(os.path.normpath(baseDir))
+    #print "root: " + root
+    #print "relPath: " + relPath
+    relPath = os.path.join(root, relPath, fileName)
+    result = relPath.replace(os.sep, ".")
+    if result[0:1] == ".":
+        result = result[1:]
+
     return result
 
 def get_php_namespace(args):
-    print args["settings"]
     settings = eval(args["settings"])
     result = None
     base_dir = ""
     for key, value in settings.iteritems():
         if value is not None:
-            print "base_dir is: " + value
             base_dir = value
+        break
 
+    # TODO: make this part of MirroredDirecotry
     rc = FileComponents(MirroredDirectory(args["dir"]).getFileDir())
     rc.setBasePath(base_dir)
     relPath = rc.getRelativePath()
@@ -370,7 +418,7 @@ def get_doc_block_tag(args):
             result = "@" + key + " " + value
         break
 
-    print "inside get_doc_block_tag: " + str(result)
+    #print "inside get_doc_block_tag: " + str(result)
     return result
 
 def get_php_autoloader(args):

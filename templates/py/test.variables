@@ -5,6 +5,12 @@
 	},
 	{
 		"variable": "package_name",
-		"command": "get_py_package_name"
+		"command": "get_py_package_name",
+		"fromSettings": ["base_path"]
+	},
+	{
+		"variable": "project_folder",
+		"command": "get_project_folder",
+		"fromSettings": ["base_path"]
 	}
 ]
