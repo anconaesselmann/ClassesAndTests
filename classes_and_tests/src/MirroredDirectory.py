@@ -1,6 +1,6 @@
 import os
-from src.FileComponents import FileComponents
-from src.Std import Std
+from FileComponents import FileComponents
+from Std import Std
 
 class MirroredDirectory():
     KIND_IS_CLASS   = "class"

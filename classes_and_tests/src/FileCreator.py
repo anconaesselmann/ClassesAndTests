@@ -43,7 +43,7 @@ class FileCreator:
 
         if slashInFront == True:
             if path[0:1] != "/":
-                print(path[0:1])
+                #print(path[0:1])
                 path = "/" + path
         elif slashInFront == False:
             if path[0:1] == "/":
@@ -207,7 +207,7 @@ class FileCreator:
             templateVariables = json.load(jsonData)
             jsonData.close()
 
-            pprint(templateVariables)
+            #pprint(templateVariables)
 
             replacements = dict()
             for templateVar in templateVariables:
@@ -228,10 +228,10 @@ class FileCreator:
                 commandString = variableCommand + "(" + str(args) + ")"
                 commandResult = eval(commandString)
 
-                print "executing:"
-                print commandString
-                print "result:"
-                print commandResult
+                #print "executing:"
+                #print commandString
+                #print "result:"
+                #print commandResult
                 #else:
                 #    commandResult = None
                 replacements[variableName] = commandResult
