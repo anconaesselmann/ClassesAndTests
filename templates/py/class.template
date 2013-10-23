@@ -3,4 +3,6 @@
 /* @license */
 """
 class /* @class_name */():
-	pass/* @cursor */
+    def __init__(self):
+        pass
+    /* @cursor */
