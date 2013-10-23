@@ -31,7 +31,7 @@
 	},
 	{
 		"keys": [",", "r"],
-		"command": "run_php_unit_tests",
+		"command": "run_unit_tests",
 		"context":
 			[
 				{ "key": "setting.command_mode", "operand":false},
@@ -40,7 +40,7 @@
 	},
 	{
 		"keys": [",", ",", "r"],
-		"command": "run_php_unit_tests", "args": {"run_test_suite": true},
+		"command": "run_unit_tests", "args": {"run_test_suite": true},
 		"context":
 			[
 				{ "key": "setting.command_mode", "operand":false},
@@ -57,7 +57,7 @@
 			]
 	},
 	{
-		"keys": [",", "r"],
+		"keys": [",", "r", "r"],
 		"command": "hide_panel", "args": {"cancel": true},
 		"context":
 		[
@@ -99,7 +99,7 @@
     },
     {
         "keys": [",", "r"],
-        "command": "run_php_unit_tests",
+        "command": "run_unit_tests",
         "context":
             [
                 {"key": "setting.vintage_ctrl_keys"},
@@ -108,7 +108,7 @@
     },
     {
         "keys": [",", ",", "r"],
-        "command": "run_php_unit_tests", "args": {"run_test_suite": true},
+        "command": "run_unit_tests", "args": {"run_test_suite": true},
         "context":
             [
                 {"key": "setting.vintage_ctrl_keys"},

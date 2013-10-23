@@ -264,35 +264,60 @@ class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
         #sublime.active_window().run_command("hide_panel", {"panel": "console"})
 
 
-class RunPhpUnitTestsCommand(sublime_plugin.WindowCommand):
+
+
+
+class RunUnitTestsCommand(sublime_plugin.WindowCommand):
     def run(self, run_test_suite = False):
         if run_test_suite == False:
             view = self.window.active_view() # ????
             fileName = view.file_name()
             if fileName is not None:
                 md = MirroredDirectory(fileName)
-                testsPath = md.getTestFileDir()
+                testsPath = md.getTestFileName()
+                extension = md.getExtension()
             else :
                 print("Tests can only be run on files that have been saved.")
                 return
         elif run_test_suite == True:
             testsPath = FileCreator.getStandardizedPath(settings.get("current_php_test_suite_dir"))
+            extension = "php" # TODO: this is temporary...
         else:
             testsPath = run_test_suite
-        self.runTests(testsPath)
+            extension = "php" # TODO: this is temporary...
 
-    def runTests(self, testsPath):
-        phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir")) + os.sep
-        commandString = phpUnitDir + "phpunit \"" + testsPath + "\""
-        self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
+        if extension == "php":
+            command = self.getPhpCommand()
+        elif extension == "py":
+            command = self.getPyCommand()
+        else:
+            print("File extension not supported for running unit tests. Currently only 'php' and 'py' are allowed")
+            return
+
+        self.runTests(command, testsPath)
+
+    def runTests(self, command, testsPath):
+        self.outputPanel = self.getOutputPanel(command + " " +  testsPath)
+        thread = CommandExecutionThread(command, testsPath)
+        thread.start()
+        self.handleCommandThread(thread)
+
+    def getPyCommand(self):
+        pythonDir = os.path.normpath("/usr/bin") # TODO: get from settings
+        return os.path.join(pythonDir, "python")
+
+    def getPhpCommand(self):
+        phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir"))
+        return os.path.join(phpUnitDir, "phpunit")
+
+    def getOutputPanel(self, commandString):
+        outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
         if settings.get("show_executed_command") == True:
             credits = PACKAGE_NAME + " " + PACKAGE_VERSION + " by Axel Ancona Esselmann"
             import datetime
             ts = datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-            self.outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + commandString + "\n\nResult:\n")
-        thread = CommandExecutionThread(commandString)
-        thread.start()
-        self.handleCommandThread(thread)
+            outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + commandString + "\n\nResult:\n")
+        return outputPanel
 
     def handleCommandThread(self, thread):
         if thread.is_alive():
@@ -337,9 +362,10 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         classView = self.classView
         liveUnitTest = LiveUnitTest(settings.get("php_unit_binary_dir"))
         liveUnitTest.updateTempFiles(classView)
-        commandString = liveUnitTest.getCommandString()
+        command = liveUnitTest.getCommand()
+        argument = liveUnitTest.getArgument()
 
-        thread = CommandExecutionThread(commandString)
+        thread = CommandExecutionThread(command, argument)
         thread.start()
         self._handleCommandThread(thread)
 
@@ -428,14 +454,15 @@ class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
 
     def updateCommandThread(self):
         global continuousUnitTestingThread
-        continuousUnitTestingThread.setCommandString(self.liveUnitTest.getCommandString())
+        continuousUnitTestingThread.setCommand(self.liveUnitTest.getCommand()) # TODO: used to be command string, now is argument!!!
+        continuousUnitTestingThread.setArgument(self.liveUnitTest.getArgument())
 
     def outputProgramStart(self):
         if settings.get("show_executed_command") == True:
             credits = PACKAGE_NAME + " " + PACKAGE_VERSION + " by Axel Ancona Esselmann"
             import datetime
             ts = datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-            self.outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + self.liveUnitTest.getCommandString() + "\n\nResult:\n")
+            self.outputPanel.printToPanel(credits + "\n" + "\nExecuting on " + ts + ":\n$ " + self.liveUnitTest.getCommand() + " " + self.liveUnitTest.getArgument() + "\n\nResult:\n")
 
     def handleCommandThread(self):
         global continuousUnitTestingThread

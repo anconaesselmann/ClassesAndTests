@@ -28,8 +28,11 @@ class LiveUnitTest():
                 curentViewContent = SublimeFunctions.getViewContent(currentView)
                 self._saveToTempClassFile(curentViewContent)
 
-    def getCommandString(self):
-        return self.phpUnitDir + "phpunit \"" + self.tempTestFileDir + "\""
+    def getCommand(self):
+        return os.path.join(self.phpUnitDir, "phpunit")
+
+    def getArgument(self):
+        return self.tempTestFileDir
 
     def _saveToTempClassFile(self, curentViewContent):
         FileManipulation.replaceFile(self.tempFileDir, curentViewContent)
