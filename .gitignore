@@ -10,6 +10,8 @@
 
 # Sublime Text generated files
 *.cache
+*.sublime-project
+*.sublime-workspace
 
 # Packages #
 ############
