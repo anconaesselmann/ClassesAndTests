@@ -30,3 +30,15 @@ class Std():
     @staticmethod
     def isAllWhitespace(aString):
         return not bool(len(aString.strip()))
+
+    @staticmethod
+    def getLineIndentAsWhitespace(indent):
+        result = ""
+        if len(indent) > 0:
+            ws = indent[0:1]
+            trimmedLen = len(indent.lstrip())
+            difference = len(indent) - trimmedLen
+            while difference > 0:
+                result += ws
+                difference -= 1
+        return result

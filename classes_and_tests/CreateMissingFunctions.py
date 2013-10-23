@@ -5,6 +5,8 @@ import sublime_plugin
 from src.CommandExecutionThread import CommandExecutionThread
 from src.LiveUnitTest import LiveUnitTest
 from src.UnitTestFunctions import UnitTestFunctions
+from src.FileComponents import FileComponents
+from src.Std import Std
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
@@ -45,38 +47,71 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
                     print("No functions have to be declared.")
 
     def _getFunctionName(self, testResult):
-        matches = re.findall("(?<=Fatal\\serror:)(?:[\\s\\w\\\\]+undefined\\smethod)(?:[\\s\\w\\\\]+::)([\\w]+)(?=\\(\\))", testResult)
-        if len(matches) > 0:
-            result = matches[0]
-        else:
-            result = None
+        result = None
+        phpMatches = re.findall("(?<=Fatal\\serror:)(?:[\\s\\w\\\\]+undefined\\smethod)(?:[\\s\\w\\\\]+::)([\\w]+)(?=\\(\\))", testResult)
+        if len(phpMatches) > 0:
+            return phpMatches[0]
+        pyMatches = re.findall("(?<=AttributeError:)(?:[\\s\\w]+')(\\w+)(?=')", testResult)
+        if len(pyMatches) > 0:
+            return pyMatches[0]
+
         return result
 
     def _insertFunction(self, functionName):
         classView = self.classView
-
-        region = classView.find("\\}[^\\}]*\\}[^\\}]*\\z", 0)
-        if region is not None:
-            #print classView.substr(region)
-            insertionPoint = region.begin()
-            indentation = classView.substr(classView.line(insertionPoint))[:-1] # fails when some idiot does some wacky formatting that puts code on the same line before or after the closing bracket of a class
-            classView.insert(self.edit, insertionPoint, self._getFunctionBody(functionName, indentation))
-
-
-            sublime.set_timeout(lambda: self._runUnitTest(), 100)
+        insertionPoint = self._getInsertPoint(classView)
+        if insertionPoint is not None:
+            indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
+            classView.insert(self.edit, insertionPoint, self._getFunctionBody(self.classView.file_name(), functionName, indentation))
+            extension = FileComponents(view.file_name()).getExtension()
+            if extension is not "py": # for some odd reason in .py scripts this would create multiple functions with the same name....
+                sublime.set_timeout(lambda: self._runUnitTest(), 200)
         else:
             print("File is not formatted correctly. A class{} needs to be inside a namespace{}")
 
-    def _getFunctionBody(self, functionName, indent):
-        if DEBUG:
-            print("Creating function \"" + functionName + "()\"")
-        indent2 = indent + indent
-        indent3 = indent2 + indent
+    def _getInsertPoint(self, view):
+        extension = FileComponents(view.file_name()).getExtension()
+        insertionPoint = None
+        if extension == "php":
+            region = view.find("\\}[^\\}]*\\}[^\\}]*\\z", 0)
+            if region is not None:
+                insertionPoint = region.begin()
+        elif extension == "py":
+            region = view.line(view.size())
+            if region is not None:
+                insertionPoint = region.end()
 
-        out =  "\n"
-        out += indent2 + "public function " + functionName + "() {\n"
-        out += indent3 + "return ;\n"
-        out += indent2 + "}\n"
-        out += indent
+        return insertionPoint
+
+    def _getFunctionBody(self, fileName, functionName, indent):
+        extension = FileComponents(fileName).getExtension()
+        out = ""
+        if extension == "php":
+            if DEBUG:
+                print("Creating php function \"" + functionName + "()\"")
+            indent2 = indent + indent
+            indent3 = indent2 + indent
+
+            out +=  "\n"
+            out += indent2 + "public function " + functionName + "() {\n"
+            out += indent3 + "return ;\n"
+            out += indent2 + "}\n"
+            out += indent
+        elif extension == "py":
+            if DEBUG:
+                print("Creating py function \"" + functionName + "()\"")
+            indent = "    " # ignoring the indentation passed with indent
+            indent2 = indent + indent
+            indent3 = indent2 + indent
+
+            out +=  "\n"
+            out += indent + "def " + functionName + "(self):\n"
+            out += indent2 + "return\n"
+            out += indent
+        else:
+            out = None
 
         return out
+
+
+
