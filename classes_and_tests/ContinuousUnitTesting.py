@@ -51,7 +51,7 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
         self.initCommandThread()
         self.liveUnitTest.updateTempFiles(self.window.active_view())
         self.outputProgramStart()
-        self.runTests()
+        self.runTests(view)
 
     def _classHasTest(self, view):
         result = False
@@ -88,18 +88,27 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
             self.window.run_command("toggle_source_test")
         self.window.focus_view(view)
 
-
-
-
+    def _getClassView(self, view):
+        classView = None
+        classFileName = MirroredDirectory(view.file_name()).getFileName()
+        if view.file_name == classFileName:
+            classView = view
+        else:
+            for tempView in self.window.views():
+                file_name = tempView.file_name()
+                if file_name == classFileName:
+                    classView = tempView
+                    break
+        return classView
 
     def _getClassAndTestView(self):
         md = MirroredDirectory(self.window.active_view().file_name())
 
-    def runTests(self):
-        view = sublime.active_window().active_view()
-        self.liveUnitTest.updateTempFiles(view)
-        self.updateCommandThread()
-        self.handleCommandThread()
+    def runTests(self, classView):
+        if classView is not None:
+            self.liveUnitTest.updateTempFiles(classView)
+            self.updateCommandThread()
+            self.handleCommandThread()
 
     def initCommandThread(self):
         global continuousUnitTestingThread
@@ -136,4 +145,5 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
                 self.outputPanel.setViewPosition(viewPosition)
                 continuousUnitTestingThread.reset()
                 if self.outputPanel.isVisible():
-                    sublime.set_timeout(lambda: self.runTests(), INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS)
+                    classView = self._getClassView(self.window.active_view())
+                    sublime.set_timeout(lambda: self.runTests(classView), INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS)
