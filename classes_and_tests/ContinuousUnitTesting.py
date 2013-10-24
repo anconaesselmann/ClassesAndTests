@@ -1,5 +1,6 @@
 import sublime
 import sublime_plugin
+from os import path
 
 from src.OutputPanel import OutputPanel
 from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
@@ -18,14 +19,49 @@ continuousUnitTestingThread = None
 
 
 class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
+    def test(self):
+
+        windows = sublime.windows()
+        for window in windows:
+            windowId = window.id()
+            activeView = window.active_view()
+            num_groups = window.num_groups()
+            print windowId
+            print activeView
+            print num_groups
+            views = window.views()
+            for view in views:
+                file_name = view.file_name()
+                print file_name
+                if file_name == "/MyProject/libraryTest/python/a/b/c/PythonClass14Test.py":
+                    #window.focus_view(view)
+                    pass
+
     def run(self):
+        #self.test()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
+        if not self._classHasTest():
+            self.outputPanel.printToPanel("No Class-Test file pair exist.")
+            return
         self.liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
 
         self.initCommandThread()
         self.liveUnitTest.updateTempFiles(self.window.active_view())
         self.outputProgramStart()
         self.runTests()
+
+    def _classHasTest(self):
+        result = False
+        view = self.window.active_view()
+        if view is not None:
+            viewFileName = view.file_name()
+            if viewFileName is not None:
+                md = MirroredDirectory(viewFileName)
+                classFileName = md.getFileName()
+                testFileName = md.getTestFileName()
+                if path.isfile(classFileName) and path.isfile(testFileName):
+                    result = True
+        return result
 
     def _getClassAndTestView(self):
         md = MirroredDirectory(self.window.active_view().file_name())
