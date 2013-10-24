@@ -45,19 +45,7 @@
 				<string>#424242</string>
 			</dict>
 		</dict>
-		<dict>
-			<key>name</key>
-			<string>command</string>
-			<key>scope</key>
-			<string>command</string>
-			<key>settings</key>
-			<dict>
-				<key>fontStyle</key>
-				<string></string>
-				<key>foreground</key>
-				<string>#5f5e5f</string>
-			</dict>
-		</dict>
+
 
 
 
@@ -335,6 +323,45 @@
 				<string></string>
 				<key>foreground</key>
 				<string>#ff8e00</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>double_line</string>
+			<key>scope</key>
+			<string>double_line</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string></string>
+				<key>foreground</key>
+				<string>#202020</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>single_line</string>
+			<key>scope</key>
+			<string>single_line</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string></string>
+				<key>foreground</key>
+				<string>#181818</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>command</string>
+			<key>scope</key>
+			<string>command</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string></string>
+				<key>foreground</key>
+				<string>#5f5e5f</string>
 			</dict>
 		</dict>
 	</array>

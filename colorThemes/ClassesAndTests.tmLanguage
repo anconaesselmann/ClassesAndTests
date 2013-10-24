@@ -23,12 +23,6 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>^\$[\s\/\w\"]+(?=\w")\w"</string>
-			<key>name</key>
-			<string>command</string>
-		</dict>
-		<dict>
-			<key>match</key>
 			<string>\b(Result:|Executing)\b</string>
 			<key>name</key>
 			<string>actions</string>
@@ -53,7 +47,19 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>[/\w]+/(?=\w+\.\w+)</string>
+			<string>(?&lt;=,\sline\s)\d+(?=,\s)</string>
+			<key>name</key>
+			<string>line_numbers</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?&lt;!\$)/[/\w\s]+/(?=\w+\.\w+)</string>
+			<key>name</key>
+			<string>folder</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?&lt;=File\s")/[/\w\s]+/(?=\w+\.\w+)</string>
 			<key>name</key>
 			<string>folder</string>
 		</dict>
@@ -71,7 +77,19 @@
 		</dict>
 		<dict>
 			<key>match</key>
+			<string>(?&lt;=\s!\=\s).+</string>
+			<key>name</key>
+			<string>wrong_value</string>
+		</dict>
+		<dict>
+			<key>match</key>
 			<string>(?&lt;=\smatches\sexpected\s).+(?=\.\s)</string>
+			<key>name</key>
+			<string>expected_value</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?&lt;=AssertionError:\s)["'\w\d\s]+(?=!\=\s)</string>
 			<key>name</key>
 			<string>expected_value</string>
 		</dict>
@@ -83,7 +101,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>^FAILURES\!</string>
+			<string>^FAILURES\!\s</string>
+			<key>name</key>
+			<string>failure_statement</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>FAILED\s\([\w]+=\d+\)\s</string>
 			<key>name</key>
 			<string>failure_statement</string>
 		</dict>
@@ -98,6 +122,24 @@
 			<string>^ClassesAndTests\s\d+\.\d+\.\d+</string>
 			<key>name</key>
 			<string>classes_and_tests</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>FAIL:(?=\s[\w]+\s\()</string>
+			<key>name</key>
+			<string>failed</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\={70}</string>
+			<key>name</key>
+			<string>double_line</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-{70}</string>
+			<key>name</key>
+			<string>single_line</string>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -120,6 +162,12 @@
 		<dict>
 			<key>match</key>
 			<string>(?&lt;=::)\w+(?=\s)</string>
+			<key>name</key>
+			<string>function_name</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?&lt;=FAIL:\s)[\w]+(?=\s\()</string>
 			<key>name</key>
 			<string>function_name</string>
 		</dict>
@@ -152,6 +200,12 @@
 			<string>\b::\b</string>
 			<key>name</key>
 			<string>resolution_operator</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>^\$[\s\/\w\"]+(?=\w")\w"</string>
+			<key>name</key>
+			<string>command</string>
 		</dict>
 	</array>
 	<key>scopeName</key>
