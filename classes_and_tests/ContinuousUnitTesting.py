@@ -5,6 +5,7 @@ from src.OutputPanel import OutputPanel
 from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
 from src.LiveUnitTest import LiveUnitTest
 from src.UnitTestFunctions import UnitTestFunctions
+from src.MirroredDirectory import MirroredDirectory
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
@@ -16,15 +17,18 @@ INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS = settings.get("interval_between_continuo
 continuousUnitTestingThread = None
 
 
-class ContinuousUnitTestingCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        self.outputPanel = OutputPanel(self.view.window(), "php_unit_output_panel", PACKAGE_NAME)
+class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
         self.liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
 
         self.initCommandThread()
-        self.liveUnitTest.updateTempFiles(self.view)
+        self.liveUnitTest.updateTempFiles(self.window.active_view())
         self.outputProgramStart()
         self.runTests()
+
+    def _getClassAndTestView(self):
+        md = MirroredDirectory(self.window.active_view().file_name())
 
     def runTests(self):
         view = sublime.active_window().active_view()
