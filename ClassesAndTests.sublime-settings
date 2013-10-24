@@ -192,7 +192,17 @@
     "interval_between_continuous_unit_tests": 1000,
 
     /*
+     * When switching a class tab, the test column will switch
+     * to the corresponding test, and vice versa.
+     *
+     * NOTE: For this setting to have any affect,
+     * seperate_tests_and_sources_by_split_view
+     * must be set to true,
+     */
+    "tab_syncronization": true,
+
+    /*
      *
      */
-    "tab_syncronization": true
+    "tab_syncronization_opens_files": true
 }

@@ -8,7 +8,7 @@ from SublimeFunctions import SublimeFunctions
 from MirroredDirectory import MirroredDirectory
 from FileCreator import FileCreator
 
-class LiveUnitTest():
+class LiveUnitTesting():
     def __init__(self, commandFolders):
         if not isinstance(commandFolders, dict):
             raise Exception("CommandFolders is a dictionary")
@@ -17,7 +17,6 @@ class LiveUnitTest():
 
     def updateTempFiles(self, currentView):
         self._activeFile = MirroredDirectory(currentView.file_name())
-        #if self._activeFile.getExtension() == "php":
         if self._activeFile.getExtension() in self._commandFolders:
             lastModTempFile = os.stat(self._activeFile.getTestFileName()).st_mtime
             if lastModTempFile != self._lastModTempFile:
@@ -78,7 +77,7 @@ class LiveUnitTest():
 
     def _replacePyLoadingStatements(self):
         injected = False
-        print "active file: " + self._activeFile.getFile()
+        #print "active file: " + self._activeFile.getFile()
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
             if not injected and "sys.path.append(path.abspath(path.join(__file__" in line:
                 print "    sys.path.append(path.abspath(path.join(__file__, \"..\", \"..\")))\n",
@@ -90,12 +89,9 @@ class LiveUnitTest():
                 print line,
 
     def _createPackageFiles(self):
-        #testPackageInit = os.path.abspath(os.path.join(self._getTempTestFileDir(), "..", "__init__.py"))
         parentPackageInit = os.path.abspath(os.path.join(self._getTempTestFileDir(), "..", "..", "__init__.py"))
         classPackageInit = os.path.abspath(os.path.join(self._getTempFileDir(), "..", "__init__.py"))
 
-        #if not os.path.isfile(testPackageInit):
-        #    FileCreator(testPackageInit).create()
         if not os.path.isfile(parentPackageInit):
             FileCreator(parentPackageInit).create()
         if not os.path.isfile(classPackageInit):

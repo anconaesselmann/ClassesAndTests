@@ -32,3 +32,4 @@ else:
 	from classes_and_tests.CreateMissingFunctions import *
 	from classes_and_tests.ContinuousUnitTesting import *
 	from classes_and_tests.ClassesAndTests import *
+	from classes_and_tests.SyncronizeClassAndTestTabs import *

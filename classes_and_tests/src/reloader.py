@@ -37,12 +37,13 @@ mods_load_order = [
     '.src.MultipleCommandExecutionThread',
     '.src.InputPanel',
     '.src.OutputPanel',
-    '.src.LiveUnitTest',
+    '.src.LiveUnitTesting',
     '.ToggleSourceTest',
     '.RunUnitTests',
     '.CreateMissingFunctions',
     '.ContinuousUnitTesting',
     '.ClassesAndTests'
+    '.SyncronizeClassAndTestTabs'
 ]
 
 for suffix in mods_load_order:

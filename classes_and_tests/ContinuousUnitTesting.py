@@ -4,7 +4,7 @@ from os import path
 
 from src.OutputPanel import OutputPanel
 from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
-from src.LiveUnitTest import LiveUnitTest
+from src.LiveUnitTesting import LiveUnitTesting
 from src.UnitTestFunctions import UnitTestFunctions
 from src.MirroredDirectory import MirroredDirectory
 
@@ -19,7 +19,7 @@ continuousUnitTestingThread = None
 
 
 class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
-    def test(self):
+    """def test(self):
 
         windows = sublime.windows()
         for window in windows:
@@ -36,57 +36,25 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
                 if file_name == "/MyProject/libraryTest/python/a/b/c/PythonClass14Test.py":
                     #window.focus_view(view)
                     pass
+    """
 
     def run(self):
         #self.test()
         view = self.window.active_view()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
-        if not self._classHasTest(view):
+        if not UnitTestFunctions.classHasTest(view):
             self.outputPanel.printToPanel("No Class-Test file pair exists.")
             return
-        self._bringViewsToFront(view)
+        UnitTestFunctions.bringViewsToFront(self.window, view)
 
-        self.liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
+        self.liveUnitTest = LiveUnitTesting(UnitTestFunctions.getCommandFolders(settings))
 
         self.initCommandThread()
         self.liveUnitTest.updateTempFiles(self.window.active_view())
         self.outputProgramStart()
         self.runTests(view)
 
-    def _classHasTest(self, view):
-        result = False
-        if view is not None:
-            viewFileName = view.file_name()
-            if viewFileName is not None:
-                md = MirroredDirectory(viewFileName)
-                classFileName = md.getFileName()
-                testFileName = md.getTestFileName()
-                if path.isfile(classFileName) and path.isfile(testFileName):
-                    result = True
-        return result
 
-    def _bringViewsToFront(self, view):
-        fileNameActiveView = view.file_name()
-        md = MirroredDirectory(fileNameActiveView)
-        classFileName = md.getFileName()
-        testFileName = md.getTestFileName()
-
-        if fileNameActiveView == classFileName:
-            fileNameInactiveView = testFileName
-        else:
-            fileNameInactiveView = classFileName
-
-        views = self.window.views()
-        inactiveViewIsOpen = False
-        for tempView in views:
-            file_name = tempView.file_name()
-            if file_name == fileNameInactiveView:
-                self.window.focus_view(tempView)
-                inactiveViewIsOpen = True
-                break
-        if not inactiveViewIsOpen:
-            self.window.run_command("toggle_source_test")
-        self.window.focus_view(view)
 
     def _getClassView(self, view):
         classView = None

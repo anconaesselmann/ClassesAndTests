@@ -3,7 +3,7 @@ import sublime
 import sublime_plugin
 
 from src.CommandExecutionThread import CommandExecutionThread
-from src.LiveUnitTest import LiveUnitTest
+from src.LiveUnitTesting import LiveUnitTesting
 from src.UnitTestFunctions import UnitTestFunctions
 from src.FileComponents import FileComponents
 from src.Std import Std
@@ -26,7 +26,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if DEBUG:
             print("Running tests to determine if all functions have been declared:")
         classView = self.classView
-        liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
+        liveUnitTest = LiveUnitTesting(UnitTestFunctions.getCommandFolders(settings))
         liveUnitTest.updateTempFiles(classView)
         command = liveUnitTest.getCommand()
         argument = liveUnitTest.getArgument()
