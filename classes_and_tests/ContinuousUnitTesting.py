@@ -39,10 +39,13 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
 
     def run(self):
         #self.test()
+        view = self.window.active_view()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
-        if not self._classHasTest():
-            self.outputPanel.printToPanel("No Class-Test file pair exist.")
+        if not self._classHasTest(view):
+            self.outputPanel.printToPanel("No Class-Test file pair exists.")
             return
+        self._bringViewsToFront(view)
+
         self.liveUnitTest = LiveUnitTest(UnitTestFunctions.getCommandFolders(settings))
 
         self.initCommandThread()
@@ -50,9 +53,8 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
         self.outputProgramStart()
         self.runTests()
 
-    def _classHasTest(self):
+    def _classHasTest(self, view):
         result = False
-        view = self.window.active_view()
         if view is not None:
             viewFileName = view.file_name()
             if viewFileName is not None:
@@ -62,6 +64,33 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
                 if path.isfile(classFileName) and path.isfile(testFileName):
                     result = True
         return result
+
+    def _bringViewsToFront(self, view):
+        fileNameActiveView = view.file_name()
+        md = MirroredDirectory(fileNameActiveView)
+        classFileName = md.getFileName()
+        testFileName = md.getTestFileName()
+
+        if fileNameActiveView == classFileName:
+            fileNameInactiveView = testFileName
+        else:
+            fileNameInactiveView = classFileName
+
+        views = self.window.views()
+        inactiveViewIsOpen = False
+        for tempView in views:
+            file_name = tempView.file_name()
+            if file_name == fileNameInactiveView:
+                self.window.focus_view(tempView)
+                inactiveViewIsOpen = True
+                break
+        if not inactiveViewIsOpen:
+            self.window.run_command("toggle_source_test")
+        self.window.focus_view(view)
+
+
+
+
 
     def _getClassAndTestView(self):
         md = MirroredDirectory(self.window.active_view().file_name())
