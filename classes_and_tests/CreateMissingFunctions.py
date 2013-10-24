@@ -17,7 +17,10 @@ settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 
 class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.classView = self.view # possibly try to find the classes view
+        window = self.view.window()
+        if window is None:
+            return
+        self.classView = UnitTestFunctions.getClassView(window, self.view)
         self.edit = edit
 
         self._runUnitTest()
@@ -63,8 +66,8 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if insertionPoint is not None:
             indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
             classView.insert(self.edit, insertionPoint, self._getFunctionBody(self.classView.file_name(), functionName, indentation))
-            extension = FileComponents(view.file_name()).getExtension()
-            if extension is not "py": # for some odd reason in .py scripts this would create multiple functions with the same name....
+            extension = FileComponents(classView.file_name()).getExtension()
+            if extension != "py": # for some odd reason in .py scripts this would create multiple functions with the same name.... I might have to hook into the on_change event
                 sublime.set_timeout(lambda: self._runUnitTest(), 200)
         else:
             print("File is not formatted correctly. A class{} needs to be inside a namespace{}")

@@ -39,7 +39,6 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
     """
 
     def run(self):
-        #self.test()
         view = self.window.active_view()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
         if not UnitTestFunctions.classHasTest(view):
@@ -53,24 +52,6 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
         self.liveUnitTest.updateTempFiles(self.window.active_view())
         self.outputProgramStart()
         self.runTests(view)
-
-
-
-    def _getClassView(self, view):
-        classView = None
-        classFileName = MirroredDirectory(view.file_name()).getFileName()
-        if view.file_name == classFileName:
-            classView = view
-        else:
-            for tempView in self.window.views():
-                file_name = tempView.file_name()
-                if file_name == classFileName:
-                    classView = tempView
-                    break
-        return classView
-
-    def _getClassAndTestView(self):
-        md = MirroredDirectory(self.window.active_view().file_name())
 
     def runTests(self, classView):
         if classView is not None:
@@ -113,5 +94,5 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
                 self.outputPanel.setViewPosition(viewPosition)
                 continuousUnitTestingThread.reset()
                 if self.outputPanel.isVisible():
-                    classView = self._getClassView(self.window.active_view())
+                    classView = UnitTestFunctions.getClassView(self.window, self.window.active_view())
                     sublime.set_timeout(lambda: self.runTests(classView), INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS)

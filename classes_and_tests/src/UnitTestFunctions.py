@@ -50,3 +50,17 @@ class UnitTestFunctions:
         if not inactiveViewIsOpen and openingFilesAllowed is True:
             window.run_command("toggle_source_test")
         window.focus_view(view)
+
+    @staticmethod
+    def getClassView(window, view):
+        classView = None
+        classFileName = MirroredDirectory(view.file_name()).getFileName()
+        if view.file_name == classFileName:
+            classView = view
+        else:
+            for tempView in window.views():
+                file_name = tempView.file_name()
+                if file_name == classFileName:
+                    classView = tempView
+                    break
+        return classView
