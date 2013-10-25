@@ -2,42 +2,37 @@ import sublime
 import sublime_plugin
 from os import path
 
-from src.OutputPanel import OutputPanel
-from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
-from src.LiveUnitTesting import LiveUnitTesting
-from src.UnitTestFunctions import UnitTestFunctions
-from src.MirroredDirectory import MirroredDirectory
-
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
 
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+DEBUG = True
 
-INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS = settings.get("interval_between_continuous_unit_tests")
+def plugin_loaded():
+    global settings
+    global INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    INTERVAL_BETWEEN_CONTINUOUS_UNIT_TESTS = settings.get("interval_between_continuous_unit_tests")
+
+try:
+    from src.OutputPanel import OutputPanel
+    from src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
+    from src.LiveUnitTesting import LiveUnitTesting
+    from src.UnitTestFunctions import UnitTestFunctions
+    from src.MirroredDirectory import MirroredDirectory   
+except ImportError:
+    from .src.OutputPanel import OutputPanel
+    from .src.MultipleCommandExecutionThread import MultipleCommandExecutionThread
+    from .src.LiveUnitTesting import LiveUnitTesting
+    from .src.UnitTestFunctions import UnitTestFunctions
+    from .src.MirroredDirectory import MirroredDirectory
+    
+else:
+    plugin_loaded()
 
 continuousUnitTestingThread = None
 
 
 class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
-    """def test(self):
-
-        windows = sublime.windows()
-        for window in windows:
-            windowId = window.id()
-            activeView = window.active_view()
-            num_groups = window.num_groups()
-            print windowId
-            print activeView
-            print num_groups
-            views = window.views()
-            for view in views:
-                file_name = view.file_name()
-                print file_name
-                if file_name == "/MyProject/libraryTest/python/a/b/c/PythonClass14Test.py":
-                    #window.focus_view(view)
-                    pass
-    """
-
     def run(self):
         view = self.window.active_view()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
@@ -63,7 +58,8 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
         global continuousUnitTestingThread
         if continuousUnitTestingThread is None:
             continuousUnitTestingThread = MultipleCommandExecutionThread()
-            print "Starting continuousUnitTestingThread"
+            if DEBUG:
+                print("Starting continuousUnitTestingThread")
             continuousUnitTestingThread.start()
 
     def updateCommandThread(self):

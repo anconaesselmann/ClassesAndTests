@@ -3,10 +3,16 @@ import sublime_plugin
 import os
 import fileinput
 
-from FileManipulation import FileManipulation
-from SublimeFunctions import SublimeFunctions
-from MirroredDirectory import MirroredDirectory
-from FileCreator import FileCreator
+try:
+    from FileManipulation import FileManipulation
+    from SublimeFunctions import SublimeFunctions
+    from MirroredDirectory import MirroredDirectory
+    from FileCreator import FileCreator
+except ImportError:
+    from .FileManipulation import FileManipulation
+    from .SublimeFunctions import SublimeFunctions
+    from .MirroredDirectory import MirroredDirectory
+    from .FileCreator import FileCreator
 
 class LiveUnitTesting():
     def __init__(self, commandFolders):
@@ -22,6 +28,8 @@ class LiveUnitTesting():
             if lastModTempFile != self._lastModTempFile:
                 # only save copy of test file, if it has been modified and saved
                 currentTestFileContent = FileManipulation.getFileContent(self._activeFile.getTestFileName())
+                #print("currentTestFileContent:")
+                #print(currentTestFileContent)
                 self._saveToTempTestFile(currentTestFileContent)
                 self._lastModTempFile = lastModTempFile
 
@@ -70,24 +78,24 @@ class LiveUnitTesting():
         injected = False
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
             if not injected and "require_once" in line:
-                print "\trequire_once\"" + self._getTempFileDir() + "\";\n",
+                print("\trequire_once\"" + self._getTempFileDir() + "\";\n"),
                 injected = True
             else:
-                print line,
+                print(line),
 
     def _replacePyLoadingStatements(self):
         injected = False
         #print "active file: " + self._activeFile.getFile()
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
             if not injected and "sys.path.append(path.abspath(path.join(__file__" in line:
-                print "    sys.path.append(path.abspath(path.join(__file__, \"..\", \"..\")))\n",
-                print "    sys.path.append(path.abspath(path.join(\"" + self._activeFile.getFileDir() + "\")))"
-                print "    from classFiles.TemporaryClass import *\n",
+                print("    sys.path.append(path.abspath(path.join(__file__, \"..\", \"..\")))\n"),
+                print("    sys.path.append(path.abspath(path.join(\"" + self._activeFile.getFileDir() + "\")))\n"),
+                print("    from classFiles.TemporaryClass import *\n"),
                 injected = True
             elif "import " + self._activeFile.getFile() in line:
                 pass
             else:
-                print line,
+                print(line),
 
     def _createPackageFiles(self):
         parentPackageInit = os.path.abspath(os.path.join(self._getTempTestFileDir(), "..", "..", "__init__.py"))

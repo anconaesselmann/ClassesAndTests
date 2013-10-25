@@ -1,6 +1,12 @@
 import os
-from FileComponents import FileComponents
-from Std import Std
+
+try:
+    from FileComponents import FileComponents
+    from Std import Std
+except ImportError:
+    from .FileComponents import FileComponents
+    from .Std import Std
+    
 
 class MirroredDirectory():
     KIND_IS_CLASS   = "class"

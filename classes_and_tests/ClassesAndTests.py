@@ -2,17 +2,28 @@ import os
 import sublime
 import sublime_plugin
 
-from src.FileCreator import FileCreator
-from src.InputPanel import InputPanel
-from src.SublimeWindowFunctions import SublimeWindowFunctions
-
 DEBUG = True
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
-PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
-TEMPLATES_DIR = PACKAGE_DIR + "/templates"
+
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    
+try:
+    from src.FileCreator import FileCreator
+    from src.InputPanel import InputPanel
+    from src.SublimeWindowFunctions import SublimeWindowFunctions 
+except ImportError:
+    from .src.FileCreator import FileCreator
+    from .src.InputPanel import InputPanel
+    from .src.SublimeWindowFunctions import SublimeWindowFunctions
+else:
+    plugin_loaded()
+
+PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path", "current_php_test_suite_dir"]
 USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code base directory:", "Enter unit-test-suite directory:"]
@@ -107,6 +118,9 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         view.erase_status("ClassesAndTests")
 
         fc = FileCreator(settings.get('base_path'), command_string, settings.get('default_file_extension'), TEMPLATES_DIR)
+        print("command_string in ClassesAndTests.on_done:")
+        print(command_string)
+        print(fc.getClassName())
         fileDir = fc.createFromTemplate()
         if fileDir is None:
             fileDir = fc.create()

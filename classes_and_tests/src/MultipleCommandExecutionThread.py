@@ -1,7 +1,12 @@
 import threading
 import time
 
-from Command import Command
+try:
+    from Command import Command
+except ImportError:
+    from .Command import Command
+
+DEBUG = True
 
 class MultipleCommandExecutionThread(threading.Thread):
     def __init__(self, command=None, argument=None):
@@ -36,11 +41,13 @@ class MultipleCommandExecutionThread(threading.Thread):
         while not self._stop:
             #print "hasRun: " + str(self._hasRun) + ", command: " + str(self._command) + ", argument: " + str(self._argument)
             if not self._hasRun and self._command is not None and self._argument is not None:
-                #print "executing command"
+                #print("executing command: " + self._command + " " + self._argument)
                 command = Command(self._command, self._argument)
                 self._scriptResponse = command.runAndGetOutputString()
                 self._hasRun = True
+                #print("result: " + str(self._scriptResponse))
             else:
-                #print "not executing command"
+                #print("not executing command")
                 time.sleep(0.1)
-        print "ending MultipleCommandExecutionThread"
+        if DEBUG:
+            print("ending MultipleCommandExecutionThread")

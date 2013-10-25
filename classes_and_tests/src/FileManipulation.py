@@ -1,8 +1,11 @@
 import fileinput
 import os
 
-from FileCreator import FileCreator
-
+try:
+    from FileCreator import FileCreator
+except ImportError:
+    from .FileCreator import FileCreator
+    
 class FileManipulation():
     @staticmethod
     def getFileContent(fileDir):

@@ -1,14 +1,18 @@
-#from os import sys, path
-#sys.path.append(path.abspath(path.join("/Users/axelesselmann/Documents/Dropbox/python/sublimePackages/ClassesAndTests/classes_and_tests/src")))
-
 import os
+import sys
 import fileinput
 import json
 #from pprint import pprint
 
-from MirroredDirectory import MirroredDirectory
-from FileComponents import FileComponents
-from Std import Std
+try:
+    from MirroredDirectory import MirroredDirectory
+    from FileComponents import FileComponents
+    from Std import Std    
+except ImportError:
+    from .MirroredDirectory import MirroredDirectory
+    from .FileComponents import FileComponents
+    from .Std import Std
+    from io import open
 
 class FileCreator:
     KIND_IS_CLASS   = "class"
@@ -68,8 +72,14 @@ class FileCreator:
         return fileExtension
 
     """ """
+    def noneToStr(self, var):
+        if var is None:
+            return ""
+        else:
+            return var
+
     def getFileDir(self):
-        fileDir = self.getParentDir() + "/" + self.getClassName() + self.getTestEnding() + self.fileExtension
+        fileDir = self.noneToStr(self.getParentDir()) + "/" + self.noneToStr(self.getClassName()) + self.noneToStr(self.getTestEnding()) + self.noneToStr(self.fileExtension)
         return fileDir
     """ """
     def getClassName(self):
@@ -78,9 +88,9 @@ class FileCreator:
             return md.getFile()
         else:
             return None"""
-        fileName, fileExtension = os.path.splitext(self.relativeFileName)
-        if fileExtension == "":
-            return None
+        fileName, fileExtension = os.path.splitext(self.relativeFileName) # this causes issues when using the default file extension
+        #if fileExtension == "":
+        #    return None
         classNameIndex = fileName.rfind('/');
         className = fileName[classNameIndex + 1:]
         if className[-7:] == "DB_Test":
@@ -168,6 +178,7 @@ class FileCreator:
             self.saveFile(fileDir, data)
         except Exception as e:
             fileDir = None
+            raise Exception("file creation unsuccessful")
         return fileDir
 
     def createFromTemplate(self):
@@ -184,6 +195,7 @@ class FileCreator:
             self.saveFile(fileDir, data)
         except Exception as e:
             fileDir = None
+            raise Exception("file creation unsuccessful")
         return fileDir
 
     def getReplacementString(self, replacementKeyWord, replacementString):
@@ -306,7 +318,10 @@ class FileCreator:
     def saveFile(self, fileDir, data):
         if not os.path.exists(fileDir):
             newFile = open(fileDir, "wb")
-            newFile.write(data);
+            if sys.version_info >= (3, 0):
+                newFile.write(str.encode(data));
+            else:
+                newFile.write(data);
             newFile.close()
 
             #self.printToConsole("File " + fileDir + " created.")

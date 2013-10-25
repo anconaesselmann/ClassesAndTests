@@ -1,13 +1,25 @@
 import sublime
 import sublime_plugin
 from os import path
-
-from src.UnitTestFunctions import UnitTestFunctions
-from src.MirroredDirectory import MirroredDirectory
-
+    
 PACKAGE_NAME = "ClassesAndTests"
 
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+
+try:
+    from src.UnitTestFunctions import UnitTestFunctions
+    from src.MirroredDirectory import MirroredDirectory    
+except ImportError:
+    from .src.UnitTestFunctions import UnitTestFunctions
+    from .src.MirroredDirectory import MirroredDirectory
+    def plugin_loaded():
+        global settings
+        settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+else:
+    plugin_loaded()
+
 
 globalActiveClassFileName = None
 globalActiveTestFileName = None

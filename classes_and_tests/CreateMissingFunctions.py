@@ -2,18 +2,32 @@ import re
 import sublime
 import sublime_plugin
 
-from src.CommandExecutionThread import CommandExecutionThread
-from src.LiveUnitTesting import LiveUnitTesting
-from src.UnitTestFunctions import UnitTestFunctions
-from src.FileComponents import FileComponents
-from src.Std import Std
-
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
 
 DEBUG = True
 
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    
+try:
+    from src.CommandExecutionThread import CommandExecutionThread
+    from src.LiveUnitTesting import LiveUnitTesting
+    from src.UnitTestFunctions import UnitTestFunctions
+    from src.FileComponents import FileComponents
+    from src.Std import Std
+except ImportError:
+    from .src.CommandExecutionThread import CommandExecutionThread
+    from .src.LiveUnitTesting import LiveUnitTesting
+    from .src.UnitTestFunctions import UnitTestFunctions
+    from .src.FileComponents import FileComponents
+    from .src.Std import Std
+    def plugin_loaded():
+        global settings
+        settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+else:
+    plugin_loaded()
 
 class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
     def run(self, edit):

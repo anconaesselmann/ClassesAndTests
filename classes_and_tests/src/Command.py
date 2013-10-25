@@ -1,9 +1,11 @@
 import subprocess
+#from pipes import quote
 
 class Command():
     def __init__(self, command, argument):
         self.command = command
         self.argument = argument
+        #print("$ " + command + " " + argument)
 
     def run(self):
         process = subprocess.Popen([self.command, self.argument], shell=True, stdout = subprocess.PIPE,
@@ -19,7 +21,7 @@ class Command():
         process = subprocess.Popen([self.command, self.argument], stdout=subprocess.PIPE,
                                                                   stderr=subprocess.PIPE)
         scriptResponse, scriptError = process.communicate()
-        return scriptResponse + "\n" + scriptError
+        return scriptResponse.decode('utf-8') + "\n" + scriptError.decode('utf-8')
 
     def runAndPrintAllOutput(self):
         print(self.runAndGetOutputString())

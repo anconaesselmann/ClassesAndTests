@@ -43,7 +43,9 @@ mods_load_order = [
     '.CreateMissingFunctions',
     '.ContinuousUnitTesting',
     '.ClassesAndTests'
-    '.SyncronizeClassAndTestTabs'
+    '.SyncronizeClassAndTestTabs',
+    '.OutputPanelInsert',
+    '.OutputPanelClear'
 ]
 
 for suffix in mods_load_order:

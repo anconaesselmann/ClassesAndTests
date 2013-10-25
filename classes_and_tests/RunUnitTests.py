@@ -2,14 +2,26 @@ import os
 import sublime
 import sublime_plugin
 
-from src.MirroredDirectory import MirroredDirectory
-from src.OutputPanel import OutputPanel
-from src.CommandExecutionThread import CommandExecutionThread
-
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
 
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+
+try:
+    from src.MirroredDirectory import MirroredDirectory
+    from src.OutputPanel import OutputPanel
+    from src.CommandExecutionThread import CommandExecutionThread
+except ImportError:
+    from .src.MirroredDirectory import MirroredDirectory
+    from .src.OutputPanel import OutputPanel
+    from .src.CommandExecutionThread import CommandExecutionThread
+    def plugin_loaded():
+        global settings
+        settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+else:
+    plugin_loaded()
 
 
 class RunUnitTestsCommand(sublime_plugin.WindowCommand):
@@ -42,14 +54,20 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
         self.runTests(command, testsPath)
 
     def runTests(self, command, testsPath):
-        self.outputPanel = self.getOutputPanel(command + " " +  testsPath)
+        testsPathString = "\"" +  testsPath + "\""
+        self.outputPanel = self.getOutputPanel(command + " " + testsPathString)
         thread = CommandExecutionThread(command, testsPath)
         thread.start()
         self.handleCommandThread(thread)
 
     def getPyCommand(self):
-        pythonDir = os.path.normpath(settings.get("python_dir"))
-        return os.path.join(pythonDir, "python")
+        pythonDir = settings.get("python_dir")
+        if pythonDir is not None:
+            pythonDir = os.path.normpath(pythonDir)
+        else:
+            pythonDir = ""
+        pythonDir = os.path.join(pythonDir, "python")
+        return pythonDir
 
     def getPhpCommand(self):
         phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir"))

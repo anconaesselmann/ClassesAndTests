@@ -2,7 +2,10 @@ import sublime
 import sublime_plugin
 from os import path
 
-from src.MirroredDirectory import MirroredDirectory
+try:
+    from MirroredDirectory import MirroredDirectory
+except ImportError:
+    from .MirroredDirectory import MirroredDirectory
 
 class UnitTestFunctions:
     @staticmethod

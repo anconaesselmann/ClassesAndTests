@@ -2,7 +2,12 @@ import os
 import sublime
 import sublime_plugin
 
-from FileCreator import FileCreator
+try:
+    from FileCreator import FileCreator
+except ImportError:
+    from .FileCreator import FileCreator
+
+
 
 class SublimeWindowFunctions():
     def __init__(self, windowInstance, settings):

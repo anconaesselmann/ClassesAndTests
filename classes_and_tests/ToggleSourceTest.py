@@ -2,24 +2,36 @@ import os
 import sublime
 import sublime_plugin
 
-from src.FileCreator import FileCreator
-from src.MirroredDirectory import MirroredDirectory
-
 DEBUG = True
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
-PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
-settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
-TEMPLATES_DIR = PACKAGE_DIR + "/templates"
-SPLIT_VIEW = settings.get("seperate_tests_and_sources_by_split_view")
 
-if settings.get("tests_on_right") == True:
-    CLASS_WINDOW = 0
-    TEST_WINDOW  = 1
+def plugin_loaded():
+    global settings
+    global SPLIT_VIEW
+    global CLASS_WINDOW
+    global TEST_WINDOW
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    SPLIT_VIEW = settings.get("seperate_tests_and_sources_by_split_view")
+    if settings.get("tests_on_right") == True:
+        CLASS_WINDOW = 0
+        TEST_WINDOW  = 1
+    else:
+        CLASS_WINDOW = 1
+        TEST_WINDOW  = 0
+
+try:
+    from src.FileCreator import FileCreator
+    from src.MirroredDirectory import MirroredDirectory
+except ImportError:
+    from .src.FileCreator import FileCreator
+    from .src.MirroredDirectory import MirroredDirectory
 else:
-    CLASS_WINDOW = 1
-    TEST_WINDOW  = 0
+    plugin_loaded()
+
+PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
+TEMPLATES_DIR = PACKAGE_DIR + "/templates"
 
 class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
     def createColumns(self):

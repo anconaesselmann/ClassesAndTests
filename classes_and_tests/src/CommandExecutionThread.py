@@ -1,6 +1,9 @@
 import threading
 
-from Command import Command
+try:
+    from Command import Command
+except ImportError:
+    from .Command import Command
 
 class CommandExecutionThread(threading.Thread):
     def __init__(self, command, argument):

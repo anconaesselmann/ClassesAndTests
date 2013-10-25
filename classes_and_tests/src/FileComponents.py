@@ -34,7 +34,8 @@ class FileComponents():
             self._file = None
 
             if path == ".":
-                print path
+                #print(path)
+                pass
         if self._path[:len(os.sep)] == os.sep:
             self._pathIsAbsolute = True
         else:
