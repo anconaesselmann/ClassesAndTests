@@ -81,6 +81,7 @@ class LiveUnitTesting():
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
             if not injected and "sys.path.append(path.abspath(path.join(__file__" in line:
                 print "    sys.path.append(path.abspath(path.join(__file__, \"..\", \"..\")))\n",
+                print "    sys.path.append(path.abspath(path.join(\"" + self._activeFile.getFileDir() + "\")))"
                 print "    from classFiles.TemporaryClass import *\n",
                 injected = True
             elif "import " + self._activeFile.getFile() in line:

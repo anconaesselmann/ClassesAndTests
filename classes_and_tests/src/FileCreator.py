@@ -1,9 +1,10 @@
+#from os import sys, path
+#sys.path.append(path.abspath(path.join("/Users/axelesselmann/Documents/Dropbox/python/sublimePackages/ClassesAndTests/classes_and_tests/src")))
+
 import os
 import fileinput
 import json
 #from pprint import pprint
-import sublime
-import sublime_plugin
 
 from MirroredDirectory import MirroredDirectory
 from FileComponents import FileComponents
@@ -27,13 +28,17 @@ class FileCreator:
             basePath = temp[0:classNameIndex]
             #print "basePath: " + basePath
             #print "relativeFileName: " + relativeFileName
+        self._fileComponents = FileComponents(relativeFileName)
+        #print self._fileComponents.getFileName()
         self.templatesDir = self.getStandardizedPath(templatesDir)
         self.tempBasePath = self.getStandardizedPath(basePath)
         if relativeFileName[0:1] == "/":
             self.tempBasePath = ""
         self.fileExtension = self.getFileExtension(relativeFileName, defaultFileExtension)
         self.relativeFileName = relativeFileName
-    """ """
+    """
+    remove this!
+    """
     @staticmethod
     def getStandardizedPath(path, slashInFront = True, slashInBack = True):
         if slashInBack == True:
@@ -52,9 +57,13 @@ class FileCreator:
                 path = path[1:]
         return path
 
-    def getFileExtension(self, fileName, defaultFileExtension):
+    @staticmethod
+    def getFileExtension(fileName, defaultFileExtension=None):
+        """
+        unit tested
+        """
         fileName, fileExtension = os.path.splitext(fileName)
-        if fileExtension == "":
+        if fileExtension == "" and defaultFileExtension is not None:
             fileExtension = "." + defaultFileExtension
         return fileExtension
 
@@ -64,7 +73,14 @@ class FileCreator:
         return fileDir
     """ """
     def getClassName(self):
+        """if self._fileComponents.isFile():
+            md = MirroredDirectory(self._fileComponents.getFileName())
+            return md.getFile()
+        else:
+            return None"""
         fileName, fileExtension = os.path.splitext(self.relativeFileName)
+        if fileExtension == "":
+            return None
         classNameIndex = fileName.rfind('/');
         className = fileName[classNameIndex + 1:]
         if className[-7:] == "DB_Test":

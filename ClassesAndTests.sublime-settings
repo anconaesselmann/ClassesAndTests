@@ -3,7 +3,7 @@
  * lost with each update, please open the User settings by going to
  *     "Sublime Text 2"->"Preferences"->"Package Settings"->
  *                       "ClassesAndTests"->"Settings - User"
- *  and enter the setting there.
+ *  and copy and paste the desired setting.
  */
 {
 // ================================================================= //

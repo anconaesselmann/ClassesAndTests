@@ -23,6 +23,9 @@ class MirroredDirectory():
     def getTestFile(self):
         return self.fileComponents.getFile()
 
+    def isFile(self):
+        return self.fileComponents.isFile()
+
     def getFileDir(self):
         folders = Std.dirExplode(self.fileComponents.getDir())
         tempFolders = []
