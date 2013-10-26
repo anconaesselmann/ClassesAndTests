@@ -79,7 +79,18 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         insertionPoint = self._getInsertPoint(classView)
         if insertionPoint is not None:
             indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
-            classView.insert(self.edit, insertionPoint, self._getFunctionBody(self.classView.file_name(), functionName, indentation))
+            
+
+            insertionString = self._getFunctionBody(self.classView.file_name(), functionName, indentation)
+            try:
+                #sublime2
+                classView.insert(self.edit, insertionPoint, insertionString)
+            except Exception:
+                #sublime3
+                classView.run_command('text_insert', {'insertionPoint': insertionPoint, 'string': insertionString})
+
+
+
             extension = FileComponents(classView.file_name()).getExtension()
             if extension != "py": # for some odd reason in .py scripts this would create multiple functions with the same name.... I might have to hook into the on_change event
                 sublime.set_timeout(lambda: self._runUnitTest(), 200)

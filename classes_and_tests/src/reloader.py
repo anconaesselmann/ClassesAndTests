@@ -38,6 +38,7 @@ mods_load_order = [
     '.src.InputPanel',
     '.src.OutputPanel',
     '.src.LiveUnitTesting',
+    '.TextInsert',
     '.ToggleSourceTest',
     '.RunUnitTests',
     '.CreateMissingFunctions',
