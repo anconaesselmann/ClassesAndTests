@@ -20,10 +20,12 @@ try:
     from src.FileCreator import FileCreator
     from src.InputPanel import InputPanel
     from src.SublimeWindowFunctions import SublimeWindowFunctions 
+    from src.UserSettings import UserSettings
 except ImportError:
     from .src.FileCreator import FileCreator
     from .src.InputPanel import InputPanel
     from .src.SublimeWindowFunctions import SublimeWindowFunctions
+    from .src.UserSettings import UserSettings
 else:
     plugin_loaded()
 

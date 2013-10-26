@@ -1,7 +1,15 @@
+from os import path, remove
+
+try:
+    from FileCreator import FileCreator
+except ImportError:
+    from .FileCreator import FileCreator
+    from io import open
+
 class UserSettings():
     def __init__(self, fileName):
         self.fileName = fileName
-        userSettingsExist = os.path.isfile(fileName)
+        userSettingsExist = path.isfile(fileName)
         if userSettingsExist != True:
             fc = FileCreator(fileName)
             fc.create("{\n}")
@@ -18,10 +26,11 @@ class UserSettings():
             jsonData = json.dumps(settingsVariables)
             print(jsonData)
             fileHandle = open(self.fileName, "wb")
-            fileHandle.write(jsonData);
+            #fileHandle.write(jsonData);
+            fileHandle.write(str.encode(jsonData));
             fileHandle.close()
         except Exception as e:
             print("Error when calling UserSettings.set():\n" + str(e))
 
     def deleteAll(self):
-        os.remove(self.fileName)
+        remove(self.fileName)
