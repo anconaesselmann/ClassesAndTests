@@ -44,6 +44,7 @@ mods_load_order = [
     '.ContinuousUnitTesting',
     '.ClassesAndTests'
     '.SyncronizeClassAndTestTabs',
+    '.SyncronizeClosingClassAndTestTabs',
     '.OutputPanelInsert',
     '.OutputPanelClear'
 ]

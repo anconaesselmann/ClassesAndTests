@@ -9,8 +9,13 @@ PACKAGE_VERSION = "0.2.0"
 
 def plugin_loaded():
     global settings
+    global PACKAGE_DIR
+    global TEMPLATES_DIR
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
-    
+    PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+    #PACKAGE_DIR = os.path.join("Packages", PACKAGE_NAME)
+    TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
+
 try:
     from src.FileCreator import FileCreator
     from src.InputPanel import InputPanel
@@ -22,8 +27,6 @@ except ImportError:
 else:
     plugin_loaded()
 
-PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
-TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path", "current_php_test_suite_dir"]
 USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code base directory:", "Enter unit-test-suite directory:"]

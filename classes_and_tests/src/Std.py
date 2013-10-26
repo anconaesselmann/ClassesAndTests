@@ -1,3 +1,4 @@
+import sys
 import os
 
 class Std():
@@ -42,3 +43,10 @@ class Std():
                 result += ws
                 difference -= 1
         return result
+
+    @staticmethod
+    def getIterItems(aDict):
+        if sys.version_info < (3, ):
+            return aDict.iteritems()
+        else:
+            return aDict.items()

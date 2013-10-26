@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 from os import path
-    
+
 PACKAGE_NAME = "ClassesAndTests"
 
 def plugin_loaded():
@@ -10,13 +10,10 @@ def plugin_loaded():
 
 try:
     from src.UnitTestFunctions import UnitTestFunctions
-    from src.MirroredDirectory import MirroredDirectory    
+    from src.MirroredDirectory import MirroredDirectory
 except ImportError:
     from .src.UnitTestFunctions import UnitTestFunctions
     from .src.MirroredDirectory import MirroredDirectory
-    def plugin_loaded():
-        global settings
-        settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 else:
     plugin_loaded()
 
@@ -24,7 +21,7 @@ else:
 globalActiveClassFileName = None
 globalActiveTestFileName = None
 
-# seems to be ignored by reloader. Restart sublime when updating!
+# sometimes seems to be ignored by reloader. Restart sublime when updating!
 # TODO: issues with tests opening twice when starting up and tab_syncronization_opens_files is true
 class SyncronizeClassAndTestTabsListener(sublime_plugin.EventListener):
     def on_activated(self, view):
@@ -32,6 +29,7 @@ class SyncronizeClassAndTestTabsListener(sublime_plugin.EventListener):
             if view is not None:
                 global globalActiveClassFileName
                 global globalActiveTestFileName
+                global globalInitiatingFile
                 fileNameActiveView = view.file_name()
                 if fileNameActiveView is not None and fileNameActiveView != globalActiveClassFileName and fileNameActiveView != globalActiveTestFileName:
                     activeWindow = sublime.active_window()
@@ -43,3 +41,5 @@ class SyncronizeClassAndTestTabsListener(sublime_plugin.EventListener):
                             globalActiveTestFileName = md.getTestFileName()
                             allowOpeningOfFiles = settings.get("tab_syncronization_opens_files")
                             UnitTestFunctions.bringViewsToFront(activeWindow, view, allowOpeningOfFiles)
+
+

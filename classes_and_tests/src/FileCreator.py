@@ -274,7 +274,7 @@ class FileCreator:
             if cursorString in lineTemp:
                 line = i
                 column = lineTemp.find(cursorString)
-                print(lineTemp[0:column] + lineTemp[column + len(cursorString):]),
+                sys.stdout.write (lineTemp[0:column] + lineTemp[column + len(cursorString):]),
                 column += 1
             else:
                 #replaced = False
@@ -291,7 +291,7 @@ class FileCreator:
                                 break #this doesn't seem to work
                         else:
                             lineTemp = lineTemp[0:index] + str(replacementString) + lineTemp[index + len(searchString):]
-                print(lineTemp),
+                sys.stdout.write (lineTemp),
         openStatement = "%s:%d:%d" % (fileDir, line, column)
         import sublime
 
@@ -369,7 +369,8 @@ class FileCreator:
 def getSettingNameValuePair(settings):
     if not isinstance(settings, dict): # I could check for string, but I would break x-compatibility between python 2 and 3
         settings = eval(settings)
-    for key, value in settings.iteritems():
+    #for key, value in settings.iteritems():
+    for key, value in Std.getIterItems(settings):
         if value is not None:
             return key, value
     return None, None
@@ -421,7 +422,8 @@ def get_php_namespace(args):
     settings = eval(args["settings"])
     result = None
     base_dir = ""
-    for key, value in settings.iteritems():
+    #for key, value in settings.iteritems():
+    for key, value in Std.getIterItems(settings):
         if value is not None:
             base_dir = value
         break
@@ -445,7 +447,8 @@ def get_class_name(args):
 def get_doc_block_tag(args):
     settings = eval(args["settings"])
     result = None
-    for key, value in settings.iteritems():
+    #for key, value in settings.iteritems():
+    for key, value in Std.getIterItems(settings):
         if value is not None:
             result = "@" + key + " " + value
         break
@@ -456,7 +459,8 @@ def get_doc_block_tag(args):
 def get_php_autoloader(args):
     settings = eval(args["settings"])
     result = None
-    for key, value in settings.iteritems():
+    #for key, value in settings.iteritems():
+    for key, value in Std.getIterItems(settings):
         if value is not None:
             if value[0:1] == "/":
                 result = "require_once \"" + value + "\";"

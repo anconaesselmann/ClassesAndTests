@@ -12,6 +12,8 @@ def plugin_loaded():
     global SPLIT_VIEW
     global CLASS_WINDOW
     global TEST_WINDOW
+    global PACKAGE_DIR
+    global TEMPLATES_DIR
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
     SPLIT_VIEW = settings.get("seperate_tests_and_sources_by_split_view")
     if settings.get("tests_on_right") == True:
@@ -20,6 +22,8 @@ def plugin_loaded():
     else:
         CLASS_WINDOW = 1
         TEST_WINDOW  = 0
+    PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+    TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
     from src.FileCreator import FileCreator
@@ -30,8 +34,7 @@ except ImportError:
 else:
     plugin_loaded()
 
-PACKAGE_DIR = sublime.packages_path() + "/" + PACKAGE_NAME
-TEMPLATES_DIR = PACKAGE_DIR + "/templates"
+
 
 class ToggleSourceTestCommand(sublime_plugin.WindowCommand):
     def createColumns(self):

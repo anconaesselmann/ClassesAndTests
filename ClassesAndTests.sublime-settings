@@ -204,5 +204,10 @@
     /*
      *
      */
-    "tab_syncronization_opens_files": true
+    "tab_syncronization_opens_files": true,
+
+    /*
+     *
+     */
+     "tab_syncronization_closes_files": true
 }

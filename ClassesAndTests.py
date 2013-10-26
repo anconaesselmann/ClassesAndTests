@@ -25,6 +25,7 @@ if VERSION > 3000:
 	from .classes_and_tests.SyncronizeClassAndTestTabs import *
 	from .classes_and_tests.OutputPanelInsert import *
 	from .classes_and_tests.OutputPanelClear import *
+	from .classes_and_tests.SyncronizeClosingClassAndTestTabs import *
 else:
 
 	from classes_and_tests.src import reloader
@@ -36,3 +37,4 @@ else:
 	from classes_and_tests.SyncronizeClassAndTestTabs import *
 	from classes_and_tests.OutputPanelInsert import *
 	from classes_and_tests.OutputPanelClear import *
+	from classes_and_tests.SyncronizeClosingClassAndTestTabs import *
