@@ -7,7 +7,7 @@ import json
 try:
     from MirroredDirectory import MirroredDirectory
     from FileComponents import FileComponents
-    from Std import Std    
+    from Std import Std
 except ImportError:
     from .MirroredDirectory import MirroredDirectory
     from .FileComponents import FileComponents
@@ -212,6 +212,45 @@ class FileCreator:
             result = ""
         return result
 
+    def _executeTemplateFunctionSublime2(self, fileExtension, functionName, args):
+        from os import sys, path
+        importPath = path.abspath(path.join(self.templatesDir))
+        sys.path.append(importPath)
+        packageString = fileExtension + ".functions"
+        _temp = __import__(packageString, globals(), locals(), [functionName], 0)
+        function = eval("_temp." + functionName)
+        return function(args)
+
+    def _executeTemplateFunctionSublime3(self, fileExtension, functionName, args):
+        import importlib
+        packageString = "ClassesAndTests.templates." + fileExtension + ".functions"
+        module = importlib.import_module(packageString)
+        function = getattr(module, functionName)
+        commandResult = function(args)
+        return commandResult
+
+    # This is a stupid hack, but I just can't figure out how to do this neatly in Sublime 2....
+    def _executeTemplateFunction(self, fileExtension, variableCommand, args):
+        if sys.version_info >= (3, 0):
+            try:
+                commandResult = self._executeTemplateFunctionSublime3(fileExtension, variableCommand, args)
+            except Exception as e:
+                try:
+                    commandResult = self._executeTemplateFunctionSublime3("general", variableCommand, args)
+                except Exception as e:
+                    raise Exception("Custom variable " + variableCommand + " does not exist")
+        else:
+
+            try:
+                commandResult = self._executeTemplateFunctionSublime2(fileExtension, variableCommand, args)
+            except Exception as e:
+                try:
+                    commandResult = self._executeTemplateFunctionSublime2("general", variableCommand, args)
+                except Exception as e:
+                    raise Exception("Custom variable " + variableCommand + " does not exist")
+        return commandResult
+
+
     def initialOpenFile(self, window, fileDir, settings):
         if settings.get("tests_on_right") == True:
             classWindow = 0
@@ -254,15 +293,8 @@ class FileCreator:
                 args["name"] = variableName
                 args["dir"] = fileDir
 
-                commandString = variableCommand + "(" + str(args) + ")"
-                commandResult = eval(commandString)
+                commandResult = self._executeTemplateFunction(fileExtension, variableCommand, args)
 
-                #print "executing:"
-                #print commandString
-                #print "result:"
-                #print commandResult
-                #else:
-                #    commandResult = None
                 replacements[variableName] = commandResult
 
         cursorString = '/* @cursor */'
@@ -365,107 +397,3 @@ class FileCreator:
         print("- FileCreator: " + out)
 
 
-
-def getSettingNameValuePair(settings):
-    if not isinstance(settings, dict): # I could check for string, but I would break x-compatibility between python 2 and 3
-        settings = eval(settings)
-    #for key, value in settings.iteritems():
-    for key, value in Std.getIterItems(settings):
-        if value is not None:
-            return key, value
-    return None, None
-
-def getRelativePath(baseDir, absDir):
-    if baseDir is None:
-        baseDir = ""
-    rc = FileComponents(MirroredDirectory(absDir).getFileDir())
-    rc.setBasePath(baseDir)
-    relPath = rc.getRelativePath()
-
-    # TODO: relative path should not return / at the front, check why it is doing this and remove this workaround
-    if relPath[0:len(os.sep)] == os.sep:
-        relPath = relPath[len(os.sep):]
-
-    return relPath
-
-def get_project_folder(args):
-    fileName = MirroredDirectory(args["dir"]).getFile()
-    varName, baseDir = getSettingNameValuePair(args["settings"])
-    relPath = getRelativePath(baseDir, args["dir"])
-    #print "inside get_project_folder:"
-    #print "relPath: " + relPath
-    result = ""
-    while 1:
-        relPath, tail = os.path.split(relPath)
-        result += ", \"..\""
-        if len(tail) < 1:
-            return result
-
-
-def get_py_package_name(args):
-    fileName = MirroredDirectory(args["dir"]).getFile()
-
-    varName, baseDir = getSettingNameValuePair(args["settings"])
-    relPath = getRelativePath(baseDir, args["dir"])
-
-    root = os.path.basename(os.path.normpath(baseDir))
-    #print "root: " + root
-    #print "relPath: " + relPath
-    relPath = os.path.join(root, relPath, fileName)
-    result = relPath.replace(os.sep, ".")
-    if result[0:1] == ".":
-        result = result[1:]
-
-    return result
-
-def get_php_namespace(args):
-    settings = eval(args["settings"])
-    result = None
-    base_dir = ""
-    #for key, value in settings.iteritems():
-    for key, value in Std.getIterItems(settings):
-        if value is not None:
-            base_dir = value
-        break
-
-    # TODO: make this part of MirroredDirecotry
-    rc = FileComponents(MirroredDirectory(args["dir"]).getFileDir())
-    rc.setBasePath(base_dir)
-    relPath = rc.getRelativePath()
-
-    result = relPath.replace(os.sep, "\\")
-    if result[0:1] == "\\":
-        result = result[1:]
-
-    return result
-
-def get_class_name(args):
-    result = MirroredDirectory(args["dir"]).getFile()
-    return result
-
-
-def get_doc_block_tag(args):
-    settings = eval(args["settings"])
-    result = None
-    #for key, value in settings.iteritems():
-    for key, value in Std.getIterItems(settings):
-        if value is not None:
-            result = "@" + key + " " + value
-        break
-
-    #print "inside get_doc_block_tag: " + str(result)
-    return result
-
-def get_php_autoloader(args):
-    settings = eval(args["settings"])
-    result = None
-    #for key, value in settings.iteritems():
-    for key, value in Std.getIterItems(settings):
-        if value is not None:
-            if value[0:1] == "/":
-                result = "require_once \"" + value + "\";"
-            else:
-                result = "require_once strstr(__FILE__, 'Test', true).'/" + value + "';"
-        break
-
-    return result

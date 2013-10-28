@@ -53,28 +53,32 @@ class LiveUnitTesting():
     def getActiveFile(self):
         return self._activeFile
 
+    def _getTestingDir(self):
+        return os.path.join(sublime.packages_path(), "User", "UnitTesting", "continuousTestingTemp")
+
     def _getTempFileDir(self):
-        return os.path.join(sublime.packages_path(), "User", "UnitTesting", "continuousTestingTemp", "classFiles", "TemporaryClass." + self._activeFile.getExtension())
+        return os.path.join(self._getTestingDir(), "classFiles", "TemporaryClass." + self._activeFile.getExtension())
 
     def _getTempTestFileDir(self):
-        return os.path.join(sublime.packages_path(), "User", "UnitTesting", "continuousTestingTemp", "testFiles", "TemporaryClassTest." + self._activeFile.getExtension())
+        return os.path.join(self._getTestingDir(), "testFiles", "TemporaryClassTest." + self._activeFile.getExtension())
 
     def _saveToTempClassFile(self, curentViewContent):
-        FileManipulation.replaceFile(self._getTempFileDir(), curentViewContent)
+        classFileContent = self._replacePyClassFileLoadingStatements(curentViewContent)
+        FileManipulation.replaceFile(self._getTempFileDir(), classFileContent)
 
     def _saveToTempTestFile(self, testFileContent):
         FileManipulation.replaceFile(self._getTempTestFileDir(), testFileContent)
 
         extension = self._activeFile.getExtension()
         if extension == "php":
-            self._replacePhpLoadingStatements()
+            self._replacePhpTestFileLoadingStatements()
         elif extension == "py":
-            self._replacePyLoadingStatements()
+            self._replacePyTestFileLoadingStatements()
             self._createPackageFiles()
         else:
             pass
 
-    def _replacePhpLoadingStatements(self):
+    def _replacePhpTestFileLoadingStatements(self):
         injected = False
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
             if not injected and "require_once" in line:
@@ -83,16 +87,43 @@ class LiveUnitTesting():
             else:
                 print(line),
 
-    def _replacePyLoadingStatements(self):
+    def _replacePyClassFileLoadingStatements(self, text):
+        fileName = self._activeFile.getFileName()
+        result = str.replace(str(text), "__file__", "\"" + fileName + "\"")
+
+        # import Class dependencies
+        classDependencies  = "from os import sys, path\n"
+        classDependencies += "sys.path.append(\"" + os.path.abspath(os.path.join(fileName, "..")) +"\")\n"
+        result = classDependencies + result
+        return result
+
+    def _replacePyTestFileLoadingStatements(self):
         injected = False
         #print "active file: " + self._activeFile.getFile()
+        #
+        fileName = self._activeFile.getFileName()
+        #print("fileName: " + fileName)
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
-            if not injected and "sys.path.append(path.abspath(path.join(__file__" in line:
-                print("    sys.path.append(path.abspath(path.join(__file__, \"..\", \"..\")))\n"),
-                print("    sys.path.append(path.abspath(path.join(\"" + self._activeFile.getFileDir() + "\")))\n"),
-                print("    from classFiles.TemporaryClass import *\n"),
+
+            # import Class dependencies
+            #classDependencies  = "from os import sys, path\n"
+            #classDependencies +=
+
+            """
+            from os import sys, path
+            sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "..", "..", "ClassesAndTests", "classes_and_tests")))
+            """
+
+            if not injected and "sys.path.append(" in line:
+                parentToPyPath = "    sys.path.append(" + "\"" + self._getTestingDir() + "\"" + ")\n"
+                includeTempClass = "    from classFiles.TemporaryClass import *\n"
+                line =  parentToPyPath + includeTempClass + line
                 injected = True
-            elif "import " + self._activeFile.getFile() in line:
+            if "__file__" in line:
+                line = str.replace(str(line), "__file__", "\"" + fileName + "\"")
+
+
+            if "import " + self._activeFile.getFile() in line:
                 pass
             else:
                 print(line),
