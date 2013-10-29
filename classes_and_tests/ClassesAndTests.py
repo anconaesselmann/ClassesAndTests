@@ -19,7 +19,7 @@ def plugin_loaded():
 try:
     from src.FileCreator import FileCreator
     from src.InputPanel import InputPanel
-    from src.SublimeWindowFunctions import SublimeWindowFunctions 
+    from src.SublimeWindowFunctions import SublimeWindowFunctions
     from src.UserSettings import UserSettings
 except ImportError:
     from .src.FileCreator import FileCreator
@@ -45,9 +45,10 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             self.displayNewFilePannel()
 
     def displayNewFilePannel(self):
-        currentPath = SublimeWindowFunctions(self.window, settings).getCurrentDirectory()
+#currentPath = SublimeWindowFunctions(self.window, settings).getCurrentDirectory()
+        currentPath = self.window.active_view().file_name()
         if currentPath == "":
-            currentPath = FileCreator.getStandardizedPath(settings.get("base_path"))
+            currentPath = os.path.normpath(settings.get("base_path"))
 
         caption = "Type in the name of a new file."
         initial = currentPath
@@ -60,7 +61,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         self.inputPanelView.settings().set("caret_style", "solid")
 
     def setUserSettings(self):
-        userSettingsDir = FileCreator.getStandardizedPath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
+        userSettingsDir = os.path.normpath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
         userSettingsExist = os.path.isfile(userSettingsDir)
         self.userInput = USER_SETTINGS_TO_BE_INITIALIZED
         self.userInputResponse = []
@@ -95,7 +96,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             self.displayNewFilePannel()
 
             # get settings that depend on other settings
-            possibleTestSuitePath = FileCreator.getStandardizedPath(settings.get("base_path"), True, False) + "Test"
+            possibleTestSuitePath = os.path.normpath(settings.get("base_path"), True, False) + "Test"
             print(possibleTestSuitePath)
 
 
@@ -161,7 +162,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         #listening = "noting"
         if hasattr(self, 'inputPanelView') and self.inputPanelView.window() is not None:
             if command_string == "":
-                replacementString = FileCreator.getStandardizedPath(settings.get("base_path"))
+                replacementString = os.path.normpath(settings.get("base_path"))
                 self.window.run_command("replace_input_panel_content", {"replacementString": replacementString})
                 return
             backOneFolder = self.detectBackOneFolder(command_string)
@@ -170,7 +171,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 self.window.run_command("remove_last_folder_from_input_panel")
             else:
                 self.inputPanelView.tempInputPanelContent = command_string
-                basePath = FileCreator.getStandardizedPath(settings.get("base_path"))
+                basePath = os.path.normpath(settings.get("base_path"))
                 fc = FileCreator(basePath, command_string, settings.get("default_file_extension"))
                 if len(command_string) > len(basePath):
                     possiblyBasePath = command_string[0:len(basePath)]
@@ -197,7 +198,7 @@ class RemoveLastFolderFromInputPanelCommand(sublime_plugin.TextCommand):
         ip = InputPanel(self.view, edit)
         newLine = ip.deleteUntil("/")
         if len(newLine) < 1:
-            replacementString = FileCreator.getStandardizedPath(settings.get("base_path"))
+            replacementString = os.path.normpath(settings.get("base_path"))
             ip.replaceAllText(replacementString)
 
 

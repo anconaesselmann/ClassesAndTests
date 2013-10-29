@@ -15,7 +15,7 @@ class SublimeWindowFunctions():
         self.settings = settings
 
 # This function is horrible!!!!
-    def getCurrentDirectory(self):
+    """def getCurrentDirectory(self):
         view = self.windowInstance.active_view()
         fileFolder = view.file_name()
         result = None
@@ -38,7 +38,7 @@ class SublimeWindowFunctions():
             result = FileCreator.getStandardizedPath(self.settings.get('current_path'), False, True)
             if result is None:
                 result = ""
-        return result.replace('//', '/') # TODO: This is a lazy fix for // appearing when not current_path was provided
+        return result.replace('//', '/') # TODO: This is a lazy fix for // appearing when not current_path was provided"""
 
 #reexamine if still in use
     def getCurrentFileName(self):

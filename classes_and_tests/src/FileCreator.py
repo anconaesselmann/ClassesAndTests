@@ -15,157 +15,24 @@ except ImportError:
     from io import open
 
 class FileCreator:
-    KIND_IS_CLASS   = "class"
-    KIND_IS_TEST    = "test"
-    KIND_IS_DB_TEST = "dbTest"
 
-    def __init__(self, basePath, relativeFileName = None, defaultFileExtension = "", templatesDir = ""):
-        self.determineVersion(basePath, relativeFileName)
-        self.set(basePath, relativeFileName, defaultFileExtension, templatesDir)
 
-    def set(self, basePath, relativeFileName, defaultFileExtension, templatesDir):
-        if relativeFileName is None:
-            #ugly workaround....
-            temp = basePath
-            classNameIndex = temp.rfind('/');
-            relativeFileName = temp[classNameIndex + 1:]
-            basePath = temp[0:classNameIndex]
-            #print "basePath: " + basePath
-            #print "relativeFileName: " + relativeFileName
-        self._fileComponents = FileComponents(relativeFileName)
-        #print self._fileComponents.getFileName()
-        self.templatesDir = self.getStandardizedPath(templatesDir)
-        self.tempBasePath = self.getStandardizedPath(basePath)
-        if relativeFileName[0:1] == "/":
-            self.tempBasePath = ""
-        self.fileExtension = self.getFileExtension(relativeFileName, defaultFileExtension)
-        self.relativeFileName = relativeFileName
-    """
-    remove this!
-    """
-    @staticmethod
-    def getStandardizedPath(path, slashInFront = True, slashInBack = True):
-        if slashInBack == True:
-            if path[-1:] != "/":
-                path += "/"
-        elif slashInBack == False:
-            if path[-1:] == "/":
-                path = path[:-1]
+    def __init__(self, fileName, defaultFileExtension = ""):
+        pass
 
-        if slashInFront == True:
-            if path[0:1] != "/":
-                #print(path[0:1])
-                path = "/" + path
-        elif slashInFront == False:
-            if path[0:1] == "/":
-                path = path[1:]
-        return path
 
-    @staticmethod
-    def getFileExtension(fileName, defaultFileExtension=None):
-        """
-        unit tested
-        """
-        fileName, fileExtension = os.path.splitext(fileName)
-        if fileExtension == "" and defaultFileExtension is not None:
-            fileExtension = "." + defaultFileExtension
-        return fileExtension
 
-    """ """
-    def noneToStr(self, var):
-        if var is None:
-            return ""
-        else:
-            return var
+    def setTempatesDir(self, dirName):
+        self.templatesDir = os.path.normpath(dirName)
 
-    def getFileDir(self):
-        fileDir = self.noneToStr(self.getParentDir()) + "/" + self.noneToStr(self.getClassName()) + self.noneToStr(self.getTestEnding()) + self.noneToStr(self.fileExtension)
-        return fileDir
-    """ """
-    def getClassName(self):
-        """if self._fileComponents.isFile():
-            md = MirroredDirectory(self._fileComponents.getFileName())
-            return md.getFile()
-        else:
-            return None"""
-        fileName, fileExtension = os.path.splitext(self.relativeFileName) # this causes issues when using the default file extension
-        #if fileExtension == "":
-        #    return None
-        classNameIndex = fileName.rfind('/');
-        className = fileName[classNameIndex + 1:]
-        if className[-7:] == "DB_Test":
-            className = className[0:-7]
-        elif className[-4:] == "Test":
-            className = className[0:-4]
-        return className
 
-    def getTestEnding(self):
-        if self.kind == self.KIND_IS_TEST:
-            result = "Test"
-        elif self.kind == self.KIND_IS_DB_TEST:
-            result = "DB_Test"
-        else:
-            result = ""
-        return result
 
-    def getParentDir(self):
-        fileName, fileExtension = os.path.splitext(self.getBasePath() + self.relativeFileName)
-        classNameIndex = fileName.rfind('/');
-        classDir = fileName[0:classNameIndex]
-        return classDir
 
-    def getNamespace(self):
-        namespace = self.getParentDir()[len(self.getBasePath()):]
-        namespace = namespace.replace('/', "\\")
-        return namespace
 
-    """ """
-    def isTest(self, fileName):
-        result = False
-        temp = fileName[-4:]
-        if temp == "Test":
-            result = True
-        return result
-    """ """
-    def isDB_Test(self, fileName):
-        result = False
-        temp = fileName[-7:]
-        if temp == "DB_Test":
-            result = True
-        return result
-    """ """
-    def determineVersion(self, basePath, relativeFileName):
-        if relativeFileName is None:
-            relativeFileName = basePath
-        fileName, fileExtension = os.path.splitext(relativeFileName)
-        if self.isDB_Test(fileName):
-            self.kind = self.KIND_IS_DB_TEST
-        elif self.isTest(fileName):
-            self.kind = self.KIND_IS_TEST
-        else:
-            self.kind = self.KIND_IS_CLASS
 
-    def getBasePath(self):
-        if self.kind == self.KIND_IS_TEST or self.kind == self.KIND_IS_DB_TEST:
-            dirArray = self.tempBasePath.split("/")
-            for (i, item) in enumerate(dirArray):
-                tempDir = ""
-                for x in range(1,i):
-                    tempDir += "/" + dirArray[x]
-                    pass
-                tempDir += "Test"
-                if os.path.exists(tempDir):
-                    dirArray[x] = dirArray[x] + "Test"
-                    #print i, tempDir
-                    break
-            result = "/".join(dirArray)
-            pass
-        else:
-            result = self.tempBasePath
-        return result
 
     def create(self, data = None):
-        className = self.getClassName()
+        className = self._fileComponents.getFile()
         if len(className) < 1:
             fileDir = None
             print("You entered a folder. File could not be created.")
@@ -173,7 +40,7 @@ class FileCreator:
         try:
             if data == None:
                 data = ""
-            fileDir = self.getFileDir()
+            fileDir = self._fileComponents.getFileDir()
             self.createFolder(fileDir)
             self.saveFile(fileDir, data)
         except Exception as e:
@@ -182,7 +49,7 @@ class FileCreator:
         return fileDir
 
     def createFromTemplate(self):
-        className = self.getClassName()
+        className = self._fileComponents.getFile()
         if len(className) < 1:
             fileDir = None
             print("You entered a folder. File could not be created.")
@@ -190,7 +57,7 @@ class FileCreator:
         try:
             data = self.getClassTemplate()
             #data = data.format(self.getNamespace(), className)
-            fileDir = self.getFileDir()
+            fileDir = self._fileComponents.getFileDir()
             self.createFolder(fileDir)
             self.saveFile(fileDir, data)
         except Exception as e:
@@ -268,7 +135,9 @@ class FileCreator:
         f = FileCreator(fileDir)
 
         fileExtension = f.fileExtension[1:]
-        templateVariablesDir = self.getStandardizedPath(self.templatesDir) + fileExtension + "/" + f.kind + ".variables"
+        templateVariablesDir = os.path.join(self.templatesDir, fileExtension, f.kind + ".variables")
+
+
         if os.path.isfile(templateVariablesDir):
 
             jsonData = open(templateVariablesDir)
@@ -371,9 +240,9 @@ class FileCreator:
             pass
 
     def getClassTemplate(self):
-        templateDirFull = self.templatesDir + self.fileExtension[1:]
+        templateDirFull = os.path.join(self.templatesDir, self.fileExtension[1:])
         try:
-            classTemplateDir = templateDirFull + self.getTemplateFileName()
+            classTemplateDir = os.path.join(templateDirFull, self.getTemplateFileName())
             classTemplateFile = open(classTemplateDir, "r")
         except Exception as e:
             print("No templates for source code ending with " + self.fileExtension)
