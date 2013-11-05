@@ -7,13 +7,45 @@ class FileComponents():
     def __init__(self, path):
         self.set(path)
 
+    # TODO: implement this
+    def setDefaultExtension(self, extension):
+        self._defaultExtension = extension
+        self._applyDefaultExtension()
+
+    def _applyDefaultExtension(self):
+        if self._defaultExtension is not None :
+            extension = self.getExtension()
+            if extension is None or extension == "":
+                oldPath = self._path
+                basePath = self._basePath
+                #print("<< path: " + str(path) + ", basePath: " + str(basePath))
+                self.set(oldPath + "." + self._defaultExtension)
+                #print("<<<< path: " + str(path) + ", basePath: " + str(basePath))
+                try:
+                    self.setBasePath(basePath)
+                except Exception as e:
+                    # a base path was set before a default file extension has been applied.
+                    # the former base path is not valid any more when old path is equal to
+                    # the base path:
+                    #       old path: /MyProject/library
+                    #       base path: /MyProject/library
+                    #       default extension is set to .php
+                    #       the new path is /MyProject/library.php
+                    #       rendering the old base path is invalid
+                    # the moral of the story: default file extensions should be 
+                    # applied before setting a base path!
+                    pass
+
+
     def set(self, path):
+        self._defaultExtension = None
         if path is None:
             path = ""
 
         if path != "":
             path = os.path.normpath(path)
             path, extension = os.path.splitext(path)
+            #print("path: " + path + ", ext: " + extension)
         else:
             extension = ""
         if extension != "":
@@ -61,24 +93,27 @@ class FileComponents():
     #                    and the base path is not the beginning of the
     #                    absolute path
     #
-    def setBasePath(self, path=None):
-        if path is None or path == "":
+    def setBasePath(self, basePath=None):
+        if basePath is None or basePath == "":
             return
-        path = os.path.normpath(path)
+        basePath = os.path.normpath(basePath)
         if self._pathIsAbsolute == False:
-            self._basePath = path
+            self._basePath = basePath
         else:
             error = True
-            lenBasePath = len(path)
+            lenBasePath = len(basePath)
             lenPath = len(self._path)
+            #print("<<<<<<<<<<<< path: " + str(self._path) + ", basePath: " + str(basePath))
+
+
             if lenPath >= lenBasePath:
                 suspect = self._path[:lenBasePath]
-                if suspect == path:
+                if suspect == basePath:
                     relativePath = self._path[lenBasePath:]
                     error = False
-                    self._basePath = path
+                    self._basePath = basePath
             if error:
-                raise Exception("Setting a base path for an absolute path where the base path is not the beginning of the absolute path.")
+                raise Exception("Setting a base path for an absolute path where the base path is not the beginning of the absolute path:\nBase path: " + basePath + "\nPath: " + self._path)
 
     ## (unitTested)
     def getBasePath(self):

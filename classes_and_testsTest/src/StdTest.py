@@ -2,9 +2,9 @@ import unittest
 
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
-    sys.path.append(path.abspath(path.join(__file__, "..", "..")))
+    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
 
-from src.Std import Std
+from classes_and_tests.src.Std import Std
 from os import path, sep
 
 data = [

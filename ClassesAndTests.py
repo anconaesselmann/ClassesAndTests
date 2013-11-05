@@ -18,7 +18,7 @@ if reloader in sys.modules:
 if VERSION > 3000:
 	from .classes_and_tests.src import reloader
 	from .classes_and_tests.ClassesAndTests import *
-	from .classes_and_tests.ToggleSourceTest import *
+	from .classes_and_tests.ToggleSourcesTests import *
 	from .classes_and_tests.RunUnitTests import *
 	from .classes_and_tests.CreateMissingFunctions import *
 	from .classes_and_tests.ContinuousUnitTesting import *
@@ -31,7 +31,7 @@ else:
 
 	from classes_and_tests.src import reloader
 	from classes_and_tests.ClassesAndTests import *
-	from classes_and_tests.ToggleSourceTest import *
+	from classes_and_tests.ToggleSourcesTests import *
 	from classes_and_tests.RunUnitTests import *
 	from classes_and_tests.CreateMissingFunctions import *
 	from classes_and_tests.ContinuousUnitTesting import *

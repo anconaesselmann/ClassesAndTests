@@ -4,15 +4,15 @@ import os
 import fileinput
 
 try:
-    from FileManipulation import FileManipulation
+    from FileManipulator import FileManipulator
     from SublimeFunctions import SublimeFunctions
     from MirroredDirectory import MirroredDirectory
-    from FileCreator import FileCreator
+    from TemplateFileCreator import TemplateFileCreator
 except ImportError:
-    from .FileManipulation import FileManipulation
+    from .FileManipulator import FileManipulator
     from .SublimeFunctions import SublimeFunctions
     from .MirroredDirectory import MirroredDirectory
-    from .FileCreator import FileCreator
+    from .TemplateFileCreator import TemplateFileCreator
 
 class LiveUnitTesting():
     def __init__(self, commandFolders):

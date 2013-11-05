@@ -51,7 +51,7 @@ class UnitTestFunctions:
                 inactiveViewIsOpen = True
                 break
         if not inactiveViewIsOpen and openingFilesAllowed is True:
-            window.run_command("toggle_source_test")
+            window.run_command("toggle_sources_tests")
         window.focus_view(view)
 
     @staticmethod

@@ -17,15 +17,23 @@ def plugin_loaded():
     TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
-    from src.FileCreator import FileCreator
+    from src.TemplateFileCreator import TemplateFileCreator
+    from src.FileComponents import FileComponents
     from src.InputPanel import InputPanel
     from src.SublimeWindowFunctions import SublimeWindowFunctions
     from src.UserSettings import UserSettings
+    from src.SublimeWindowManipulator import SublimeWindowManipulator
+    from src.FileManipulator import FileManipulator
+    from src.MirroredDirectory import MirroredDirectory
 except ImportError:
-    from .src.FileCreator import FileCreator
+    from .src.TemplateFileCreator import TemplateFileCreator
+    from .src.FileComponents import FileComponents
     from .src.InputPanel import InputPanel
     from .src.SublimeWindowFunctions import SublimeWindowFunctions
     from .src.UserSettings import UserSettings
+    from .src.SublimeWindowManipulator import SublimeWindowManipulator
+    from .src.FileManipulator import FileManipulator
+    from .src.MirroredDirectory import MirroredDirectory
 else:
     plugin_loaded()
 
@@ -36,6 +44,9 @@ USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code bas
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def run(self):
+        self.windowManipulator = SublimeWindowManipulator(self.window, settings)
+        self.fileManipulator = FileManipulator()
+
         userSettingsDir =  os.path.join(sublime.packages_path(), "User", PACKAGE_NAME + ".sublime-settings")
         userSettingsExist = os.path.isfile(userSettingsDir)
         if userSettingsExist != True:
@@ -120,31 +131,52 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         view.erase_status("ClassesAndTests")
 
     def on_done(self, command_string):
+        fileDir = None
         view = self.window.active_view()
         view.erase_status("ClassesAndTests")
 
-        fc = FileCreator(settings.get('base_path'), command_string, settings.get('default_file_extension'), TEMPLATES_DIR)
-        print("command_string in ClassesAndTests.on_done:")
-        print(command_string)
-        print(fc.getClassName())
-        fileDir = fc.createFromTemplate()
-        if fileDir is None:
-            fileDir = fc.create()
-        fc.initialOpenFile(self.window, fileDir, settings)
+        if DEBUG:
+            print("command_string in ClassesAndTests.on_done:")
+            print(command_string)
+        fc = TemplateFileCreator(command_string)
+        fc.setBasePath(settings.get('base_path'))
+        fc.setSettings(settings)
+        fc.setDefaultExtension(settings.get('default_file_extension'))
+        fc.setTemplateDir(TEMPLATES_DIR)
+        if DEBUG:
+            print("file name in ClassesAndTests.on_done:")
+            print(fc.getFileName())
+        fileCreated = fc.createFromTemplate()
+        if fileCreated:
+            fileDir = fc.getFileName()
+            cursors = fc.getCursors()
+            
+        else:
+            fileCreated = self.fileManipulator.createFile(command_string)
+            fileDir = command_string 
+            cursors = [(0, 0)]
+
+        if fileCreated:
+            self.windowManipulator.openFile(fileDir, cursors)
+        else:
+            print("File " + command_string + " could not be created.")
+            return
+
+        
+        #fc.initialOpenFile(self.window, fileDir, settings)
 
         # create corresponding test or source files
-        if fc.kind == fc.KIND_IS_CLASS:
+        if fc.classifyKind() == MirroredDirectory.KIND_IS_CLASS:
             if settings.get("create_tests_for_source_files") == True:
-                fc.kind = FileCreator.KIND_IS_TEST
-                fileDir = fc.createFromTemplate()
-                fc.initialOpenFile(self.window, fileDir, settings)
-                pass
-            pass
-        elif fc.kind == fc.KIND_IS_TEST or fc.kind == fc.KIND_IS_DB_TEST:
+                fc.setKind(MirroredDirectory.KIND_IS_TEST)
+                fileCreated = fc.createFromTemplate()
+        elif fc.classifyKind() == MirroredDirectory.KIND_IS_TEST or fc.getKind() == MirroredDirectory.KIND_IS_DB_TEST:
             if settings.get("create_source_for_test_files") == True:
-                fc.kind = FileCreator.KIND_IS_CLASS
-                fileDir = fc.createFromTemplate()
-                fc.initialOpenFile(self.window, fileDir, settings)
+                fc.setKind(MirroredDirectory.KIND_IS_CLASS)
+                fileCreated = fc.createFromTemplate()
+
+        if fileCreated:
+            self.windowManipulator.openFile(fc.getFileName(), fc.getCursors())
 
     # TODO: Has an issue when clearing the whole input line....
     def detectBackOneFolder(self, newInputPanelContent):
@@ -161,10 +193,10 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def on_change(self, command_string):
         #listening = "noting"
         if hasattr(self, 'inputPanelView') and self.inputPanelView.window() is not None:
-            if command_string == "":
+            """if command_string == "":
                 replacementString = os.path.normpath(settings.get("base_path"))
                 self.window.run_command("replace_input_panel_content", {"replacementString": replacementString})
-                return
+                return"""
             backOneFolder = self.detectBackOneFolder(command_string)
             if backOneFolder == True:
                 self.inputPanelView.tempInputPanelContent = ""
@@ -172,17 +204,25 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             else:
                 self.inputPanelView.tempInputPanelContent = command_string
                 basePath = os.path.normpath(settings.get("base_path"))
-                fc = FileCreator(basePath, command_string, settings.get("default_file_extension"))
-                if len(command_string) > len(basePath):
+                fc = FileComponents(command_string)
+                try:
+                    fc.setBasePath(basePath)
+                except Exception as e:
+                    pass
+                fc.setDefaultExtension(settings.get("default_file_extension"))
+                print(fc.getFileName())
+                """if len(command_string) > len(basePath):
                     possiblyBasePath = command_string[0:len(basePath)]
                     sublime.status_message(possiblyBasePath + " " + basePath)
                     if possiblyBasePath == basePath:
                         newCommandString = command_string[len(basePath):]
                         self.window.run_command("replace_input_panel_content", {"replacementString": newCommandString})
-                        command_string = command_string[len(basePath):]
-                statusMessage = "Creating file: " + fc.getFileDir()
-                view = self.window.active_view()
-                view.set_status("ClassesAndTests", statusMessage)
+                        command_string = command_string[len(basePath):]"""
+                fileName = fc.getFileName()
+                if fileName is not None:
+                    statusMessage = "Creating file: " + fileName
+                    view = self.window.active_view()
+                    view.set_status("ClassesAndTests", statusMessage)
 
     def on_cancel(self):
         view = self.window.active_view()

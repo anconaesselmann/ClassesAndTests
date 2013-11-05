@@ -3,10 +3,12 @@ import os
 try:
     from FileComponents import FileComponents
     from Std import Std
+    from FileManipulator import FileManipulator
 except ImportError:
     from .FileComponents import FileComponents
     from .Std import Std
-    
+    from .FileManipulator import FileManipulator
+
 
 class MirroredDirectory():
     KIND_IS_CLASS   = "class"
@@ -14,8 +16,16 @@ class MirroredDirectory():
     KIND_IS_DB_TEST = "db_Test"
 
     def __init__(self, fileName):
+        self.fileManipulator = FileManipulator()
         self.fileComponents = FileComponents(fileName)
         self._determineKind(self.fileComponents.getFile())
+
+    def setDefaultExtension(self, fileExtension):
+        self.fileComponents.setDefaultExtension(fileExtension)
+        self._determineKind(self.fileComponents.getFile())
+
+    def setBasePath(self, basePath):
+        self.fileComponents.setBasePath(basePath)
 
     def getExtension(self):
         return self.fileComponents.getExtension()
@@ -23,6 +33,9 @@ class MirroredDirectory():
     def getKind(self):
         return self._kind
 
+    def setKind(self, kind):
+        self._kind = kind
+        
     def getFile(self):
         return self._getCleanFileName()
 
@@ -87,25 +100,27 @@ class MirroredDirectory():
 
     def _getExistingFileDir(self, searchTerm):
         folders = Std.dirExplode(self.fileComponents.getDir())
-        tempFolders = []
-        for folder in folders:
-            tempParentDir = Std.dirImplode(tempFolders)
-            testName = folder + searchTerm
-            tempDir = os.path.join(tempParentDir, testName)
-            if os.path.isdir(tempDir):
-                tempFolders.append(testName)
-            else:
-                tempFolders.append(folder)
-        return Std.dirImplode(tempFolders)
+        for i in range(len(folders) - 1,-1,-1): 
+            temp = folders[i]
+            folders[i] = folders[i] + searchTerm
+            tempDir = Std.dirImplode(folders)
+            if self.fileManipulator.isdir(tempDir):
+                return tempDir
+            folders[i] = temp
+        return self.fileComponents.getDir()
+
 
     def _determineKind(self, fileName):
-        fileName, fileExtension = os.path.splitext(fileName)
-        if self._isDB_Test(fileName):
-            self._kind = self.KIND_IS_DB_TEST
-        elif self._isTest(fileName):
-            self._kind = self.KIND_IS_TEST
+        if fileName != None:
+            fileName, fileExtension = os.path.splitext(fileName)
+            if self._isDB_Test(fileName):
+                self._kind = self.KIND_IS_DB_TEST
+            elif self._isTest(fileName):
+                self._kind = self.KIND_IS_TEST
+            else:
+                self._kind = self.KIND_IS_CLASS
         else:
-            self._kind = self.KIND_IS_CLASS
+            self._kind = None
 
     def _getCleanFileName(self):
         if self._kind == self.KIND_IS_CLASS:

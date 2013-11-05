@@ -1,9 +1,9 @@
 from os import path, remove
 
 try:
-    from FileCreator import FileCreator
+    from FileManipulator import FileManipulator
 except ImportError:
-    from .FileCreator import FileCreator
+    from .FileManipulator import FileManipulator
     from io import open
 
 class UserSettings():
@@ -11,8 +11,7 @@ class UserSettings():
         self.fileName = fileName
         userSettingsExist = path.isfile(fileName)
         if userSettingsExist != True:
-            fc = FileCreator(fileName)
-            fc.create("{\n}")
+            created = FileManipulator.createFile(fileName, "{\n}")
 
     def set(self, variable, value):
         try:

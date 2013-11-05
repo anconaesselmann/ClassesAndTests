@@ -1,11 +1,11 @@
-import fileinput
+"""import fileinput
 import os
 
 try:
     from FileCreator import FileCreator
 except ImportError:
     from .FileCreator import FileCreator
-    
+
 class FileManipulation():
     @staticmethod
     def getFileContent(fileDir):
@@ -23,4 +23,4 @@ class FileManipulation():
     def replaceFile(fileDir, content):
         if os.path.isfile(fileDir):
             os.remove(fileDir)
-        FileManipulation.saveToFile(fileDir, content)
+        FileManipulation.saveToFile(fileDir, content)"""

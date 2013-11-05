@@ -1,6 +1,6 @@
 [
 	{ 	"keys": ["f2"], "command": "classes_and_tests" },
-	{ 	"keys": ["ctrl+shift+t"], "command": "toggle_source_test" },
+	{ 	"keys": ["ctrl+shift+t"], "command": "toggle_sources_tests" },
 
 	{
         "keys": [",", "c"],
@@ -22,7 +22,7 @@
 	},
 	{
 		"keys": [",", "t"],
-		"command": "toggle_source_test",
+		"command": "toggle_sources_tests",
 		"context":
 			[
 				{ "key": "setting.command_mode", "operand":false},
@@ -90,7 +90,7 @@
     },
     {
         "keys": [",", "t"],
-        "command": "toggle_source_test",
+        "command": "toggle_sources_tests",
         "context":
             [
                 {"key": "setting.vintage_ctrl_keys"},
