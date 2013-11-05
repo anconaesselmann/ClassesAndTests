@@ -7,6 +7,7 @@ if __name__ == '__main__' and __package__ is None:
 from classes_and_tests.src.MirroredDirectory import MirroredDirectory
 from classes_and_tests.src.TemplateFileCreator import TemplateFileCreator
 from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
+from classes_and_tests.src.mocking.sublime import MockSettings
 
 class UnitTestHelpers:
 
@@ -80,7 +81,7 @@ class MockPHPFunctionCollectionObject(object):
         else:
             return None
 
-class MockSettings:
+"""class MockSettings:
     def get(self, varName):
         if varName == "author":
             return "Axel"
@@ -89,7 +90,7 @@ class MockSettings:
         elif varName == "license":
             return None
         else:
-            return None
+            return None"""
 
 class MockImporter:
 	def __init__(self):
@@ -102,6 +103,13 @@ class MockImporter:
 		return self._mockObjects[functionFileDir + " " + ClassName]
 
 class TemplateFileCreatorTest(unittest.TestCase):
+    def _getSettings(self):
+        settings = MockSettings()
+        settings.set("author", "Axel")
+        settings.set("base_path", "/MyProject/library")
+        settings.set("license", None)
+
+        return settings
 
     def test_UnitTestHelpers_dictIsEqual_dicts_are_equal(self):
         dict1 = {"a": None, "b": "works", "c": "Cam"}
@@ -158,7 +166,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.maxDiff = None
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)
-        fc.setSettings(MockSettings())
+        fc.setSettings(self._getSettings())
         result = fc.getArgsDictFromVarContent(variableContent)
         
         self.assertEqual(result, expected)
@@ -235,7 +243,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
 
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)
-        fc.setSettings(MockSettings())
+        fc.setSettings(self._getSettings())
 
         result = fc.getReplacements(args, functionCollectionObject)
         self.assertEqual(result, expected)
@@ -251,7 +259,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         expectedCursorPos = [(10, 8)]
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)
-        fc.setSettings(MockSettings())
+        fc.setSettings(self._getSettings())
         result = fc.getReplacementContent(templateContent, variableContent, functionCollectionObject)
         resultCursorPos = fc.getCursors()
         self.assertEqual(result, expected)
@@ -286,7 +294,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         #print("\n" + templateFileDir)
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)
-        fc.setSettings(MockSettings())
+        fc.setSettings(self._getSettings())
         fc.setTemplateDir(templateDir)
         fc.fileManipulator = MockFileManipulator()
         fc.fileManipulator.createFile(templateFileDir, templateContent)

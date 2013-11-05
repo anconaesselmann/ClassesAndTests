@@ -1,11 +1,22 @@
-import os
-import sublime
-import sublime_plugin
-
 DEBUG = True
+UNIT_TEST_DEBUG = False
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
+
+import os
+try:
+    import sublime
+    import sublime_plugin
+except ImportError:
+    from src.mocking.sublime import sublime
+    from src.mocking import sublime_plugin
+    if UNIT_TEST_DEBUG: 
+        DEBUG = True
+        print("ClassesAndTestsCommand: sublime and sublime_plugin not imported in " + __file__)
+    else:
+        DEBUG = False
+
 
 def plugin_loaded():
     global settings
@@ -43,7 +54,18 @@ USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code bas
 
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
+    def _initializeDependencies(self):
+        # allows for unit testing by injecting a mocked instances of dependencies
+        if not hasattr(self, "sublime"):
+            self.sublime = sublime
+        if not hasattr(self, "settings"):
+            self.settings = settings
+
+        self.splitView = self.settings.get("seperate_tests_and_sources_by_split_view")
+
     def run(self):
+        self._initializeDependencies()
+
         self.windowManipulator = SublimeWindowManipulator(self.window, settings)
         self.fileManipulator = FileManipulator()
 
@@ -55,12 +77,22 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         else:
             self.displayNewFilePannel()
 
-    def displayNewFilePannel(self):
-#currentPath = SublimeWindowFunctions(self.window, settings).getCurrentDirectory()
+    # Unit Tested
+    def getCurrentPath(self):
+        result = ""
         currentPath = self.window.active_view().file_name()
-        if currentPath == "":
-            currentPath = os.path.normpath(settings.get("base_path"))
+        if currentPath is None or currentPath == "":
+            defaultPath = self.settings.get("base_path")
+            if defaultPath is not None:
+                result = os.path.normpath(defaultPath) + os.sep
+        else:
+            currentPath, fileName = os.path.split(currentPath)
+            result = currentPath + os.sep
+            
+        return result
 
+    def displayNewFilePannel(self):
+        currentPath = self.getCurrentPath()
         caption = "Type in the name of a new file."
         initial = currentPath
         self.inputPanelView = self.window.show_input_panel(
@@ -72,6 +104,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         self.inputPanelView.settings().set("caret_style", "solid")
 
     def setUserSettings(self):
+#TODO: change to path.join
         userSettingsDir = os.path.normpath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
         userSettingsExist = os.path.isfile(userSettingsDir)
         self.userInput = USER_SETTINGS_TO_BE_INITIALIZED

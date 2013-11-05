@@ -46,4 +46,38 @@ class sublime():
     def setActiveWindow(window):
         global activeWindow
         activeWindow = window
+
+class MockSublimeWindow:
+    def __init__(self, activeView=None):
+        if activeView is None:
+            self.activeView = MockSublimeView()
+        else:
+            self.activeView = activeView
+
+    def active_view(self):
+        return self.activeView
+
+    def run_command(self, *args):
+        pass
+
+    def open_file(self, aPath):
+        pass
+
+class MockSublimeView:
+    def __init__(self, fileName=None):
+        self.fileName = fileName
+
+    def file_name(self):
+        return self.fileName
+
+
+class MockSettings:
+    def __init__(self):
+        self._settings = dict()
+
+    def set(self, varName, varValue):
+        self._settings[varName] = varValue
+
+    def get(self, varName):
+        return self._settings[varName]
     

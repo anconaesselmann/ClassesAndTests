@@ -1,5 +1,15 @@
-import sublime
-import sublime_plugin
+DEBUG = True
+UNIT_TEST_DEBUG = False
+
+try:
+    import sublime
+except ImportError:
+    from mocking.sublime import sublime
+    if UNIT_TEST_DEBUG: 
+        DEBUG = True
+        print("InputPanel: sublime and sublime_plugin not imported in " + __file__)
+    else:
+        DEBUG = False
 
 class InputPanel():
     def __init__(self, sublimeViewInstance ,sublimeEditInstance):

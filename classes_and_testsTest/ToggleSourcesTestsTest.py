@@ -7,58 +7,34 @@ if __name__ == '__main__' and __package__ is None:
     sys.path.append(path.abspath(path.join(__file__, "..", "..")))
 
 from classes_and_tests.ToggleSourcesTests import ToggleSourcesTestsCommand
-from classes_and_tests.src.mocking.sublime import sublime
+from classes_and_tests.src.mocking.sublime import *
 from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
 
-class MockSublimeWindow:
-	def __init__(self, activeView=None):
-		if activeView is None:
-			self.activeView = MockSublimeView()
-		else:
-			self.activeView = activeView
-
-	def active_view(self):
-		return self.activeView
-
-	def run_command(self, *args):
-		pass
-
-	def open_file(self, aPath):
-		pass
-
-class MockSublimeView:
-	def __init__(self, fileName=None):
-		self.fileName = fileName
-
-	def file_name(self):
-		return self.fileName
-
-
 class MockSublimeWindowManipulator:
-	def __init__(self):
-		self.fileOpened = None
-		self.cursors = None
-	def openFile(self, aPath, cursors):
-		self.fileOpened = aPath
-		self.cursors = cursors
-		return True	
+    def __init__(self):
+        self.fileOpened = None
+        self.cursors = None
+    def openFile(self, aPath, cursors):
+        self.fileOpened = aPath
+        self.cursors = cursors
+        return True 
 
 class MockTemplateFileCreator:
-	def __init__(self, path, cursors):
-		self.path = path
-		self.cursors = cursors
+    def __init__(self, path, cursors):
+        self.path = path
+        self.cursors = cursors
 
-	def set(self, path):
-		pass
+    def set(self, path):
+        pass
 
-	def getFileName(self):
-		return self.path
+    def getFileName(self):
+        return self.path
 
-	def getCursors(self):
-		return self.cursors
+    def getCursors(self):
+        return self.cursors
 
-	def createFromTemplate(self):
-		return True
+    def createFromTemplate(self):
+        return True
 
 class ToggleSourcesTestsCommandTest(unittest.TestCase):
 	def test___init__(self):
