@@ -66,7 +66,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 
 	
 	def test_run_with_no_file_name(self):
-		expectedOutput = 'To toggle between test and class, save the current file.\n'
+		expectedOutput = 'TSTC: To toggle between test and class, save the current file.\n'
 		tst = ToggleSourcesTestsCommand()
 		mockSublimeWindow = MockSublimeWindow()
 		tst.window = mockSublimeWindow

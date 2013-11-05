@@ -40,22 +40,24 @@ class SublimeWindowManipulator():
         splitView = self._settings.get("seperate_tests_and_sources_by_split_view")
         if splitView is True:
             #sublime.active_window().run_command("set_layout", { "cols": [0.0, leftColumnSize, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]] })
-            self._windowInstance.run_command("set_layout", { "cols": [0.0, leftColumnSize, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]] })
+            sublime.active_window().run_command("set_layout", { "cols": [0.0, leftColumnSize, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]] })
         else:
             #sublime.active_window().run_command("set_layout", { "cols": [0.0, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1]] })
-            self._windowInstance.run_command("set_layout", { "cols": [0.0, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1]] })
+            sublime.active_window().run_command("set_layout", { "cols": [0.0, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1]] })
 
         if fileComponents.getKind() == fileComponents.KIND_IS_TEST or fileComponents.getKind() == fileComponents.KIND_IS_DB_TEST:
             if splitView is True:
                 #sublime.active_window().run_command("focus_group", { "group": testWindow })
-                self._windowInstance.run_command("focus_group", { "group": testWindow })
+                sublime.active_window().run_command("focus_group", { "group": testWindow })
         else:
             if splitView is True:
                 #sublime.active_window().run_command("focus_group", { "group": classWindow })
-                self._windowInstance.run_command("focus_group", { "group": classWindow })
+                sublime.active_window().run_command("focus_group", { "group": classWindow })
 
         line, column = cursors[0]
-        openStatement = "%s:%d:%d" % (fileComponents.getFileName(), line, column)
-
-        openedFile = self._windowInstance.open_file(openStatement, sublime.ENCODED_POSITION)
+        openStatement = "%s:%d:%d" % (fileComponents.getOriginalFileName(), line, column)
+        if DEBUG: print("SublimeWindowManipulator: opening file '" + openStatement + "'")
+        openedFile = sublime.active_window().open_file(openStatement, sublime.ENCODED_POSITION)
+        #openedFile = sublime.active_window().open_file(fileDir)
+        #return
         return openedFile
