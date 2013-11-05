@@ -41,7 +41,7 @@ class TemplateFileCreator:
         functionCollectionObject = self.importer.getObjectInstance(functionPath, "FunctionCollection")
         content = self.getReplacementContent(templateContent, variableContent,
                                              functionCollectionObject)
-        
+
         if DEBUG: print("TemplateFileCreator: creating file: " + self._fileComponents.getOriginalFileName())
         return self.fileManipulator.createFile(self._fileComponents.getOriginalFileName(), content)
 
@@ -92,10 +92,10 @@ class TemplateFileCreator:
 
     def getReplacements(self, args, functionCollectionObject):
         # TODO: this check has loopholes...
-        if isinstance(functionCollectionObject, (int, long, float, complex, str)) or functionCollectionObject is None:
+        if isinstance(functionCollectionObject, (int, float, complex, str)) or functionCollectionObject is None:
             raise Exception("The functionCollectionObject argument must be an instance of an object, " + str(type(functionCollectionObject)) + " passed instead.")
         result = dict()
-        for name, arg in args.iteritems():
+        for name, arg in Std.getIterItems(args):
             function = getattr(functionCollectionObject, arg["command"])
             result["/* @" + name + " */"] = function(arg)
         return result
@@ -134,7 +134,7 @@ class TemplateFileCreator:
     def getReplacementContent(self, templateContent, variableContent, functionCollectionObject):
         args = self.getArgsDictFromVarContent(variableContent)
         replacements = self.getReplacements(args, functionCollectionObject)
-        for searchString, replacement in replacements.iteritems():
+        for searchString, replacement in Std.getIterItems(replacements):
             if replacement is None:
                 replacement = ""
                 searchString = self.getSearchStringForNone(templateContent, searchString)
