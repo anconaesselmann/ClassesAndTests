@@ -150,10 +150,10 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if fileCreated:
             fileDir = fc.getFileName()
             cursors = fc.getCursors()
-            
+
         else:
             fileCreated = self.fileManipulator.createFile(command_string)
-            fileDir = command_string 
+            fileDir = command_string
             cursors = [(0, 0)]
 
         if fileCreated:
@@ -162,7 +162,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             print("File " + command_string + " could not be created.")
             return
 
-        
+
         #fc.initialOpenFile(self.window, fileDir, settings)
 
         # create corresponding test or source files

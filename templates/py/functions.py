@@ -61,8 +61,12 @@ class FunctionCollection(object):
     def getRelativePath(baseDir, absDir):
         if baseDir is None:
             baseDir = ""
-        rc = FileComponents(MirroredDirectory(absDir).getFileDir())
-        rc.setBasePath(baseDir)
+        #rc = FileComponents(MirroredDirectory(absDir).getFileDir())
+        #rc.setBasePath(baseDir)
+
+        rc = MirroredDirectory(absDir)
+        rc.discoverBasePath()
+
         relPath = rc.getRelativePath()
 
         # TODO: relative path should not return / at the front, check why it is doing this and remove this workaround

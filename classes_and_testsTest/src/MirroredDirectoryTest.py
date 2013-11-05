@@ -82,6 +82,76 @@ class MirroredDirectoryTest(unittest.TestCase):
 
 		self.assertEqual(aFileName, result)
 
+	def test_find_base_path(self):
+		aFileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
+		testDir = os.path.join(os.sep, "MyProject", "libraryTest")
+
+		expectedBasePath = os.path.join(os.sep, "MyProject", "library")
+		expectedRelativePath = os.path.join("aae", "mvc")
+
+		mockFileManipulator = MockFileManipulator()
+		mockFileManipulator.createFile(os.path.join(testDir, "someFileTest.php"), "") #TODO: replace once directories can be mocked
+
+		md = MirroredDirectory(aFileName)
+		md.fileManipulator = mockFileManipulator
+
+		md.discoverBasePath()
+
+		resultBasePath = md.getBasePath()
+		resultRelativePath = md.getRelativePath()
+
+		self.assertEqual(expectedBasePath, resultBasePath)
+		self.assertEqual(expectedRelativePath, resultRelativePath)
+
+	def test_discoverBasePath_with_relative_path_provided(self):
+		aFileName = os.path.join("MyProject", "library", "aae", "mvc", "Controller.php")
+		testDir = os.path.join("MyProject", "libraryTest")
+
+		expectedRelativePath = os.path.join("MyProject", "library", "aae", "mvc")
+		expectedBasePath = None
+
+		mockFileManipulator = MockFileManipulator()
+		mockFileManipulator.createFile(os.path.join(testDir, "someFileTest.php"), "") #TODO: replace once directories can be mocked
+
+		md = MirroredDirectory(aFileName)
+		md.fileManipulator = mockFileManipulator
+
+		md.discoverBasePath()
+
+		resultBasePath = md.getBasePath()
+		resultRelativePath = md.getRelativePath()
+
+		self.assertEqual(expectedBasePath, resultBasePath)
+		self.assertEqual(expectedRelativePath, resultRelativePath)
+
+	def test_getFileDir_with_empty_dir(self):
+		aFileName = ""
+		md = MirroredDirectory(aFileName)
+		result = md.getFileDir()
+
+		self.assertEqual(None, result)
+
+	def test_getFileName_with_empty_dir(self):
+		aFileName = ""
+		md = MirroredDirectory(aFileName)
+		result = md.getFileName()
+
+		self.assertEqual(None, result)
+
+	def test_getTestFileName_with_empty_dir(self):
+		aFileName = ""
+		md = MirroredDirectory(aFileName)
+		result = md.getTestFileName()
+
+		self.assertEqual(None, result)
+
+	def test_getOriginalFileName(self):
+		aFileName = os.path.join("MyProject", "library", "aae", "mvc", "Controller.php")
+
+		md = MirroredDirectory(aFileName)
+		result = md.getOriginalFileName()
+
+		self.assertEqual(aFileName, result)
 
 if __name__ == '__main__':
     unittest.main()

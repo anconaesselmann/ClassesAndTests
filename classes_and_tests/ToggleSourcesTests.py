@@ -13,7 +13,7 @@ except ImportError:
     from src.mocking import sublime_plugin
     if UNIT_TEST_DEBUG: 
         DEBUG = True
-        print("sublime and sublime_plugin not imported in " + __file__)
+        print("TSTC: sublime and sublime_plugin not imported in " + __file__)
     else:
         DEBUG = False
 
@@ -69,7 +69,7 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
         self.splitView = self.settings.get("seperate_tests_and_sources_by_split_view")
 
     def run(self):
-        if DEBUG: print("toggle_sources_tests called")
+        if DEBUG: print("TSTC: toggle_sources_tests called")
         self._initializeDependencies()
 
         currentFileName = self.getCurrentFileName()
@@ -79,7 +79,7 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
             self.giveColumnFocus(toogledFileName)
             return self.openWindow(toogledFileName)
         else:
-            print("To toggle between test and class, save the current file.")
+            print("TSTC: To toggle between test and class, save the current file.")
             return False
         #self.sublime.active_window().run_command("hide_panel", {"panel": "console"})
 
@@ -106,26 +106,26 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
         if fileDir is not None:
             fileExists = self.fileManipulator.isfile(fileDir)
             if fileExists != True:
-                if DEBUG: print("creating file: " + fileDir)
+                if DEBUG: print("TSTC: creating file: " + fileDir)
                 self.templateFileCreator.set(fileDir)
                 fileExists = self.templateFileCreator.createFromTemplate()
                 if fileExists:
-                    if DEBUG: print("file creation successfull")
+                    if DEBUG: print("TSTC: file creation successfull")
                     fileDir = self.templateFileCreator.getFileName()
                     cursors = self.templateFileCreator.getCursors()
                 else:
-                    if DEBUG: print("file creation failed")
+                    if DEBUG: print("TSTC: file creation failed")
                     fileDir = None
-            elif DEBUG is True: print("file " + fileDir + " exists")
+            elif DEBUG is True: print("TSTC: file " + fileDir + " exists")
         return fileDir, cursors
 
     def openWindow(self, fileDir):
         fileDir, cursors = self.getFileDirAndCursors(fileDir)
         if fileDir is not None:
-            if DEBUG: print("opening file: " + fileDir)
+            if DEBUG: print("TSTC: opening file: " + fileDir)
             return self.windowManipulator.openFile(fileDir, cursors)
         else:
-            print("toggle_sources_tests experienced an error.")
+            print("TSTC: toggle_sources_tests experienced an error.")
             return False
 
     def toggleFileName(self, fileName):

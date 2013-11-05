@@ -3,6 +3,8 @@ import sys
 import re
 import ast
 
+DEBUG = False
+
 try:
     from MirroredDirectory import MirroredDirectory
     from Std import Std
@@ -17,14 +19,16 @@ except ImportError:
 class TemplateFileCreator:
     def __init__(self, fileName, defaultFileExtension = ""):
         self._settings = None
-        self.set(fileName, defaultFileExtension)
         self.fileManipulator = FileManipulator()
         self.importer = Importer()
         self._templateDir = None
-        
+        self.set(fileName, defaultFileExtension)
+
 
     def set(self, fileName, defaultFileExtension = ""):
+        if DEBUG: print("TemplateFileCreator: setting dir to: '" + fileName + "'")
         self._fileComponents = MirroredDirectory(fileName)
+        if DEBUG: print("TemplateFileCreator: dir set to: '" + str(self._fileComponents.getOriginalFileName()) + "'")
         self._cursors = []
 
     def createFromTemplate(self):
@@ -37,7 +41,9 @@ class TemplateFileCreator:
         functionCollectionObject = self.importer.getObjectInstance(functionPath, "FunctionCollection")
         content = self.getReplacementContent(templateContent, variableContent,
                                              functionCollectionObject)
-        return self.fileManipulator.createFile(self._fileComponents.getFileName(), content)
+        
+        if DEBUG: print("TemplateFileCreator: creating file: " + self._fileComponents.getOriginalFileName())
+        return self.fileManipulator.createFile(self._fileComponents.getOriginalFileName(), content)
 
     def setBasePath(self, basePath):
         self._fileComponents.setBasePath(basePath)
@@ -52,7 +58,7 @@ class TemplateFileCreator:
         return self._cursors
 
     def getFileName(self):
-        return self._fileComponents.getFileName()
+        return self._fileComponents.getOriginalFileName()
 
     #def open(self, window):
     #    self.fileManipulator.open(self._fileComponents.getFileName(), self._settings, window, self.getCursors())

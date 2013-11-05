@@ -28,12 +28,10 @@ class FileManipulator():
             else:
                 newFile.write(content);
             newFile.close()
-            if DEBUG:
-                print("Created file " + filePath)
+            if DEBUG: print("FileManipulator: Created file " + filePath)
             return True
         else:
-            if DEBUG:
-                print("File " + filePath + " exists.")
+            if DEBUG: print("FileManipulator: File " + filePath + " exists.")
         return False
 
     @staticmethod
@@ -42,8 +40,7 @@ class FileManipulator():
         if extension != "":
         	folder = os.path.dirname(folder)
         if not os.path.isdir(folder):
-            if DEBUG:
-                print("Created folder " + folder)
+            if DEBUG: print("FileManipulator: Created folder " + folder)
             os.makedirs(folder)
 
     @staticmethod
