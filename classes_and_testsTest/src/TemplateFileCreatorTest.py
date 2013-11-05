@@ -4,6 +4,7 @@ if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
 
+from classes_and_tests.src.MirroredDirectory import MirroredDirectory
 from classes_and_tests.src.TemplateFileCreator import TemplateFileCreator
 from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
 
@@ -308,9 +309,14 @@ class TemplateFileCreatorTest(unittest.TestCase):
 
         self.assertEqual(expectedKind, result)
 
+    def test_setKind(self):
+        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        expectedPath = "/MyProject/library/aae/mvc/ControllerTest.php"
+        fc = TemplateFileCreator(aPath)
+        fc.setKind(MirroredDirectory.KIND_IS_TEST)
+        result = fc.getFileName()
 
-
-
+        self.assertEqual(expectedPath, result)
 
         
 

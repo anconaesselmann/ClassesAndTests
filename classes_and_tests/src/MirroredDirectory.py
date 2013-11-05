@@ -15,9 +15,16 @@ class MirroredDirectory():
     KIND_IS_TEST    = "test"
     KIND_IS_DB_TEST = "db_Test"
 
-    def __init__(self, fileName):
+    def _initializeDependencies(self):
         self.fileManipulator = FileManipulator()
-        self.fileComponents = FileComponents(fileName)
+        self.fileComponents = FileComponents(None)
+
+    def __init__(self, fileName):
+        self._initializeDependencies()
+        self.set(fileName)
+
+    def set(self, fileName):
+        self.fileComponents.set(fileName)
         self._determineKind(self.fileComponents.getFile())
 
     def setDefaultExtension(self, fileExtension):
@@ -34,7 +41,17 @@ class MirroredDirectory():
         return self._kind
 
     def setKind(self, kind):
-        self._kind = kind
+        basePath = self.getBasePath()
+        if kind == self.KIND_IS_CLASS:
+            newFile = self.getFileName()
+        elif kind == self.KIND_IS_TEST:
+            newFile = self.getTestFileName()
+        elif kind == self.KIND_IS_DB_TEST:
+            newFile = self.getDBTestFileName()
+        else:
+            raise Exception("Unknown kind")
+        self.set(newFile)
+        self.setBasePath(basePath)
         
     def getFile(self):
         return self._getCleanFileName()

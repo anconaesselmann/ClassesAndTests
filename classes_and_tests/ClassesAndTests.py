@@ -168,14 +168,17 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         # create corresponding test or source files
         if fc.classifyKind() == MirroredDirectory.KIND_IS_CLASS:
             if settings.get("create_tests_for_source_files") == True:
+                if DEBUG: print("ClassesAndTestsCommand: creating corresponding test file")
                 fc.setKind(MirroredDirectory.KIND_IS_TEST)
                 fileCreated = fc.createFromTemplate()
         elif fc.classifyKind() == MirroredDirectory.KIND_IS_TEST or fc.getKind() == MirroredDirectory.KIND_IS_DB_TEST:
             if settings.get("create_source_for_test_files") == True:
+                if DEBUG: print("ClassesAndTestsCommand: creating corresponding class file")
                 fc.setKind(MirroredDirectory.KIND_IS_CLASS)
                 fileCreated = fc.createFromTemplate()
 
         if fileCreated:
+            if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + fc.getFileName())
             self.windowManipulator.openFile(fc.getFileName(), fc.getCursors())
 
     # TODO: Has an issue when clearing the whole input line....
