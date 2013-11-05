@@ -58,6 +58,4 @@ class SublimeWindowManipulator():
         openStatement = "%s:%d:%d" % (fileComponents.getOriginalFileName(), line, column)
         if DEBUG: print("SublimeWindowManipulator: opening file '" + openStatement + "'")
         openedFile = sublime.active_window().open_file(openStatement, sublime.ENCODED_POSITION)
-        #openedFile = sublime.active_window().open_file(fileDir)
-        #return
         return openedFile

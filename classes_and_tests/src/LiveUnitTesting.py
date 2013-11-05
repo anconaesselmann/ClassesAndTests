@@ -27,7 +27,7 @@ class LiveUnitTesting():
             lastModTempFile = os.stat(self._activeFile.getTestFileName()).st_mtime
             if lastModTempFile != self._lastModTempFile:
                 # only save copy of test file, if it has been modified and saved
-                currentTestFileContent = FileManipulation.getFileContent(self._activeFile.getTestFileName())
+                currentTestFileContent = FileManipulator.getFileContent(self._activeFile.getTestFileName())
                 #print("currentTestFileContent:")
                 #print(currentTestFileContent)
                 self._saveToTempTestFile(currentTestFileContent)
@@ -64,10 +64,10 @@ class LiveUnitTesting():
 
     def _saveToTempClassFile(self, curentViewContent):
         classFileContent = self._replacePyClassFileLoadingStatements(curentViewContent)
-        FileManipulation.replaceFile(self._getTempFileDir(), classFileContent)
+        FileManipulator.replaceFile(self._getTempFileDir(), classFileContent)
 
     def _saveToTempTestFile(self, testFileContent):
-        FileManipulation.replaceFile(self._getTempTestFileDir(), testFileContent)
+        FileManipulator.replaceFile(self._getTempTestFileDir(), testFileContent)
 
         extension = self._activeFile.getExtension()
         if extension == "php":

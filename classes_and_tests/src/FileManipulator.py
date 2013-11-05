@@ -35,6 +35,12 @@ class FileManipulator():
         return False
 
     @staticmethod
+    def replaceFile(fileDir, content):
+        if os.path.isfile(fileDir):
+            os.remove(fileDir)
+        FileManipulator.createFile(fileDir, content)
+
+    @staticmethod
     def createFolder(aPath):
         folder, extension = os.path.splitext(aPath)
         if extension != "":
