@@ -9,37 +9,12 @@ if __name__ == '__main__' and __package__ is None:
 from classes_and_tests.ToggleSourcesTests import ToggleSourcesTestsCommand
 from classes_and_tests.src.mocking.sublime import *
 from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
-
-class MockSublimeWindowManipulator:
-    def __init__(self):
-        self.fileOpened = None
-        self.cursors = None
-    def openFile(self, aPath, cursors):
-        self.fileOpened = aPath
-        self.cursors = cursors
-        return True 
-
-class MockTemplateFileCreator:
-    def __init__(self, path, cursors):
-        self.path = path
-        self.cursors = cursors
-
-    def set(self, path):
-        pass
-
-    def getFileName(self):
-        return self.path
-
-    def getCursors(self):
-        return self.cursors
-
-    def createFromTemplate(self):
-        return True
+from classes_and_tests.src.mocking.MockTemplateFileCreator import MockTemplateFileCreator
+from classes_and_tests.src.mocking.MockSublimeWindowManipulator import MockSublimeWindowManipulator
 
 class ToggleSourcesTestsCommandTest(unittest.TestCase):
 	def test___init__(self):
 		obj = ToggleSourcesTestsCommand()
-
 	
 	def test_run_with_no_file_name(self):
 		expectedOutput = 'TSTC: To toggle between test and class, save the current file.\n'
@@ -103,7 +78,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		mockFileManipulator = MockFileManipulator()
 		tst = ToggleSourcesTestsCommand()
 		tst.fileManipulator = mockFileManipulator
-		tst.templateFileCreator = MockTemplateFileCreator(aFileName, cursors)
+		tst.templateFileCreator = MockTemplateFileCreator({aFileName: (cursors, True)})
 		resultFileName, resultCursors = tst.getFileDirAndCursors(aFileName)
 		self.assertEqual(aFileName, resultFileName)
 		self.assertEqual(cursors, resultCursors)
@@ -127,7 +102,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		tst.window = mockSublimeWindow
 		tst.sublime = mockSublime
 		tst.fileManipulator = mockFileManipulator
-		tst.templateFileCreator = MockTemplateFileCreator(file2, cursors)
+		tst.templateFileCreator = MockTemplateFileCreator({file2: (cursors, True)})
 		tst.windowManipulator = mockSublimeWindowManipulator
 		
 		tst.run()
@@ -136,7 +111,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		self.assertEqual(file2, mockSublimeWindowManipulator.fileOpened)
 		self.assertEqual(cursors, mockSublimeWindowManipulator.cursors)
 
-	
+#TODO: Make this test pass!	
 	def test_run_class_file_open_creates_test_file(self):
 		theClassFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
 		theTestFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")

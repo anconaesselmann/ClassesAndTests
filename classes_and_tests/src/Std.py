@@ -50,3 +50,12 @@ class Std():
             return aDict.iteritems()
         else:
             return aDict.items()
+
+    @staticmethod 
+    def getSettingNameValuePair(settings):
+        if not isinstance(settings, dict): # I could check for string, but I would break x-compatibility between python 2 and 3
+            settings = eval(settings)
+        for key, value in Std.getIterItems(settings):
+            if value is not None:
+                return key, value
+        return None, None

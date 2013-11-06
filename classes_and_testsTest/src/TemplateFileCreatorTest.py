@@ -81,17 +81,6 @@ class MockPHPFunctionCollectionObject(object):
         else:
             return None
 
-"""class MockSettings:
-    def get(self, varName):
-        if varName == "author":
-            return "Axel"
-        elif varName == "base_path":
-            return "/MyProject/library"
-        elif varName == "license":
-            return None
-        else:
-            return None"""
-
 class MockImporter:
 	def __init__(self):
 		self._mockObjects = dict()
@@ -290,7 +279,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         functionFileDir = os.path.join(templateDir, "php", "functions.py")
         templateContent = "<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n     * /* @license */\n     * @package /* @namespace */\n     */\n    class /* @class_name */ {\n        /* @cursor */\n    }\n}"
         variableContent = "[\n    {\n        \"variable\": \"namespace\",\n        \"command\": \"get_php_namespace\",\n        \"fromSettings\": [\"base_path\"]\n    },\n    {\n        \"variable\": \"class_name\",\n        \"command\": \"get_class_name\"\n    },\n    {\n        \"variable\": \"author\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"author\"]\n    },\n    {\n        \"variable\": \"license\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"license\"]\n    }\n]"
-        functionCollectionObject = MockPHPFunctionCollectionObject()
+        functionCollectionObject = MockPHPFunctionCollectionObject
         #print("\n" + templateFileDir)
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)

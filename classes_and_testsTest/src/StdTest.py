@@ -47,6 +47,12 @@ class StdTest(unittest.TestCase):
 			result = obj.getLineIndentAsWhitespace(inputValue)
 			self.assertEqual(expected, result)
 
+	def test_getSettingNameValuePair(self):
+        settings = "{\"author\": \"Axel\"}"
+        expected = ("author", "Axel")
+        fc = FunctionCollection()
+        result1, result2 = fc.getSettingNameValuePair(settings)
+        self.assertEqual(expected, (result1, result2))
 
 if __name__ == '__main__':
     unittest.main()

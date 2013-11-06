@@ -60,14 +60,23 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             self.sublime = sublime
         if not hasattr(self, "settings"):
             self.settings = settings
+        if not hasattr(self, "windowManipulator"):
+            self.windowManipulator = SublimeWindowManipulator(self.window, settings)
+        if not hasattr(self, "fileManipulator"):
+            self.fileManipulator = FileManipulator()
+        if not hasattr(self, "mirroredDirectory"):
+            self.mirroredDirectory = MirroredDirectory()
+        if not hasattr(self, "templateFileCreator"):
+            self.templateFileCreator = TemplateFileCreator()
+            #self.templateFileCreator.setBasePath(settings.get('base_path'))
+            self.templateFileCreator.setSettings(settings)
+            self.templateFileCreator.setDefaultExtension(settings.get('default_file_extension'))
+            self.templateFileCreator.setTemplateDir(TEMPLATES_DIR)
 
         self.splitView = self.settings.get("seperate_tests_and_sources_by_split_view")
 
     def run(self):
         self._initializeDependencies()
-
-        self.windowManipulator = SublimeWindowManipulator(self.window, settings)
-        self.fileManipulator = FileManipulator()
 
         userSettingsDir =  os.path.join(sublime.packages_path(), "User", PACKAGE_NAME + ".sublime-settings")
         userSettingsExist = os.path.isfile(userSettingsDir)
@@ -164,55 +173,72 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         view.erase_status("ClassesAndTests")
 
     def on_done(self, command_string):
-        fileDir = None
         view = self.window.active_view()
         view.erase_status("ClassesAndTests")
+        if DEBUG: print("ClassesAndTests: command_string in on_done:" + command_string)
+        self._openFilesCreateIfNecessary(command_string)
 
-        if DEBUG:
-            print("command_string in ClassesAndTests.on_done:")
-            print(command_string)
-        fc = TemplateFileCreator(command_string)
-        fc.setBasePath(settings.get('base_path'))
-        fc.setSettings(settings)
-        fc.setDefaultExtension(settings.get('default_file_extension'))
-        fc.setTemplateDir(TEMPLATES_DIR)
-        if DEBUG:
-            print("file name in ClassesAndTests.on_done:")
-            print(fc.getFileName())
-        fileCreated = fc.createFromTemplate()
-        if fileCreated:
-            fileDir = fc.getFileName()
-            cursors = fc.getCursors()
-
-        else:
-            fileCreated = self.fileManipulator.createFile(command_string)
-            fileDir = command_string
-            cursors = [(0, 0)]
-
-        if fileCreated:
+    def _openFilesCreateIfNecessary(self, fileName):
+        compFileDir = None
+        fileDir, cursors = self._getTemplateFile(fileName)
+        if fileDir is not None:
+            if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + self.templateFileCreator.getFileName())
             self.windowManipulator.openFile(fileDir, cursors)
+
+            compFileDirTemp = self._getCorrespondingTemplateFilePath(fileDir)
+            compFileDir, compFileCursors = self._getTemplateFile(compFileDirTemp)
         else:
-            print("File " + command_string + " could not be created.")
-            return
+            print("File " + fileName + " could not be created.")
 
+        if compFileDir is not None:
+            if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + self.templateFileCreator.getFileName())
+            self.windowManipulator.openFile(compFileDir, compFileCursors)
+        else:
+            print("Complementary file for " + fileName + " could not be created.")
 
-        #fc.initialOpenFile(self.window, fileDir, settings)
+    # Unit Tested
+    def _getTemplateFile(self, fileName):
+        fileCreated = False
+        fileDir = None
+        cursors = None
+        if fileName is not None:
+            self.templateFileCreator.set(fileName)
+            if DEBUG: print("ClassesAndTestsCommand: _getTemplateFile fileName: '" + self.templateFileCreator.getFileName() + "'")
+            if not self.fileManipulator.isfile(fileName):
+                fileCreated = self.templateFileCreator.createFromTemplate()
+                if fileCreated:
+                    fileDir = self.templateFileCreator.getFileName()
+                    cursors = self.templateFileCreator.getCursors()
+                else:
+                    if DEBUG: print("ClassesAndTestsCommand: No templates, creating empty file.")
+                    fileCreated = self.fileManipulator.createFile(fileName)
+                    if fileCreated:
+                        fileDir = fileName
+                        cursors = [(0, 0)]
+            else:
+                if DEBUG: print("ClassesAndTestsCommand: File exists, just open.")
+                fileDir = fileName
+                cursors = [(0, 0)]
 
-        # create corresponding test or source files
-        if fc.classifyKind() == MirroredDirectory.KIND_IS_CLASS:
-            if settings.get("create_tests_for_source_files") == True:
-                if DEBUG: print("ClassesAndTestsCommand: creating corresponding test file")
-                fc.setKind(MirroredDirectory.KIND_IS_TEST)
-                fileCreated = fc.createFromTemplate()
-        elif fc.classifyKind() == MirroredDirectory.KIND_IS_TEST or fc.getKind() == MirroredDirectory.KIND_IS_DB_TEST:
-            if settings.get("create_source_for_test_files") == True:
-                if DEBUG: print("ClassesAndTestsCommand: creating corresponding class file")
-                fc.setKind(MirroredDirectory.KIND_IS_CLASS)
-                fileCreated = fc.createFromTemplate()
+        return fileDir, cursors
 
-        if fileCreated:
-            if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + fc.getFileName())
-            self.windowManipulator.openFile(fc.getFileName(), fc.getCursors())
+    # Unit Tested
+    def _getCorrespondingTemplateFilePath(self, fileName):
+        if DEBUG: print("ClassesAndTestsCommand: corresponding file creation called for '" + fileName + "'")
+        fileDir = None
+
+        self.mirroredDirectory.set(fileName)
+        if self.mirroredDirectory.getKind() == MirroredDirectory.KIND_IS_CLASS:
+            if self.settings.get("create_tests_for_source_files") == True:
+                self.mirroredDirectory.setKind(MirroredDirectory.KIND_IS_TEST)
+                fileDir = self.mirroredDirectory.getOriginalFileName()
+        elif self.mirroredDirectory.getKind() == MirroredDirectory.KIND_IS_TEST or self.mirroredDirectory.getKind() == MirroredDirectory.KIND_IS_DB_TEST:
+            if self.settings.get("create_source_for_test_files") == True:
+                self.mirroredDirectory.setKind(MirroredDirectory.KIND_IS_CLASS)
+                fileDir = self.mirroredDirectory.getOriginalFileName()
+
+        return fileDir
+
 
     # TODO: Has an issue when clearing the whole input line....
     def detectBackOneFolder(self, newInputPanelContent):
@@ -282,3 +308,4 @@ class ReplaceInputPanelContentCommand(sublime_plugin.TextCommand):
     def run(self, edit, replacementString):
         ip = InputPanel(self.view, edit)
         ip.replaceAllText(replacementString)
+    

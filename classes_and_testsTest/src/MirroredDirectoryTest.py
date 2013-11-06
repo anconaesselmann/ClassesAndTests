@@ -95,7 +95,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         md = MirroredDirectory(aFileName)
         md.fileManipulator = mockFileManipulator
 
-        md.discoverBasePath()
+        md._discoverBasePath()
 
         resultBasePath = md.getBasePath()
         resultRelativePath = md.getRelativePath()
@@ -103,7 +103,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         self.assertEqual(expectedBasePath, resultBasePath)
         self.assertEqual(expectedRelativePath, resultRelativePath)
 
-    def test_discoverBasePath_with_relative_path_provided(self):
+    def test__discoverBasePath_with_relative_path_provided(self):
         aFileName = os.path.join("MyProject", "library", "aae", "mvc", "Controller.php")
         testDir = os.path.join("MyProject", "libraryTest")
 
@@ -116,7 +116,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         md = MirroredDirectory(aFileName)
         md.fileManipulator = mockFileManipulator
 
-        md.discoverBasePath()
+        md._discoverBasePath()
 
         resultBasePath = md.getBasePath()
         resultRelativePath = md.getRelativePath()
@@ -186,6 +186,34 @@ class MirroredDirectoryTest(unittest.TestCase):
 
         self.assertEqual(expectedPath, result)
         self.assertEqual(basePath, resultBasePath)
+
+    def _getInstance(self):
+    	aPath = "/MyProject/library/aae/mvc/Controller.php"
+        testDir = "/MyProject/library/aaeTest/mvc" #TODO: remove trailing folder once mocking of directory structure works
+        expectedPath = "/MyProject/library/aaeTest/mvc/ControllerTest.php"
+        mockFileManipulator = MockFileManipulator()
+        mockFileManipulator.createFile(os.path.join(testDir, "someFileTest.php"), "") #TODO: replace once directories can be mocked
+
+        md = MirroredDirectory(aPath)
+        md.fileManipulator = mockFileManipulator
+
+        return md
+
+    def test_getBasePath_no_base_path_set_but_has_test_folder(self):
+    	expected = os.path.join(os.sep, "MyProject", "library", "aae")
+    	md = self._getInstance()
+
+    	result = md.getBasePath()
+
+    	self.assertEqual(expected, result)
+        
+    def test_getRelativeFileName(self):
+    	expected = os.path.join("mvc", "Controller.php")
+    	md = self._getInstance()
+
+    	result = md.getRelativeFileName()
+
+    	self.assertEqual(expected, result)
 
 if __name__ == '__main__':
     unittest.main()

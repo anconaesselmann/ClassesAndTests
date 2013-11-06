@@ -17,7 +17,7 @@ except ImportError:
     from .Importer import Importer
 
 class TemplateFileCreator:
-    def __init__(self, fileName, defaultFileExtension = ""):
+    def __init__(self, fileName = "", defaultFileExtension = ""):
         self._settings = None
         self.fileManipulator = FileManipulator()
         self.importer = Importer()
@@ -38,7 +38,7 @@ class TemplateFileCreator:
 
         templateContent = self.fileManipulator.getFileContent(templatePath)
         variableContent = self.fileManipulator.getFileContent(variablePath)
-        functionCollectionObject = self.importer.getObjectInstance(functionPath, "FunctionCollection")
+        functionCollectionObject = self.importer.getObjectInstance(functionPath, "FunctionCollection")()
         content = self.getReplacementContent(templateContent, variableContent,
                                              functionCollectionObject)
 
@@ -85,10 +85,21 @@ class TemplateFileCreator:
             args["settings"] = str(settingsValues)
             args["name"] = variableName
             args["dir"] = self._fileComponents.getFileName()
+            #args["basePath"] = ""
             args["command"] = templateVar["command"]
 
             result[variableName] = args
         return result
+
+    """def getReplacements(self, args, functionCollectionObject):
+        # TODO: this check has loopholes...
+        if isinstance(functionCollectionObject, (int, float, complex, str)) or functionCollectionObject is None:
+            raise Exception("The functionCollectionObject argument must be an instance of an object, " + str(type(functionCollectionObject)) + " passed instead.")
+        result = dict()
+        for name, arg in Std.getIterItems(args):
+            function = getattr(functionCollectionObject, arg["command"])
+            result["/* @" + name + " */"] = function(arg)
+        return result"""
 
     def getReplacements(self, args, functionCollectionObject):
         # TODO: this check has loopholes...

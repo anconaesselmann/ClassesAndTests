@@ -1,5 +1,7 @@
 import os
 
+DEBUG = False
+
 try:
     from FileComponents import FileComponents
     from Std import Std
@@ -19,7 +21,7 @@ class MirroredDirectory():
         self.fileManipulator = FileManipulator()
         self.fileComponents = FileComponents(None)
 
-    def __init__(self, fileName):
+    def __init__(self, fileName=""):
         self._initializeDependencies()
         self.set(fileName)
 
@@ -90,6 +92,20 @@ class MirroredDirectory():
             return None
         fileName = cleanFileName + "." + self.fileComponents.getExtension()
         return os.path.join(self.getFileDir(), fileName)
+
+    def getRelativeFileName(self):
+        result = self.fileComponents.getRelativeFileName()
+        if result is None:
+            self._discoverBasePath()
+            result = self.fileComponents.getRelativeFileName()
+        return result 
+
+    def getRelativePath(self):
+        result = self.fileComponents.getRelativePath()
+        if result is None:
+            self._discoverBasePath()
+            result = self.fileComponents.getRelativePath()
+        return result 
 
     def getTestFileName(self):
         cleanFileName = self._getCleanFileName()
@@ -172,30 +188,25 @@ class MirroredDirectory():
             result = True
         return result
 
-    def discoverBasePath(self):
+    def _discoverBasePath(self):
         if not self.fileComponents.pathIsAbsolute():
             return
         searchTerm = "Test"
         folders = Std.dirExplode(self.fileComponents.getDir())
         result = False
         for i in range(len(folders) - 1,-1,-1): 
-            temp = folders[i]
-            folders[i] = folders[i] + searchTerm
-            tempDir = Std.dirImplode(folders[:i-1])
+            tempDir = Std.dirImplode(folders[:i]) + searchTerm
             if self.fileManipulator.isdir(tempDir):
-                folders[i] = temp
+                if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
                 result = Std.dirImplode(folders[:i])
                 break
-            folders[i] = temp
         if result is not False:
             self.setBasePath(result)
+            if DEBUG: print("MirroredDirectory: discoveredBasePath: " + result)  
 
-    
     def getBasePath(self):
-        return self.fileComponents.getBasePath()
-    
-    def getRelativePath(self):
-        return self.fileComponents.getRelativePath()
-    
-    
-    
+        result = self.fileComponents.getBasePath()
+        if result is None:
+            self._discoverBasePath()
+            result = self.fileComponents.getBasePath()
+        return result
