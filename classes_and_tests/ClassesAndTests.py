@@ -232,12 +232,12 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if DEBUG: print("ClassesAndTestsCommand: Creating py package file.")
         self.mirroredDirectory.set(fileName)
         extension = self.mirroredDirectory.getExtension()
-        if extension == "py":
+        kind = self.mirroredDirectory.getKind()
+        if extension == "py" and kind == MirroredDirectory.KIND_IS_CLASS:
             if DEBUG: print("ClassesAndTestsCommand: is py file: " + fileName)
             basePath = self.mirroredDirectory.getBasePath()
             basePathParent = os.path.dirname(basePath) #TODO: throws exception with test files
             relativeFileName = self.mirroredDirectory.getRelativeFileName()
-
             root = os.path.basename(os.path.normpath(basePath))
             relativeFileNameWithoutExt, ext = os.path.splitext(relativeFileName)
             untreatedPackageName = os.path.join(root, relativeFileNameWithoutExt)

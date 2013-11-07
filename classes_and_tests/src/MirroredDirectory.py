@@ -211,16 +211,28 @@ class MirroredDirectory():
         searchTerm = "Test"
         folders = Std.dirExplode(self.fileComponents.getDir())
         result = False
-        for i in range(len(folders) - 1,-1,-1): 
-            tempDir = Std.dirImplode(folders[:i]) + searchTerm
+        while len(folders) > 0:
+            # Class files
+            tempDir = Std.dirImplode(folders) + searchTerm
             if self.fileManipulator.isdir(tempDir):
                 if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
-                result = Std.dirImplode(folders[:i])
+                result = Std.dirImplode(folders)
                 break
+            currentFolder = folders.pop()
+            # Test files
+            if currentFolder[-len(searchTerm):] == searchTerm:
+                tempDir = os.path.join(Std.dirImplode(folders), currentFolder[:-4])
+                if self.fileManipulator.isdir(tempDir):
+                    if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
+                    result = tempDir + searchTerm
+                    break
         if result is not False:
             self.setBasePath(result)
         else:
             if DEBUG: print("MirroredDirectory: base Path could not be discovered")  
+
+    def _discoverBasePathFromTestFile(self):
+        pass
 
     def getBasePath(self):
         result = self.fileComponents.getBasePath()

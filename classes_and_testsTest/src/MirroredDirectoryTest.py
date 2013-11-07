@@ -76,7 +76,7 @@ class MirroredDirectoryTest(unittest.TestCase):
 
         self.assertEqual(aFileName, result)
 
-    def test_find_base_path(self):
+    def test__discoverBasePath(self):
         aFileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         testDir = os.path.join(os.sep, "MyProject", "libraryTest")
 
@@ -106,6 +106,27 @@ class MirroredDirectoryTest(unittest.TestCase):
 
         mockFileManipulator = MockFileManipulator()
         mockFileManipulator.createFile(os.path.join(testDir, "someFileTest.php"), "") #TODO: replace once directories can be mocked
+
+        md = MirroredDirectory(aFileName)
+        md.fileManipulator = mockFileManipulator
+
+        md._discoverBasePath()
+
+        resultBasePath = md.getBasePath()
+        resultRelativePath = md.getRelativePath()
+
+        self.assertEqual(expectedBasePath, resultBasePath)
+        self.assertEqual(expectedRelativePath, resultRelativePath)
+
+    def test__discoverBasePath_test_file(self):
+        aFileName = os.path.join(os.sep, "MyProject", "libraryTest", "aae", "mvc", "ControllerTest.php")
+        baseDir = os.path.join(os.sep, "MyProject", "library")
+
+        expectedBasePath = os.path.join(os.sep, "MyProject", "libraryTest")
+        expectedRelativePath = os.path.join("aae", "mvc")
+
+        mockFileManipulator = MockFileManipulator()
+        mockFileManipulator.createFile(os.path.join(baseDir, "someFile.php"), "") #TODO: replace once directories can be mocked
 
         md = MirroredDirectory(aFileName)
         md.fileManipulator = mockFileManipulator
