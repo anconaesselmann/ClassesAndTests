@@ -66,6 +66,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
             self.fileManipulator = FileManipulator()
         if not hasattr(self, "mirroredDirectory"):
             self.mirroredDirectory = MirroredDirectory()
+            self.mirroredDirectory.setDefaultExtension(settings.get('default_file_extension'))
         if not hasattr(self, "templateFileCreator"):
             self.templateFileCreator = TemplateFileCreator()
             #self.templateFileCreator.setBasePath(settings.get('base_path'))
@@ -203,7 +204,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         cursors = None
         if fileName is not None:
             self.templateFileCreator.set(fileName)
-            if DEBUG: print("ClassesAndTestsCommand: _getTemplateFile fileName: '" + self.templateFileCreator.getFileName() + "'")
+            if DEBUG: print("ClassesAndTestsCommand: _getTemplateFile fileName: '" + str(self.templateFileCreator.getFileName()) + "'")
             if not self.fileManipulator.isfile(fileName):
                 fileCreated = self.templateFileCreator.createFromTemplate()
                 if fileCreated:

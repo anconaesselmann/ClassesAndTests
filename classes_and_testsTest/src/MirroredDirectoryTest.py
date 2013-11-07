@@ -188,9 +188,8 @@ class MirroredDirectoryTest(unittest.TestCase):
         self.assertEqual(basePath, resultBasePath)
 
     def _getInstance(self):
-    	aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject/library/aae/mvc/Controller.php"
         testDir = "/MyProject/library/aaeTest/mvc" #TODO: remove trailing folder once mocking of directory structure works
-        expectedPath = "/MyProject/library/aaeTest/mvc/ControllerTest.php"
         mockFileManipulator = MockFileManipulator()
         mockFileManipulator.createFile(os.path.join(testDir, "someFileTest.php"), "") #TODO: replace once directories can be mocked
 
@@ -200,20 +199,46 @@ class MirroredDirectoryTest(unittest.TestCase):
         return md
 
     def test_getBasePath_no_base_path_set_but_has_test_folder(self):
-    	expected = os.path.join(os.sep, "MyProject", "library", "aae")
-    	md = self._getInstance()
+        expected = os.path.join(os.sep, "MyProject", "library", "aae")
+        md = self._getInstance()
 
-    	result = md.getBasePath()
+        result = md.getBasePath()
 
-    	self.assertEqual(expected, result)
+        self.assertEqual(expected, result)
         
     def test_getRelativeFileName(self):
-    	expected = os.path.join("mvc", "Controller.php")
-    	md = self._getInstance()
+        expected = os.path.join("mvc", "Controller.php")
+        md = self._getInstance()
 
-    	result = md.getRelativeFileName()
+        result = md.getRelativeFileName()
 
-    	self.assertEqual(expected, result)
+        self.assertEqual(expected, result)
+
+    def test_setDefaultExtension(self):
+        aPath = "/MyProject/library/aae/mvc/Controller"
+        defaultFileExtension = "php"
+        expected = "/MyProject/library/aae/mvc/Controller.php"
+        md = self._getInstance()
+        md.setDefaultExtension(defaultFileExtension)
+
+        result = md.getOriginalFileName()
+
+        self.assertEqual(expected, result)
+
+    def test_setDefaultExtension_call_set_after_setting_default_file_extension(self):
+        aPath = "/Some/Thing/Completely/different.php"
+        anotherPath = "/MyProject/library/aae/mvc/Controller"
+        
+        defaultFileExtension = "php"
+        expected = "/MyProject/library/aae/mvc/Controller.php"
+        md = MirroredDirectory(aPath)
+        md.setDefaultExtension(defaultFileExtension)
+
+        md.set(anotherPath)
+
+        result = md.getOriginalFileName()
+
+        self.assertEqual(expected, result)
 
 if __name__ == '__main__':
     unittest.main()

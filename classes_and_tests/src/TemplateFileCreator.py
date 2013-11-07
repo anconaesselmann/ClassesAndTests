@@ -20,6 +20,7 @@ class TemplateFileCreator:
     def __init__(self, fileName = "", defaultFileExtension = ""):
         self._settings = None
         self.fileManipulator = FileManipulator()
+        self._fileComponents = MirroredDirectory()
         self.importer = Importer()
         self._templateDir = None
         self.set(fileName, defaultFileExtension)
@@ -27,7 +28,7 @@ class TemplateFileCreator:
 
     def set(self, fileName, defaultFileExtension = ""):
         if DEBUG: print("TemplateFileCreator: setting dir to: '" + fileName + "'")
-        self._fileComponents = MirroredDirectory(fileName)
+        self._fileComponents.set(fileName)
         if DEBUG: print("TemplateFileCreator: dir set to: '" + str(self._fileComponents.getOriginalFileName()) + "'")
         self._cursors = []
 
@@ -59,9 +60,6 @@ class TemplateFileCreator:
 
     def getFileName(self):
         return self._fileComponents.getOriginalFileName()
-
-    #def open(self, window):
-    #    self.fileManipulator.open(self._fileComponents.getFileName(), self._settings, window, self.getCursors())
 
     def setDefaultExtension(self, fileExtension):
         self._fileComponents.setDefaultExtension(fileExtension)

@@ -5,6 +5,7 @@ import os
 #
 class FileComponents():
     def __init__(self, path):
+        self._defaultExtension = None
         self.set(path)
 
     # TODO: implement this
@@ -38,7 +39,6 @@ class FileComponents():
 
 
     def set(self, path):
-        self._defaultExtension = None
         if path is None:
             path = ""
 
@@ -73,6 +73,7 @@ class FileComponents():
         else:
             self._pathIsAbsolute = False
         self._basePath = None
+        self._applyDefaultExtension()
 
     def pathIsAbsolute(self):
         if self._pathIsAbsolute:

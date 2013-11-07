@@ -314,8 +314,32 @@ class TemplateFileCreatorTest(unittest.TestCase):
         result = fc.getFileName()
 
         self.assertEqual(expectedPath, result)
+    
+    def test_setDefaultExtension(self):
+        aPath = "/MyProject/library/aae/mvc/Controller"
+        defaultFileExtension = "php"
+        expected = "/MyProject/library/aae/mvc/Controller.php"
+        fc = TemplateFileCreator(aPath)
+        fc.setDefaultExtension(defaultFileExtension)
 
+        result = fc.getFileName()
+
+        self.assertEqual(expected, result)
+
+    def test_setDefaultExtension_call_set_after_setting_default_file_extension(self):
+        aPath = "/Some/Thing/Completely/different.php"
+        anotherPath = "/MyProject/library/aae/mvc/Controller"
         
+        defaultFileExtension = "php"
+        expected = "/MyProject/library/aae/mvc/Controller.php"
+        fc = TemplateFileCreator(aPath)
+        fc.setDefaultExtension(defaultFileExtension)
+
+        fc.set(anotherPath)
+        
+        result = fc.getFileName()
+
+        self.assertEqual(expected, result)
 
         
         
