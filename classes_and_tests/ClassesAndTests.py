@@ -36,6 +36,7 @@ try:
     from src.SublimeWindowManipulator import SublimeWindowManipulator
     from src.FileManipulator import FileManipulator
     from src.MirroredDirectory import MirroredDirectory
+    from src.Std import Std
 except ImportError:
     from .src.TemplateFileCreator import TemplateFileCreator
     from .src.FileComponents import FileComponents
@@ -45,6 +46,7 @@ except ImportError:
     from .src.SublimeWindowManipulator import SublimeWindowManipulator
     from .src.FileManipulator import FileManipulator
     from .src.MirroredDirectory import MirroredDirectory
+    from .src.Std import Std
 else:
     plugin_loaded()
 
@@ -185,6 +187,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if fileDir is not None:
             if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + self.templateFileCreator.getFileName())
             self.windowManipulator.openFile(fileDir, cursors)
+            self._createPythonPackageFiles(fileDir)
 
             compFileDirTemp = self._getCorrespondingTemplateFilePath(fileDir)
             compFileDir, compFileCursors = self._getTemplateFile(compFileDirTemp)
@@ -194,6 +197,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if compFileDir is not None:
             if DEBUG: print("ClassesAndTestsCommand: file creation successful, opening file: " + self.templateFileCreator.getFileName())
             self.windowManipulator.openFile(compFileDir, compFileCursors)
+            self._createPythonPackageFiles(compFileDir)
         else:
             print("Complementary file for " + fileName + " could not be created.")
 
@@ -222,6 +226,35 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 cursors = [(0, 0)]
 
         return fileDir, cursors
+
+    # Unit Tested (general case, no possible failures except non py file)
+    def _createPythonPackageFiles(self, fileName):
+        if DEBUG: print("ClassesAndTestsCommand: Creating py package file.")
+        self.mirroredDirectory.set(fileName)
+        extension = self.mirroredDirectory.getExtension()
+        if extension == "py":
+            if DEBUG: print("ClassesAndTestsCommand: is py file: " + fileName)
+            basePath = self.mirroredDirectory.getBasePath()
+            basePathParent = os.path.dirname(basePath) #TODO: throws exception with test files
+            relativeFileName = self.mirroredDirectory.getRelativeFileName()
+
+            root = os.path.basename(os.path.normpath(basePath))
+            relativeFileNameWithoutExt, ext = os.path.splitext(relativeFileName)
+            untreatedPackageName = os.path.join(root, relativeFileNameWithoutExt)
+            packageFoldersString = os.path.dirname(untreatedPackageName)
+            packageFolders = Std.dirExplode(packageFoldersString)
+            packageFolders.reverse()
+
+            workingDir = basePathParent
+            while len(packageFolders) > 0:
+                currentDir = packageFolders.pop()
+                workingDir = os.path.join(workingDir, currentDir)
+                tempFileName = os.path.join(workingDir, "__init__.py")
+                if not self.fileManipulator.isfile(tempFileName):
+                    if DEBUG: print ("ClassesAndTestsCommand: Creating package file: " + tempFileName)
+                    self.fileManipulator.createFile(tempFileName, "")
+                else:
+                    if DEBUG: print("ClassesAndTestsCommand: py file exists.")
 
     # Unit Tested
     def _getCorrespondingTemplateFilePath(self, fileName):
@@ -309,4 +342,5 @@ class ReplaceInputPanelContentCommand(sublime_plugin.TextCommand):
     def run(self, edit, replacementString):
         ip = InputPanel(self.view, edit)
         ip.replaceAllText(replacementString)
+
     

@@ -182,5 +182,44 @@ class ClassesAndTestsTest(unittest.TestCase):
     	result = cats._getCorrespondingTemplateFilePath(fileName)
     	self.assertEqual(correspondingFileName, result)
 
+###
+    def test__createPythonPackageFiles(self):
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	baseDir = os.path.join(os.sep, "MyProject", "library")
+    	relativeFileName = os.path.join("aae", "mvc", "Controller.py")
+    	
+    	cats = self._getrInstanceWithMockedDependencies()
+    	cats.mirroredDirectory.setMockBasePath(fileName, baseDir)
+    	cats.mirroredDirectory.setMockRelativeFileName(fileName, relativeFileName)
+
+    	cats._createPythonPackageFiles(fileName)
+
+    	result1 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
+    	result2 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
+    	result3 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
+
+    	self.assertEqual(True, result1)
+    	self.assertEqual(True, result2)
+    	self.assertEqual(True, result3)
+
+    def test__createPythonPackageFiles_non_py_file(self):
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
+    	baseDir = os.path.join(os.sep, "MyProject", "library")
+    	relativeFileName = os.path.join("aae", "mvc", "Controller.php")
+    	
+    	cats = self._getrInstanceWithMockedDependencies()
+    	cats.mirroredDirectory.setMockBasePath(fileName, baseDir)
+    	cats.mirroredDirectory.setMockRelativeFileName(fileName, relativeFileName)
+
+    	cats._createPythonPackageFiles(fileName)
+
+    	result1 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
+    	result2 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
+    	result3 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
+
+    	self.assertEqual(False, result1)
+    	self.assertEqual(False, result2)
+    	self.assertEqual(False, result3)
+
 if __name__ == '__main__':
     unittest.main()
