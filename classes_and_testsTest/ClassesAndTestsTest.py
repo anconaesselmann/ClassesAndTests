@@ -66,7 +66,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         return mockFileManipulator
 
     def _getrInstanceWithMockedDependencies(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
     	mockFileCreatorReturns = {
     		fileName: ([(11, 15)], True)
     	}
@@ -92,7 +92,7 @@ class ClassesAndTestsTest(unittest.TestCase):
 ##################################################
 
     def test__getTemplateFile_create_the_file_from_template(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         cursors = [(11, 15)]
 
         cats = self._getrInstanceWithMockedDependencies()
@@ -102,7 +102,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         self.assertEqual(cursors, returnCursor)
 
     def test__getTemplateFile_create_the_file_without_template(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         cursors = [(0, 0)]
 
         cats = self._getrInstanceWithMockedDependencies()
@@ -117,7 +117,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         self.assertEqual(True, resultFileCreated)
 
     def test__getTemplateFile_file_exists(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         cursors = [(0, 0)]
 
         cats = self._getrInstanceWithMockedDependencies()
@@ -141,7 +141,7 @@ class ClassesAndTestsTest(unittest.TestCase):
 #   TESTING _getCorrespondingTemplateFilePath, called in on_done  #
 ###############################################################
     def test__getCorrespondingTemplateFilePath_class_file_provided_test_file_createion_disabled(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
     	settings = MockSettings()
     	settings.set("create_tests_for_source_files", False)
     	settings.set("create_source_for_test_files", True)
@@ -152,7 +152,7 @@ class ClassesAndTestsTest(unittest.TestCase):
     	self.assertEqual(None, result)
 
     def test__getCorrespondingTemplateFilePath_test_file_provided_class_file_createion_disabled(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.php")
     	settings = MockSettings()
     	settings.set("create_tests_for_source_files", True)
     	settings.set("create_source_for_test_files", False)
@@ -163,8 +163,8 @@ class ClassesAndTestsTest(unittest.TestCase):
     	self.assertEqual(None, result)
 
     def test__getCorrespondingTemplateFilePath_class_file_provided_creating_test_file(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
-    	correspondingFileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
+    	correspondingFileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.php")
     	cats = self._getrInstanceWithMockedDependencies()
     	cats.mirroredDirectory.setMockKind(fileName, "class")
     	cats.mirroredDirectory.setMockOriginalFileName(correspondingFileName)
@@ -173,8 +173,8 @@ class ClassesAndTestsTest(unittest.TestCase):
     	self.assertEqual(correspondingFileName, result)
 
     def test__getCorrespondingTemplateFilePath_test_file_provided_creating_class_file(self):
-    	fileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.py")
-    	correspondingFileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
+    	fileName = os.path.join(os.sep, "MyProject", "library", "aaeTest", "mvc", "ControllerTest.php")
+    	correspondingFileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
     	cats = self._getrInstanceWithMockedDependencies()
     	cats.mirroredDirectory.setMockKind(fileName, "test")
     	cats.mirroredDirectory.setMockOriginalFileName(correspondingFileName)

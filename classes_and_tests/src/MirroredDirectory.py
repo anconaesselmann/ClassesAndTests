@@ -82,6 +82,17 @@ class MirroredDirectory():
     def getTestFileDir(self):
         return self._getExistingFileDir("Test")
 
+        """
+        basePath = self.getBasePath()
+        if basePath is not None:
+            possibleTestDir = basePath + "Test"
+            if self.fileManipulator.isdir(possibleTestDir):
+                print("TestFolder Exists")
+                print cleanFileName
+                cleanFileName = os.path.join(possibleTestDir, cleanFileName[len(basePath):])
+                print cleanFileName
+        """
+
     def getDBTestFileDir(self):
         return self._getExistingFileDir("DB_Test")
 
@@ -144,13 +155,19 @@ class MirroredDirectory():
 
     def _getExistingFileDir(self, searchTerm):
         folders = Std.dirExplode(self.fileComponents.getDir())
-        for i in range(len(folders) - 1,-1,-1): 
-            temp = folders[i]
-            folders[i] = folders[i] + searchTerm
-            tempDir = Std.dirImplode(folders) #Std.dirImplode(folders[:i])
+        tailFolders = []
+        while len(folders) > 0:
+            lastFolder = folders.pop()
+            tempDir = os.path.join(Std.dirImplode(folders), lastFolder + searchTerm)
             if self.fileManipulator.isdir(tempDir):
-                return tempDir
-            folders[i] = temp
+                if len(tailFolders) > 0:
+                    tailFolders.reverse()
+                    tail = Std.dirImplode(tailFolders)
+                    result = os.path.join(tempDir, tail)
+                else:
+                    result = tempDir
+                return result
+            tailFolders.append(lastFolder)
         return self.fileComponents.getDir()
 
 
@@ -202,7 +219,8 @@ class MirroredDirectory():
                 break
         if result is not False:
             self.setBasePath(result)
-            if DEBUG: print("MirroredDirectory: discoveredBasePath: " + result)  
+        else:
+            if DEBUG: print("MirroredDirectory: base Path could not be discovered")  
 
     def getBasePath(self):
         result = self.fileComponents.getBasePath()

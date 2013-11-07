@@ -33,8 +33,8 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 
 
 	def test_toggleFileName_no_test_folder(self):
-		aFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
-		fileNameResult = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "ControllerTest.php")
+		aFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		fileNameResult = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "ControllerTest.php")
 		mockFileManipulator = MockFileManipulator()
 		tst = ToggleSourcesTestsCommand()
 		tst.fileManipulator = mockFileManipulator
@@ -42,8 +42,8 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		self.assertEqual(fileNameResult, result)
 
 	def test_toggleFileName_class_to_test(self):
-		aFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
-		fileNameResult = os.path.join("User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
+		aFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		fileNameResult = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
 		mockFileManipulator = MockFileManipulator()
 		mockFileManipulator.createFile(fileNameResult)
 		tst = ToggleSourcesTestsCommand()
@@ -52,8 +52,8 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		self.assertEqual(fileNameResult, result)
 
 	def test_toggleFileName_test_to_class(self):
-		aFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
-		fileNameResult = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		aFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
+		fileNameResult = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
 		mockFileManipulator = MockFileManipulator()
 		mockFileManipulator.createFile(fileNameResult)
 		tst = ToggleSourcesTestsCommand()
@@ -63,7 +63,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 
 
 	def test_getFileDirAndCursors_file_exists(self):
-		aFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		aFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
 		mockFileManipulator = MockFileManipulator()
 		mockFileManipulator.createFile(aFileName)
 		tst = ToggleSourcesTestsCommand()
@@ -73,7 +73,7 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 		self.assertEqual([(0, 0)], resultCursors)
 
 	def test_getFileDirAndCursors_file_dosent_exist(self):
-		aFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		aFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
 		cursors = [(0, 0)]
 		mockFileManipulator = MockFileManipulator()
 		tst = ToggleSourcesTestsCommand()
@@ -113,15 +113,15 @@ class ToggleSourcesTestsCommandTest(unittest.TestCase):
 
 #TODO: Make this test pass!	
 	def test_run_class_file_open_creates_test_file(self):
-		theClassFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
-		theTestFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
+		theClassFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		theTestFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
 		cursors = [(11, 19)]	
 
 		self._run_helper(theClassFileName, theTestFileName, cursors)
 
 	def test_run_test_file_open_creates_class_file(self):
-		theClassFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
-		theTestFileName = os.path.join("User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
+		theClassFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "src", "aae", "mvc", "Controller.php")
+		theTestFileName = os.path.join(os.sep, "User", "Projects", "MyProject", "codeBase", "srcTest", "aae", "mvc", "ControllerTest.php")
 		cursors = [(11, 19)]	
 
 		self._run_helper(theTestFileName, theClassFileName, cursors)

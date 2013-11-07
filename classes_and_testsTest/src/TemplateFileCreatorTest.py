@@ -310,6 +310,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         aPath = "/MyProject/library/aae/mvc/Controller.php"
         expectedPath = "/MyProject/library/aae/mvc/ControllerTest.php"
         fc = TemplateFileCreator(aPath)
+        fc._fileComponents.fileManipulator = MockFileManipulator()
         fc.setKind(MirroredDirectory.KIND_IS_TEST)
         result = fc.getFileName()
 
