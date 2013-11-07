@@ -2,12 +2,12 @@ import unittest
 import os
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
-    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
+    sys.path.append(path.abspath(path.join(__file__, "..", "..")))
 
-from classes_and_tests.src.MirroredDirectory import MirroredDirectory
-from classes_and_tests.src.TemplateFileCreator import TemplateFileCreator
-from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
-from classes_and_tests.src.mocking.sublime import MockSettings
+from src.MirroredDirectory import MirroredDirectory
+from src.TemplateFileCreator import TemplateFileCreator
+from src.mocking.MockFileManipulator import MockFileManipulator
+from src.mocking.sublime import MockSettings
 
 class UnitTestHelpers:
 
@@ -34,7 +34,7 @@ class UnitTestHelpers:
             if printErrors is True:
                 for e, message in errors.iteritems():
                    print(message)
-        
+
         return isEqual
 
 
@@ -128,7 +128,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         aPath = "/MyProject/library/aae/mvc/Controller.php"
         basePath = "/MyProject/library"
         variableContent = None
-        
+
         fc = TemplateFileCreator(aPath)
         self.assertRaises(TypeError, lambda: fc.getArgsDictFromVarContent(variableContent))
 
@@ -157,7 +157,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         fc.setBasePath(basePath)
         fc.setSettings(self._getSettings())
         result = fc.getArgsDictFromVarContent(variableContent)
-        
+
         self.assertEqual(result, expected)
 
     def test_getCursorsFromContent_one_cursor(self):
@@ -253,7 +253,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         resultCursorPos = fc.getCursors()
         self.assertEqual(result, expected)
         self.assertEqual(expectedCursorPos, resultCursorPos)
-    
+
     def test_set_and_getTemplateDir(self):
         aPath = "/MyProject/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
@@ -298,7 +298,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         aPath = "/MyProject/library/aae/mvc/Controller"
         defaultFileExtension = "php"
         expectedKind = "class"
-        
+
         fc = TemplateFileCreator(aPath)
         fc.setDefaultExtension(defaultFileExtension)
 
@@ -315,7 +315,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         result = fc.getFileName()
 
         self.assertEqual(expectedPath, result)
-    
+
     def test_setDefaultExtension(self):
         aPath = "/MyProject/library/aae/mvc/Controller"
         defaultFileExtension = "php"
@@ -330,19 +330,19 @@ class TemplateFileCreatorTest(unittest.TestCase):
     def test_setDefaultExtension_call_set_after_setting_default_file_extension(self):
         aPath = "/Some/Thing/Completely/different.php"
         anotherPath = "/MyProject/library/aae/mvc/Controller"
-        
+
         defaultFileExtension = "php"
         expected = "/MyProject/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
         fc.setDefaultExtension(defaultFileExtension)
 
         fc.set(anotherPath)
-        
+
         result = fc.getFileName()
 
         self.assertEqual(expected, result)
 
-        
-        
+
+
 if __name__ == '__main__':
     unittest.main()

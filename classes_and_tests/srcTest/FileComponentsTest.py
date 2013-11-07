@@ -2,9 +2,9 @@ import unittest
 import os
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
-    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
+    sys.path.append(path.abspath(path.join(__file__, "..", "..")))
 
-from classes_and_tests.src.FileComponents import FileComponents
+from src.FileComponents import FileComponents
 
 data = [
     {"basePath": None                  ,"inputValue": "/A/path/To/a/file.txt"                                  , "extension": "txt"    , "className": "file"       , "fileName": "file"           , "isFile": True , "basePathExeption": False, "isAbsolute": True , "relativePath": None                           , "relativeFileName": None                                           , "absoluteFileName": "/A/path/To/a/file.txt"                         },
@@ -173,7 +173,7 @@ class FileComponentsTest(unittest.TestCase):
         #       default extension is set to .php
         #       the new path is /MyProject/library.php
         #       rendering the old base path is invalid
-        # the moral of the story: default file extensions should be 
+        # the moral of the story: default file extensions should be
         # applied before setting a base path!
         aPath = "/MyProject/library"
         basePath = "/MyProject/library/"

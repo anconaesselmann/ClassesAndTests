@@ -2,13 +2,13 @@ import unittest
 import os
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
-    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
+    sys.path.append(path.abspath(path.join(__file__, "..", "..")))
 
-from classes_and_tests.src.MirroredDirectory import MirroredDirectory
-from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
+from src.MirroredDirectory import MirroredDirectory
+from src.mocking.MockFileManipulator import MockFileManipulator
 
 class MirroredDirectoryTest(unittest.TestCase):
-    
+
     def test___init__(self):
         aPath = os.path.join("a", "path", "to", "a", "file.php")
         obj = MirroredDirectory(aPath)
@@ -22,7 +22,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         md.fileManipulator = mockFileManipulator
         result = md._getExistingFileDir("")
         self.assertEqual(aPath, result)
-    
+
     def test__getExistingFileDir_get_test_file(self):
         aFileName = os.path.join("a", "path", "to", "a", "file.php")
         aTestFileName = os.path.join("a", "pathTest", "to", "a", "file.php")
@@ -34,7 +34,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         md.fileManipulator = mockFileManipulator
         result = md._getExistingFileDir("Test")
         self.assertEqual(aPath, result)
-       
+
     #horribly messy, since my mock file createor is absolutely DUMB!!!
     def test__getExistingFileDir_get_test_file_multiple_test_folders(self):
         aFileName = os.path.join("a", "path", "to", "a", "file.php")
@@ -49,7 +49,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         md.fileManipulator = mockFileManipulator
         result = md._getExistingFileDir("Test")
         self.assertEqual(aPath, result)
-    
+
     def test_getToggledFileName_class_to_test(self):
         aFileName = os.path.join("a", "path", "to", "a", "file.php")
         aTestFileName = os.path.join("a", "pathTest", "to", "a", "fileTest.php")
@@ -62,7 +62,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         result = md.getToggledFileName();
 
         self.assertEqual(aTestFileName, result)
-    
+
     def test_getToggledFileName_test_to_class(self):
         aFileName = os.path.join("a", "path", "to", "a", "file.php")
         aTestFileName = os.path.join("a", "pathTest", "to", "a", "fileTest.php")
@@ -189,10 +189,10 @@ class MirroredDirectoryTest(unittest.TestCase):
 
         self.assertEqual(expectedPath, result)
         self.assertEqual(MirroredDirectory.KIND_IS_TEST, resultKind)
-    
+
     def test_setKind_retain_base_path(self):
         aPath = "/MyProject/library/aae/mvc/Controller.php"
-        testDir = "/MyProject/library/aaeTest" 
+        testDir = "/MyProject/library/aaeTest"
         basePath = "/MyProject/library"
         expectedPath = "/MyProject/library/aaeTest/mvc/ControllerTest.php"
         mockFileManipulator = MockFileManipulator()
@@ -226,7 +226,7 @@ class MirroredDirectoryTest(unittest.TestCase):
         result = md.getBasePath()
 
         self.assertEqual(expected, result)
-        
+
     def test_getRelativeFileName(self):
         expected = os.path.join("mvc", "Controller.php")
         md = self._getInstance()
@@ -249,7 +249,7 @@ class MirroredDirectoryTest(unittest.TestCase):
     def test_setDefaultExtension_call_set_after_setting_default_file_extension(self):
         aPath = "/Some/Thing/Completely/different.php"
         anotherPath = "/MyProject/library/aae/mvc/Controller"
-        
+
         defaultFileExtension = "php"
         expected = "/MyProject/library/aae/mvc/Controller.php"
         md = MirroredDirectory(aPath)
@@ -260,6 +260,6 @@ class MirroredDirectoryTest(unittest.TestCase):
         result = md.getOriginalFileName()
 
         self.assertEqual(expected, result)
-    
+
 if __name__ == '__main__':
     unittest.main()

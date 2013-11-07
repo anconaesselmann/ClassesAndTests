@@ -2,9 +2,9 @@ import unittest
 import os
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
-    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "..")))
+    sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
 
-from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
+from src.mocking.MockFileManipulator import MockFileManipulator
 
 class MockFileManipulatorTest(unittest.TestCase):
 	def test___init__(self):

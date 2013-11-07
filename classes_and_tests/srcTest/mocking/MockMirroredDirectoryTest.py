@@ -3,11 +3,12 @@ if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.abspath(path.join(__file__, "..", "..", "..")))
 
-from classes_and_tests.src.Importer import Importer
+from src.mocking.MockMirroredDirectory import MockMirroredDirectory
 
-class ImporterTest(unittest.TestCase):
+class MockMirroredDirectoryTest(unittest.TestCase):
 	def test___init__(self):
-		obj = Importer()
+		obj = MockMirroredDirectory()
+
 
 
 if __name__ == '__main__':
