@@ -9,4 +9,7 @@ class WindowCommand():
 class TextCommand():
     def __init__(self):
         pass
-    
+
+class EventListener():
+    def __init__(self):
+        pass

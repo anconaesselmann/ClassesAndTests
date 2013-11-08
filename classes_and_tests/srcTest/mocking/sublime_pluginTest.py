@@ -13,6 +13,9 @@ class TextCommandTest(unittest.TestCase):
 	def test___init__(self):
 		obj = TextCommand()
 
+class EventListenerTest(unittest.TestCase):
+	def test___init__(self):
+		obj = EventListener()
 
 if __name__ == '__main__':
     unittest.main()
