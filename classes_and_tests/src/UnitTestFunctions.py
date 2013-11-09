@@ -36,6 +36,10 @@ class UnitTestFunctions:
                 md = MirroredDirectory(viewFileName)
                 classFileName = md.getFileName()
                 testFileName = md.getTestFileName()
+                print(classFileName)
+                print(testFileName)
+                print(path.isfile(classFileName))
+                print(path.isfile(testFileName))
                 if path.isfile(classFileName) and path.isfile(testFileName):
                     result = True
         return result
@@ -43,11 +47,14 @@ class UnitTestFunctions:
     @staticmethod
     def bringViewsToFront(window, view, openingFilesAllowed=True):
         if not UnitTestFunctions.classHasTest(view):
+            if DEBUG: print("UnitTestFunctions: file does not have a complement.")
             return
         fileNameActiveView = view.file_name()
         md = MirroredDirectory(fileNameActiveView)
         classFileName = md.getFileName()
         testFileName = md.getTestFileName()
+        print(classFileName)
+        print(testFileName)
 
         if fileNameActiveView == classFileName:
             fileNameInactiveView = testFileName

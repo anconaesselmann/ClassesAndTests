@@ -5,10 +5,12 @@
 import os
 import sys
 
-try:
+"""try:
     from .Std import Std
 except ImportError:
-    from ..Std import Std
+    from ..Std import Std"""
+
+from MockFileSystem import *
 
 DEBUG = True
 
