@@ -1,5 +1,12 @@
 import os
 
+import sys
+print sys.version_info
+if sys.version_info < (3, ):
+    from orderedDict import OrderedDict
+else:
+    from collections import OrderedDict
+
 DEBUG = False
 
 try:
@@ -21,116 +28,91 @@ class MirroredDirectory():
         self.fileManipulator = FileManipulator()
         self.fileComponents = FileComponents(None)
 
-    def __init__(self, fileName=""):
+    def __init__(self, fileName=None):
+        self._kindDict = OrderedDict([
+            ("db_Test", ["_db_test", "DB_Test"]),
+            ("test", ["_test", "Test"])
+        ])
         self._initializeDependencies()
-        self.set(fileName)
+        if fileName is not None:
+            self.set(fileName)
 
     def set(self, fileName):
-        self.fileComponents.set(fileName)
-        self._determineKind(self.fileComponents.getFile())
+        kind = self._determineKind(fileName)
+        self.setKind(kind)
+        classFileName = self._scrubPath(fileName, kind)
+        self.fileComponents.set(classFileName)
+        self._discoverBasePath()
 
     def setDefaultExtension(self, fileExtension):
         self.fileComponents.setDefaultExtension(fileExtension)
-        self._determineKind(self.fileComponents.getFile())
+    
+    # returns the file name without extension or path
+    def getFile(self):
+        return self.fileComponents.getFile() + "." + self.getExtension()
 
-    def setBasePath(self, basePath):
-        self.fileComponents.setBasePath(basePath)
+    # returns the Test file name without extension or path
+    def getTestFile(self):
+        return self.fileComponents.getFile() + "Test" + "." + self.getExtension()
 
+    # returns the file extension without leading period
     def getExtension(self):
         return self.fileComponents.getExtension()
 
-    def getKind(self):
-        return self._kind
-
-    def setKind(self, kind):
-        basePath = self.getBasePath()
-        if kind == self.KIND_IS_CLASS:
-            newFile = self.getFileName()
-        elif kind == self.KIND_IS_TEST:
-            newFile = self.getTestFileName()
-        elif kind == self.KIND_IS_DB_TEST:
-            newFile = self.getDBTestFileName()
-        else:
-            raise Exception("Unknown kind")
-        self.set(newFile)
-        self.setBasePath(basePath)
-        
-    def getFile(self):
-        return self._getCleanFileName()
-
-    #def getTestFile(self):
-    #    return self.fileComponents.getFile()
-
+    # returns true if instance is a file
     def isFile(self):
         return self.fileComponents.isFile()
 
     def getFileDir(self):
-        fileDir = self.fileComponents.getDir()
-        if fileDir is None:
-            return None
-        folders = Std.dirExplode(fileDir)
-        tempFolders = []
-        for folder in folders:
-            if folder[-7:] == "DB_Test":
-                folder = folder[0:-7]
-            elif folder[-4:] == "Test":
-                folder = folder[0:-4]
-
-            tempFolders.append(folder)
-        return Std.dirImplode(tempFolders)
+        return self.fileComponents.getDir()
 
     def getTestFileDir(self):
-        return self._getExistingFileDir("Test")
-
-        """
+        searchTerm = "Test"
         basePath = self.getBasePath()
-        if basePath is not None:
-            possibleTestDir = basePath + "Test"
-            if self.fileManipulator.isdir(possibleTestDir):
-                print("TestFolder Exists")
-                print cleanFileName
-                cleanFileName = os.path.join(possibleTestDir, cleanFileName[len(basePath):])
-                print cleanFileName
-        """
+        relativePath = self.getRelativePath()
+        if basePath is not None and relativePath is not None:
+            return os.path.join(basePath + searchTerm, relativePath)
+        else:
+            return self.getFileDir()
 
     def getDBTestFileDir(self):
-        return self._getExistingFileDir("DB_Test")
-
-
-    def getFileName(self):
-        cleanFileName = self._getCleanFileName()
-        if cleanFileName is None:
-            return None
-        fileName = cleanFileName + "." + self.fileComponents.getExtension()
-        return os.path.join(self.getFileDir(), fileName)
-
-    def getRelativeFileName(self):
-        result = self.fileComponents.getRelativeFileName()
-        if result is None:
-            self._discoverBasePath()
-            result = self.fileComponents.getRelativeFileName()
-        return result 
+        searchTerm = "DB_Test"
+        basePath = self.getBasePath()
+        relativePath = self.getRelativePath()
+        if basePath is not None and relativePath is not None:
+            return os.path.join(basePath + searchTerm, relativePath)
+        else:
+            return self.getFileDir()
 
     def getRelativePath(self):
-        result = self.fileComponents.getRelativePath()
-        if result is None:
-            self._discoverBasePath()
-            result = self.fileComponents.getRelativePath()
-        return result 
+        return self.fileComponents.getRelativePath()
+
+    def getFileName(self):
+        return self.fileComponents.getFileName()
 
     def getTestFileName(self):
-        cleanFileName = self._getCleanFileName()
-        if cleanFileName is None:
-            return None
-        fileName = cleanFileName + "Test." + self.fileComponents.getExtension()
-        return os.path.join(self.getTestFileDir(), fileName)
+        searchTerm = "Test"
+        testDir = self.getTestFileDir()
+        if testDir is not None:
+            return os.path.join(testDir, self.fileComponents.getFile() + searchTerm + "." + self.fileComponents.getExtension())
+        else: return None
 
     def getDBTestFileName(self):
-        fileName = self._getCleanFileName() + "DB_Test." + self.fileComponents.getExtension()
-        return os.path.join(self.getDBTestFileDir(), fileName)
-
+        searchTerm = "DB_Test"
+        testDir = self.getDBTestFileDir()
+        if testDir is not None:
+            return os.path.join(testDir, self.fileComponents.getFile() + searchTerm + "." + self.fileComponents.getExtension())
+        else: return None
+    
     def getOriginalFileName(self):
-        return self.fileComponents.getFileName()
+        if self._kind == self.KIND_IS_CLASS:
+            return self.getFileName()
+        elif self._kind == self.KIND_IS_TEST:
+            return self.getTestFileName()
+        elif self._kind == self.KIND_IS_DB_TEST:
+            return self.getDbFileName()
+        else:
+            raise Exception("Unknown file type")
 
     def getToggledDir(self):
         if self._kind == self.KIND_IS_CLASS:
@@ -152,151 +134,8 @@ class MirroredDirectory():
         else:
             raise Exception("Unknown file type")
 
-
-    def _getExistingFileDir(self, searchTerm):
-        basePath = self.getBasePath()
-        relativePath = self.getRelativePath()
-        if basePath is not None:
-            tempPath = os.path.join(basePath + searchTerm, relativePath)
-            return tempPath
-            
-        #print("- " + str(basePath))
-        #print("- " + str(relativePath))
-        #print("- " + self.fileComponents.getDir())
-        return self.fileComponents.getDir() 
-
-        """folders = Std.dirExplode(self.fileComponents.getDir())
-        tailFolders = []
-        while len(folders) > 0:
-            lastFolder = folders.pop()
-            tempDir = os.path.join(Std.dirImplode(folders), lastFolder + searchTerm)
-            if self.fileManipulator.isdir(tempDir):
-                if len(tailFolders) > 0:
-                    tailFolders.reverse()
-                    tail = Std.dirImplode(tailFolders)
-                    result = os.path.join(tempDir, tail)
-                else:
-                    result = tempDir
-                return result
-            tailFolders.append(lastFolder)
-        return self.fileComponents.getDir()"""
-
-
-    def _determineKind(self, fileName):
-        if fileName != None:
-            fileName, fileExtension = os.path.splitext(fileName)
-            if self._isDB_Test(fileName):
-                self._kind = self.KIND_IS_DB_TEST
-            elif self._isTest(fileName):
-                self._kind = self.KIND_IS_TEST
-            else:
-                self._kind = self.KIND_IS_CLASS
-        else:
-            self._kind = None
-
-    def _getCleanFileName(self):
-        if self.fileComponents.getFile() is None:
-            return None
-        if self._kind == self.KIND_IS_CLASS:
-            return self.fileComponents.getFile()
-        else:
-            return self.fileComponents.getFile()[:-len(self._kind)]
-
-    def _isTest(self, fileName):
-        result = False
-        temp = fileName[-4:]
-        if temp == "Test":
-            result = True
-        return result
-
-    def _isDB_Test(self, fileName):
-        result = False
-        temp = fileName[-7:]
-        if temp == "DB_Test":
-            result = True
-        return result
-
-    def _discoverBasePathFromClassFile(self, aPath, searchTerm):
-        #print("fromClass: " + aPath)
-        folders = Std.dirExplode(aPath)
-        result = False
-        while len(folders) > 0:
-            tempDir = Std.dirImplode(folders) + searchTerm
-            if self.fileManipulator.isdir(tempDir):
-                if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
-                result = Std.dirImplode(folders)
-                break
-            currentFolder = folders.pop()
-        #print("returning: " + str(result))
-        return result  
-
-    def _discoverBasePathFromTestFile(self, aPath, searchTerm):
-        #print("fromTest: " + aPath)
-        folders = Std.dirExplode(aPath)
-        result = False
-        for i in range(len(folders)):
-            currentFolder = folders[i]
-            if len(currentFolder) > len(searchTerm):
-                ending = currentFolder[-len(searchTerm):]
-                if ending == searchTerm:
-                    folders[i] = currentFolder[:-len(searchTerm)]
-
-        aNewPath = Std.dirImplode(folders)
-        #print ("aNewPath: " + aNewPath)
-        result = self._discoverBasePathFromClassFile(aNewPath, searchTerm)
-        if result:
-            result += searchTerm
-        print (result)
-        return result
-
-        """while len(folders) > 0:
-            currentFolder = folders.pop()
-            if currentFolder[-len(searchTerm):] == searchTerm:
-                tempDir = os.path.join(Std.dirImplode(folders), currentFolder[:-4])
-                if self.fileManipulator.isdir(tempDir):
-                    if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
-                    result = tempDir + searchTerm
-                    break
-        if not result and DEBUG: print("MirroredDirectory: base Path could not be discovered from test file")
-        return result"""
-
-    def _discoverBasePath(self):
-        if not self.fileComponents.pathIsAbsolute(): return
-        searchTerm = "Test"
-
-        #print("dir: " + self.fileComponents.getDir())
-        result = self._discoverBasePathFromClassFile(self.fileComponents.getDir(), searchTerm)
-        if not result:
-            if DEBUG: print("MirroredDirectory: base Path could not be discovered from Class file.")
-            result = self._discoverBasePathFromTestFile(self.fileComponents.getDir(), searchTerm)
-        if not result:
-            if DEBUG: print("MirroredDirectory: base Path could not be discovered") 
-        else:
-            self.setBasePath(result)
-
-        """
-        folders = Std.dirExplode(self.fileComponents.getDir())
-        result = False
-        while len(folders) > 0:
-            # Class files
-            tempDir = Std.dirImplode(folders) + searchTerm
-            if self.fileManipulator.isdir(tempDir):
-                if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
-                result = Std.dirImplode(folders)
-                break
-            currentFolder = folders.pop()
-            # Test files
-            if currentFolder[-len(searchTerm):] == searchTerm:
-                tempDir = os.path.join(Std.dirImplode(folders), currentFolder[:-4])
-                if self.fileManipulator.isdir(tempDir):
-                    if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
-                    result = tempDir + searchTerm
-                    break
-        if result is not False:
-            self.setBasePath(result)
-        else:
-            if DEBUG: print("MirroredDirectory: base Path could not be discovered")  """
-
+    def setBasePath(self, basePath):
+        self.fileComponents.setBasePath(basePath)
 
     def getBasePath(self):
         result = self.fileComponents.getBasePath()
@@ -304,3 +143,64 @@ class MirroredDirectory():
             self._discoverBasePath()
             result = self.fileComponents.getBasePath()
         return result
+
+    def getRelativeFileName(self):
+        result = self.fileComponents.getRelativeFileName()
+        if result is None:
+            self._discoverBasePath()
+            result = self.fileComponents.getRelativeFileName()
+        return result 
+
+    def setKind(self, kind):
+        self._kind = kind
+
+    def getKind(self):
+        return self._kind
+
+    def _discoverBasePathFromClassFile(self, aPath, searchTerm):
+        folders = Std.dirExplode(aPath)
+        result = False
+        while len(folders) > 0:
+            tempDir = Std.dirImplode(folders) + searchTerm
+            if self.fileManipulator.isdir(tempDir):
+                if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
+                result = Std.dirImplode(folders)
+                break
+            currentFolder = folders.pop()
+        return result 
+
+    def _discoverBasePath(self):
+        if not self.fileComponents.pathIsAbsolute(): return
+        searchTerm = "Test"
+        result = self._discoverBasePathFromClassFile(self.fileComponents.getDir(), searchTerm)
+        if not result:
+            if DEBUG: print("MirroredDirectory: base Path could not be discovered.")
+        else:
+            self.setBasePath(result)
+
+    def _determineKind(self, fileName):
+        result = MirroredDirectory.KIND_IS_CLASS
+        fileName, ext = os.path.splitext(fileName)
+        for kind, endings in Std.getIterItems(self._kindDict):
+            for ending in endings:
+                endingLen = len(ending)
+                if len(fileName) > endingLen:
+                    if fileName[-endingLen:] == ending:
+                        result = kind
+                        return result
+        return result
+
+    def _scrubPath(self, aPath, kind):
+        if kind == MirroredDirectory.KIND_IS_CLASS:
+            return aPath
+        fileName, ext = os.path.splitext(aPath)
+        folders = Std.dirExplode(fileName)
+        result = False
+        for searchTerm in self._kindDict[kind]:
+            for i in range(len(folders)):
+                currentFolder = folders[i]
+                if len(currentFolder) > len(searchTerm):
+                    ending = currentFolder[-len(searchTerm):]
+                    if ending == searchTerm:
+                        folders[i] = currentFolder[:-len(searchTerm)]
+        return Std.dirImplode(folders) + ext

@@ -41,9 +41,9 @@ class UnitTestHelpers:
 class MockPHPFunctionCollectionObject(object):
     def get_php_namespace(self, args):
         expected = {'command': 'get_php_namespace',
-                    'dir': '/MyProject/library/aae/mvc/Controller.php',
+                    'dir': '/MyProject1/library/aae/mvc/Controller.php',
                     'name': 'namespace',
-                    'settings': "{'base_path': '/MyProject/library'}"}
+                    'settings': "{'base_path': '/MyProject1/library'}"}
         if UnitTestHelpers.dictIsEqual(expected, args):
             return "aae\\mvc"
         else:
@@ -51,7 +51,7 @@ class MockPHPFunctionCollectionObject(object):
 
     def get_class_name(self, args):
         expected = {'command': 'get_class_name',
-                    'dir': '/MyProject/library/aae/mvc/Controller.php',
+                    'dir': '/MyProject1/library/aae/mvc/Controller.php',
                     'name': 'class_name',
                     'settings': '{}'}
         if UnitTestHelpers.dictIsEqual(expected, args):
@@ -62,7 +62,7 @@ class MockPHPFunctionCollectionObject(object):
     def get_doc_block_tag(self, args):
         if args["name"] == "author":
             expected = {'command': 'get_doc_block_tag',
-                        'dir': '/MyProject/library/aae/mvc/Controller.php',
+                        'dir': '/MyProject1/library/aae/mvc/Controller.php',
                         'name': 'author',
                         'settings': "{'author': 'Axel'}"}
             if UnitTestHelpers.dictIsEqual(expected, args):
@@ -71,7 +71,7 @@ class MockPHPFunctionCollectionObject(object):
                 return "ERROR"
         elif args["name"] == "license":
             expected = {'command': 'get_doc_block_tag',
-                        'dir': '/MyProject/library/aae/mvc/Controller.php',
+                        'dir': '/MyProject1/library/aae/mvc/Controller.php',
                         'name': 'license',
                         'settings': "{'license': None}"}
             if UnitTestHelpers.dictIsEqual(expected, args):
@@ -95,7 +95,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
     def _getSettings(self):
         settings = MockSettings()
         settings.set("author", "Axel")
-        settings.set("base_path", "/MyProject/library")
+        settings.set("base_path", "/MyProject1/library")
         settings.set("license", None)
 
         return settings
@@ -125,33 +125,33 @@ class TemplateFileCreatorTest(unittest.TestCase):
         obj = TemplateFileCreator(aPath)
 
     def test_getArgsDictFromVarContent_could_not_be_evaluated_exception(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        basePath = "/MyProject/library"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        basePath = "/MyProject1/library"
         variableContent = None
 
         fc = TemplateFileCreator(aPath)
         self.assertRaises(TypeError, lambda: fc.getArgsDictFromVarContent(variableContent))
 
     def test_getArgsDictFromVarContent(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        basePath = "/MyProject/library"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        basePath = "/MyProject1/library"
         variableContent = "[\n    {\n        \"variable\": \"namespace\",\n        \"command\": \"get_php_namespace\",\n        \"fromSettings\": [\"base_path\"]\n    },\n    {\n        \"variable\": \"class_name\",\n        \"command\": \"get_class_name\"\n    },\n    {\n        \"variable\": \"author\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"author\"]\n    },\n    {\n        \"variable\": \"license\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"license\"]\n    }\n]"
         expected = {'author': {'command': 'get_doc_block_tag',
-                               'dir': '/MyProject/library/aae/mvc/Controller.php',
+                               'dir': '/MyProject1/library/aae/mvc/Controller.php',
                                'name': 'author',
                                'settings': "{'author': 'Axel'}"},
                     'class_name': {'command': 'get_class_name',
-                                   'dir': '/MyProject/library/aae/mvc/Controller.php',
+                                   'dir': '/MyProject1/library/aae/mvc/Controller.php',
                                    'name': 'class_name',
                                    'settings': '{}'},
                     'license': {'command': 'get_doc_block_tag',
-                                'dir': '/MyProject/library/aae/mvc/Controller.php',
+                                'dir': '/MyProject1/library/aae/mvc/Controller.php',
                                 'name': 'license',
                                 'settings': "{'license': None}"},
                     'namespace': {'command': 'get_php_namespace',
-                                  'dir': '/MyProject/library/aae/mvc/Controller.php',
+                                  'dir': '/MyProject1/library/aae/mvc/Controller.php',
                                   'name': 'namespace',
-                                  'settings': "{'base_path': '/MyProject/library'}"}}
+                                  'settings': "{'base_path': '/MyProject1/library'}"}}
         self.maxDiff = None
         fc = TemplateFileCreator(aPath)
         fc.setBasePath(basePath)
@@ -161,7 +161,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_getCursorsFromContent_one_cursor(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         templateContent = "<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n     * /* @license */\n     * @package /* @namespace */\n     */\n    class /* @class_name */ {\n        Before/* @cursor */After\n    }\n}"
         expected = [(11, 14)]
         fc = TemplateFileCreator(aPath)
@@ -171,7 +171,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
 
 
     def test_getCursorsFromContent_multiple_cursors(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         templateContent = "/* @cursor */<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n/* @cursor */     * /* @license */\n    /* @cursor */ * @package /* @namespace */\n     */\n    class /* @class_name */ {\n        /* @cursor */\n    }\n}/* @cursor */"
         expected = [(0, 0), (7, 0), (8, 4), (11, 8), (13, 1)]
         fc = TemplateFileCreator(aPath)
@@ -180,7 +180,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_getCursorsFromContent_multiple_cursors_in_same_line(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         templateContent = "<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n     * /* @license */\n     * @package /* @namespace */\n     */\n    class /* @class_name */ {\n/* @cursor */123456789/* @cursor */\n    }\n}"
         expected = [(11, 0), (11, 9)]
         fc = TemplateFileCreator(aPath)
@@ -189,7 +189,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_getCursorsFromContent_no_cursors(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         templateContent = "<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n     * /* @license */\n     * @package /* @namespace */\n     */\n    class /* @class_name */ {\n        \n    }\n}"
         expected = []
         fc = TemplateFileCreator(aPath)
@@ -198,7 +198,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_getReplacements_no_class_instance_exception(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         functionCollectionObject = None
         args = {}
 
@@ -206,24 +206,24 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertRaises(Exception, lambda: fc.getReplacements(args, functionCollectionObject))
 
     def test_getReplacements(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        basePath = "/MyProject/library"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        basePath = "/MyProject1/library"
         args = {'author': {'command': 'get_doc_block_tag',
-                           'dir': '/MyProject/library/aae/mvc/Controller.php',
+                           'dir': '/MyProject1/library/aae/mvc/Controller.php',
                            'name': 'author',
                            'settings': "{'author': 'Axel'}"},
                 'class_name': {'command': 'get_class_name',
-                               'dir': '/MyProject/library/aae/mvc/Controller.php',
+                               'dir': '/MyProject1/library/aae/mvc/Controller.php',
                                'name': 'class_name',
                                'settings': '{}'},
                 'license': {'command': 'get_doc_block_tag',
-                            'dir': '/MyProject/library/aae/mvc/Controller.php',
+                            'dir': '/MyProject1/library/aae/mvc/Controller.php',
                             'name': 'license',
                             'settings': "{'license': None}"},
                 'namespace': {'command': 'get_php_namespace',
-                              'dir': '/MyProject/library/aae/mvc/Controller.php',
+                              'dir': '/MyProject1/library/aae/mvc/Controller.php',
                               'name': 'namespace',
-                              'settings': "{'base_path': '/MyProject/library'}"}}
+                              'settings': "{'base_path': '/MyProject1/library'}"}}
         functionCollectionObject = MockPHPFunctionCollectionObject()
         expected = {'/* @author */': '@author Axel',
                     '/* @class_name */': 'MockedClassSuccess',
@@ -238,8 +238,8 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_getReplacedContent_for_php_class(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        basePath = "/MyProject/library"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        basePath = "/MyProject1/library"
         templateContent = "<?php\n/**\n *\n */\nnamespace /* @namespace */ {\n    /**\n     * /* @author */\n     * /* @license */\n     * @package /* @namespace */\n     */\n    class /* @class_name */ {\n        /* @cursor */\n    }\n}"
         variableContent = "[\n    {\n        \"variable\": \"namespace\",\n        \"command\": \"get_php_namespace\",\n        \"fromSettings\": [\"base_path\"]\n    },\n    {\n        \"variable\": \"class_name\",\n        \"command\": \"get_class_name\"\n    },\n    {\n        \"variable\": \"author\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"author\"]\n    },\n    {\n        \"variable\": \"license\",\n        \"command\": \"get_doc_block_tag\",\n        \"fromSettings\": [\"license\"]\n    }\n]"
         functionCollectionObject = MockPHPFunctionCollectionObject()
@@ -255,7 +255,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expectedCursorPos, resultCursorPos)
 
     def test_set_and_getTemplateDir(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
         templateDir = path.join("Path", "to", "Templates")
 
@@ -264,15 +264,15 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(templateDir, result)
 
     def test_classifyKind(self):
-    	aPath = "/MyProject/library/aae/mvc/Controller.php"
+    	aPath = "/MyProject1/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
         expectedKind = "class"
         result = fc.classifyKind()
         self.assertEqual(expectedKind, result)
 
     def test_createFromTemplate(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        basePath = "/MyProject/library"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        basePath = "/MyProject1/library"
         templateDir = "/Users/axelesselmann/Documents/Dropbox/python/sublimePackages/ClassesAndTests/templates"
         templateFileDir = os.path.join(templateDir, "php", "class.template")
         variableFileDir = os.path.join(templateDir, "php", "class.variables")
@@ -295,7 +295,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(True, result)
 
     def test_determine_kind_with_default_extension(self):
-        aPath = "/MyProject/library/aae/mvc/Controller"
+        aPath = "/MyProject1/library/aae/mvc/Controller"
         defaultFileExtension = "php"
         expectedKind = "class"
 
@@ -307,8 +307,8 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expectedKind, result)
 
     def test_setKind(self):
-        aPath = "/MyProject/library/aae/mvc/Controller.php"
-        expectedPath = "/MyProject/library/aae/mvc/ControllerTest.php"
+        aPath = "/MyProject1/library/aae/mvc/Controller.php"
+        expectedPath = "/MyProject1/library/aae/mvc/ControllerTest.php"
         fc = TemplateFileCreator(aPath)
         fc._fileComponents.fileManipulator = MockFileManipulator()
         fc.setKind(MirroredDirectory.KIND_IS_TEST)
@@ -317,9 +317,9 @@ class TemplateFileCreatorTest(unittest.TestCase):
         self.assertEqual(expectedPath, result)
 
     def test_setDefaultExtension(self):
-        aPath = "/MyProject/library/aae/mvc/Controller"
+        aPath = "/MyProject1/library/aae/mvc/Controller"
         defaultFileExtension = "php"
-        expected = "/MyProject/library/aae/mvc/Controller.php"
+        expected = "/MyProject1/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
         fc.setDefaultExtension(defaultFileExtension)
 
@@ -329,10 +329,10 @@ class TemplateFileCreatorTest(unittest.TestCase):
 
     def test_setDefaultExtension_call_set_after_setting_default_file_extension(self):
         aPath = "/Some/Thing/Completely/different.php"
-        anotherPath = "/MyProject/library/aae/mvc/Controller"
+        anotherPath = "/MyProject1/library/aae/mvc/Controller"
 
         defaultFileExtension = "php"
-        expected = "/MyProject/library/aae/mvc/Controller.php"
+        expected = "/MyProject1/library/aae/mvc/Controller.php"
         fc = TemplateFileCreator(aPath)
         fc.setDefaultExtension(defaultFileExtension)
 
