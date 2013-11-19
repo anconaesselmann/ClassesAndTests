@@ -19,7 +19,7 @@ except ImportError:
 
 class UserSettingsSetter():
     def __init__(self, window, fileName, userInput, userInputCaption):
-    	self.window = window
+        self.window = window
         self.fileSystem = FileSystem()
         self.fileName = fileName
         self.userInput = userInput
@@ -29,7 +29,7 @@ class UserSettingsSetter():
         self.setUserSettings()
 
     def setCallbackWhenFinished(self, callback):
-    	self.callback = callback
+        self.callback = callback
     
     def setUserSettings(self):
         self.userSettings = UserSettings(self.fileName, self.fileSystem)
@@ -65,7 +65,7 @@ class UserSettingsSetter():
             view.erase_status("InputPanel")
 
             if self.callback is not None:
-            	sublime.set_timeout(lambda: self.callback(), 100)
+                sublime.set_timeout(lambda: self.callback(), 100)
 
     def settingEnteringChange(self, command_string):
         view = self.window.active_view()
