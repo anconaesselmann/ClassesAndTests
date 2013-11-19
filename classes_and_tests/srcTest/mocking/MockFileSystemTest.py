@@ -219,7 +219,36 @@ class MockFileSystemTest(unittest.TestCase):
 
     	result = mfs.getFileContent(aFileName)
 
-    	self.assertEqual(fileContent, result)    	
+    	self.assertEqual(fileContent, result)    
 
+    def test_remove_removing_existing_folder(self):
+        mfs = MockFileSystem()
+        aFolder = path.join(os.sep, "Folder1", "Folder2", "Folder3")
+        aFolderToBeRemoved = path.join(os.sep, "Folder1", "Folder2")
+        folderStillExists = path.join(os.sep, "Folder1")
+
+        mfs.createFolder(aFolder)
+        created = mfs.isdir(aFolder)
+
+        self.assertEqual(True, created)
+
+        removedResult = mfs.remove(aFolderToBeRemoved)
+
+        removed1 = mfs.isdir(aFolderToBeRemoved)
+        removed2 = mfs.isdir(aFolder)
+        stillExists = mfs.isdir(folderStillExists)
+
+        self.assertEqual(False, removed1)
+        self.assertEqual(False, removed2)
+        self.assertEqual(True, stillExists)
+        self.assertEqual(True, removedResult)
+
+    def test_remove_removing_non_existing_folder(self):
+        mfs = MockFileSystem()
+        aFolderToBeRemoved = path.join(os.sep, "Folder1", "Folder2")
+        
+        removedResult = mfs.remove(aFolderToBeRemoved)
+
+        self.assertEqual(False, removedResult)
 if __name__ == '__main__':
     unittest.main()

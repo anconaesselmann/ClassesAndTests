@@ -34,12 +34,12 @@ def plugin_loaded():
     TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
-    from src.FileManipulator import FileManipulator
+    from src.FileSystem import FileSystem
     from src.MirroredDirectory import MirroredDirectory
     from src.SublimeWindowManipulator import SublimeWindowManipulator
     from src.TemplateFileCreator import TemplateFileCreator
 except ImportError:
-    from .src.FileManipulator import FileManipulator
+    from .src.FileSystem import FileSystem
     from .src.MirroredDirectory import MirroredDirectory
     from .src.SublimeWindowManipulator import SublimeWindowManipulator
     from .src.TemplateFileCreator import TemplateFileCreator
@@ -53,8 +53,8 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
         # allows for unit testing by injecting a mocked instances of dependencies
         if not hasattr(self, "sublime"):
             self.sublime = sublime
-        if not hasattr(self, "fileManipulator"):
-            self.fileManipulator = FileManipulator()
+        if not hasattr(self, "fileSystem"):
+            self.fileSystem = FileSystem()
         if not hasattr(self, "settings"):
             self.settings = settings
         if not hasattr(self, "templatesDir"):
@@ -104,7 +104,7 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
     def getFileDirAndCursors(self, fileDir):
         cursors = [(0, 0)]
         if fileDir is not None:
-            fileExists = self.fileManipulator.isfile(fileDir)
+            fileExists = self.fileSystem.isfile(fileDir)
             if fileExists != True:
                 if DEBUG: print("TSTC: creating file: " + fileDir)
                 self.templateFileCreator.set(fileDir)
@@ -130,7 +130,7 @@ class ToggleSourcesTestsCommand(sublime_plugin.WindowCommand):
 
     def toggleFileName(self, fileName):
         md = MirroredDirectory(fileName)
-        md.fileManipulator = self.fileManipulator
+        md.fileSystem = self.fileSystem
         return md.getToggledFileName()
 
     def getCurrentFileName(self):

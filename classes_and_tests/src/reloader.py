@@ -33,7 +33,7 @@ mods_load_order = [
     '.src.MirroredDirectory',
     '.src.Command',
     #'.src.FileManipulation',
-    '.src.FileManipulator',
+    '.src.FileSystem',
     #'.src.FileCreator',
     '.src.TemplateFileCreator',
     '.src.CommandExecutionThread',

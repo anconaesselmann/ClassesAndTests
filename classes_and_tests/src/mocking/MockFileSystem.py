@@ -103,7 +103,19 @@ class MockFileSystem():
     		else:
     			raise Exception("Folder should exist or should have been created....")
         return result
+
+    def replaceFile(self, aPath, content):
+        self.remove(aPath)
+        return self.createFile(aPath, content)
     
+    def remove(self, fileName):
+        aPath, aFileName = os.path.split(fileName)
+        if not self.isdir(aPath):
+            return False
+        parentFolder = self._getFolder(aPath)
+        del parentFolder[aFileName]
+        return not self.isfile(fileName)
+
     def printTree(self):
     	print(self.root)
 

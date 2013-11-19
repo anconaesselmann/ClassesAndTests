@@ -7,7 +7,7 @@ import sys
 
 DEBUG = True
 
-class FileManipulator():
+class FileSystem():
     def __init__(self):
         pass
 
@@ -20,7 +20,7 @@ class FileManipulator():
 
     @staticmethod
     def createFile(filePath, content):
-        FileManipulator.createFolder(filePath)
+        FileSystem.createFolder(filePath)
         if not os.path.exists(filePath):
             newFile = open(filePath, "wb")
             if sys.version_info >= (3, 0):
@@ -28,17 +28,17 @@ class FileManipulator():
             else:
                 newFile.write(content);
             newFile.close()
-            if DEBUG: print("FileManipulator: Created file " + filePath)
+            if DEBUG: print("FileSystem: Created file " + filePath)
             return True
         else:
-            if DEBUG: print("FileManipulator: File " + filePath + " exists.")
+            if DEBUG: print("FileSystem: File " + filePath + " exists.")
         return False
 
     @staticmethod
     def replaceFile(fileDir, content):
         if os.path.isfile(fileDir):
             os.remove(fileDir)
-        FileManipulator.createFile(fileDir, content)
+        return FileSystem.createFile(fileDir, content)
 
     @staticmethod
     def createFolder(aPath):
@@ -46,7 +46,7 @@ class FileManipulator():
         if extension != "":
         	folder = os.path.dirname(folder)
         if not os.path.isdir(folder):
-            if DEBUG: print("FileManipulator: Created folder " + folder)
+            if DEBUG: print("FileSystem: Created folder " + folder)
             os.makedirs(folder)
 
     @staticmethod
@@ -56,3 +56,7 @@ class FileManipulator():
     @staticmethod
     def isfile(aPath):
         return os.path.isfile(aPath)
+
+    @staticmethod
+    def remove(aPath):
+        return os.path.remove(aPath)

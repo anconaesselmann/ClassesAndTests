@@ -17,66 +17,60 @@ except ImportError:
     else:
         DEBUG = False
 
-
 def plugin_loaded():
     global settings
     global PACKAGE_DIR
     global TEMPLATES_DIR
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
     PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
-    #PACKAGE_DIR = os.path.join("Packages", PACKAGE_NAME)
     TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
     from src.TemplateFileCreator import TemplateFileCreator
     from src.FileComponents import FileComponents
     from src.InputPanel import InputPanel
-    from src.SublimeWindowFunctions import SublimeWindowFunctions
-    from src.UserSettings import UserSettings
     from src.SublimeWindowManipulator import SublimeWindowManipulator
-    from src.FileManipulator import FileManipulator
+    from src.FileSystem import FileSystem
     from src.MirroredDirectory import MirroredDirectory
     from src.Std import Std
+    from src.UserSettingsSetter import UserSettingsSetter
 except ImportError:
     from .src.TemplateFileCreator import TemplateFileCreator
     from .src.FileComponents import FileComponents
     from .src.InputPanel import InputPanel
-    from .src.SublimeWindowFunctions import SublimeWindowFunctions
-    from .src.UserSettings import UserSettings
     from .src.SublimeWindowManipulator import SublimeWindowManipulator
-    from .src.FileManipulator import FileManipulator
+    from .src.FileSystem import FileSystem
     from .src.MirroredDirectory import MirroredDirectory
     from .src.Std import Std
+    from .src.UserSettingsSetter import UserSettingsSetter
 else:
     plugin_loaded()
 
-
-USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path", "current_php_test_suite_dir"]
-USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter code base directory:", "Enter unit-test-suite directory:"]
-
+USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path"]
+USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter default directory:"]
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
-    def _initializeDependencies(self):
-        # allows for unit testing by injecting a mocked instances of dependencies
-        if not hasattr(self, "sublime"):
-            self.sublime = sublime
-        if not hasattr(self, "settings"):
-            self.settings = settings
-        if not hasattr(self, "windowManipulator"):
-            self.windowManipulator = SublimeWindowManipulator(self.window, settings)
-        if not hasattr(self, "fileManipulator"):
-            self.fileManipulator = FileManipulator()
-        if not hasattr(self, "mirroredDirectory"):
-            self.mirroredDirectory = MirroredDirectory()
-            self.mirroredDirectory.setDefaultExtension(settings.get('default_file_extension'))
-        if not hasattr(self, "templateFileCreator"):
-            self.templateFileCreator = TemplateFileCreator()
-            #self.templateFileCreator.setBasePath(settings.get('base_path'))
-            self.templateFileCreator.setSettings(settings)
-            self.templateFileCreator.setDefaultExtension(settings.get('default_file_extension'))
-            self.templateFileCreator.setTemplateDir(TEMPLATES_DIR)
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
 
+        self.sublime = sublime
+        self.settings = settings
+        self.windowManipulator = SublimeWindowManipulator(self.window, settings)
+        self.fileSystem = FileSystem()
+        self.mirroredDirectory = MirroredDirectory()
+        self.templateFileCreator = TemplateFileCreator()
+
+    def _initializeDependencies(self):
+        self.mirroredDirectory.fileSystem = self.fileSystem
+        self.mirroredDirectory.setDefaultExtension(self.settings.get('default_file_extension'))
+        
         self.splitView = self.settings.get("seperate_tests_and_sources_by_split_view")
+        
+        self.templateFileCreator.fileSystem = self.fileSystem
+        self.templateFileCreator.setSettings(self.settings)
+        self.templateFileCreator.setDefaultExtension(self.settings.get('default_file_extension'))
+        self.templateFileCreator.setTemplateDir(TEMPLATES_DIR
+        #self.templateFileCreator.setBasePath(self.settings.get('base_path')))
 
     def run(self):
         self._initializeDependencies()
@@ -84,10 +78,17 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         userSettingsDir =  os.path.join(sublime.packages_path(), "User", PACKAGE_NAME + ".sublime-settings")
         userSettingsExist = os.path.isfile(userSettingsDir)
         if userSettingsExist != True:
-            self.userSettings = UserSettings(userSettingsDir)
             self.setUserSettings()
         else:
             self.displayNewFilePannel()
+
+    def setUserSettings(self):
+        userSettingsDir = os.path.join(os.path.normpath(sublime.packages_path()), "User", PACKAGE_NAME + ".sublime-settings")
+        userSettingsSetter = UserSettingsSetter(self.window,
+                                                userSettingsDir, 
+                                                USER_SETTINGS_TO_BE_INITIALIZED,
+                                                USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS)
+        userSettingsSetter.setCallbackWhenFinished(self.displayNewFilePannel)
 
     # Unit Tested
     def getCurrentPath(self):
@@ -114,66 +115,6 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         self.inputPanelView.tempInputPanelContent = currentPath
         self.inputPanelView.set_name("InputPanel")
         self.inputPanelView.settings().set("caret_style", "solid")
-
-    def setUserSettings(self):
-#TODO: change to path.join
-        userSettingsDir = os.path.normpath(sublime.packages_path()) + "User/" + PACKAGE_NAME + ".sublime-settings"
-        userSettingsExist = os.path.isfile(userSettingsDir)
-        self.userInput = USER_SETTINGS_TO_BE_INITIALIZED
-        self.userInputResponse = []
-        self.userInputCaption = USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS
-        self.currentInput = 0
-        if userSettingsExist == True:
-            self.captureInput(self.userInputCaption[self.currentInput], "")
-        else:
-            print("Error trying to write to " + userSettingsDir)
-
-    def captureInput(self, caption, initial):
-        if self.currentInput != None:
-            self.inputPanelView = self.window.show_input_panel(
-                caption, initial,
-                self.settingEntered, self.settingEnteringChange, self.settingEnteringAbort
-            )
-            self.inputPanelView.set_name("InputPanel")
-            self.inputPanelView.settings().set("caret_style", "solid")
-            pass
-
-    def settingEntered(self, command_string):
-        self.userInputResponse.append(command_string)
-        self.currentInput += 1
-        if self.currentInput < len(self.userInput):
-            self.captureInput(self.userInputCaption[self.currentInput], "")
-        else:
-            for x in range(0,len(self.userInput)):
-                if len(self.userInputResponse[x]) > 0:
-                    self.userSettings.set(self.userInput[x], self.userInputResponse[x])
-            view = self.window.active_view()
-            view.erase_status("ClassesAndTests")
-            self.displayNewFilePannel()
-
-            # get settings that depend on other settings
-            possibleTestSuitePath = os.path.normpath(settings.get("base_path"), True, False) + "Test"
-            print(possibleTestSuitePath)
-
-
-
-
-
-
-
-
-
-
-
-
-    def settingEnteringChange(self, command_string):
-        view = self.window.active_view()
-        view.set_status("ClassesAndTests", command_string)
-
-    def settingEnteringAbort(self):
-        self.userSettings.deleteAll()
-        view = self.window.active_view()
-        view.erase_status("ClassesAndTests")
 
     def on_done(self, command_string):
         view = self.window.active_view()
@@ -209,14 +150,14 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         if fileName is not None:
             self.templateFileCreator.set(fileName)
             if DEBUG: print("ClassesAndTestsCommand: _getTemplateFile fileName: '" + str(self.templateFileCreator.getFileName()) + "'")
-            if not self.fileManipulator.isfile(fileName):
+            if not self.fileSystem.isfile(fileName):
                 fileCreated = self.templateFileCreator.createFromTemplate()
                 if fileCreated:
                     fileDir = self.templateFileCreator.getFileName()
                     cursors = self.templateFileCreator.getCursors()
                 else:
                     if DEBUG: print("ClassesAndTestsCommand: No templates, creating empty file.")
-                    fileCreated = self.fileManipulator.createFile(fileName)
+                    fileCreated = self.fileSystem.createFile(fileName)
                     if fileCreated:
                         fileDir = fileName
                         cursors = [(0, 0)]
@@ -250,9 +191,9 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 currentDir = packageFolders.pop()
                 workingDir = os.path.join(workingDir, currentDir)
                 tempFileName = os.path.join(workingDir, "__init__.py")
-                if not self.fileManipulator.isfile(tempFileName):
+                if not self.fileSystem.isfile(tempFileName):
                     if DEBUG: print ("ClassesAndTestsCommand: Creating package file: " + tempFileName)
-                    self.fileManipulator.createFile(tempFileName, "")
+                    self.fileSystem.createFile(tempFileName, "")
                 else:
                     if DEBUG: print("ClassesAndTestsCommand: py file exists.")
 
@@ -272,7 +213,6 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 fileDir = self.mirroredDirectory.getOriginalFileName()
 
         return fileDir
-
 
     # TODO: Has an issue when clearing the whole input line....
     def detectBackOneFolder(self, newInputPanelContent):

@@ -4,6 +4,7 @@
 """
 class WindowCommand():
     def __init__(self):
+    	self.window = None
         pass
 
 class TextCommand():

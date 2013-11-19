@@ -14,7 +14,7 @@ from MockFileSystem import *
 
 DEBUG = True
 
-class MockFileManipulator():
+class MockFileSystem():
     def __init__(self):
         self.mockFileSystem = MockFileSystem()
     

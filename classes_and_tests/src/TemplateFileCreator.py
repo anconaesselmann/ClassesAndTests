@@ -8,18 +8,18 @@ DEBUG = False
 try:
     from MirroredDirectory import MirroredDirectory
     from Std import Std
-    from FileManipulator import FileManipulator
+    from FileSystem import FileSystem
     from Importer import Importer
 except ImportError:
     from .MirroredDirectory import MirroredDirectory
     from .Std import Std
-    from .FileManipulator import FileManipulator
+    from .FileSystem import FileSystem
     from .Importer import Importer
 
 class TemplateFileCreator:
     def __init__(self, fileName = "", defaultFileExtension = ""):
         self._settings = None
-        self.fileManipulator = FileManipulator()
+        self.fileSystem = FileSystem()
         self._fileComponents = MirroredDirectory()
         self.importer = Importer()
         self._templateDir = None
@@ -37,14 +37,14 @@ class TemplateFileCreator:
         variablePath = os.path.join(self.getTemplateDir(), self._fileComponents.getExtension(), self.classifyKind() + ".variables")
         functionPath = os.path.join(self.getTemplateDir(), self._fileComponents.getExtension(), "functions.py")
 
-        templateContent = self.fileManipulator.getFileContent(templatePath)
-        variableContent = self.fileManipulator.getFileContent(variablePath)
+        templateContent = self.fileSystem.getFileContent(templatePath)
+        variableContent = self.fileSystem.getFileContent(variablePath)
         functionCollectionObject = self.importer.getObjectInstance(functionPath, "FunctionCollection")()
         content = self.getReplacementContent(templateContent, variableContent,
                                              functionCollectionObject)
 
         if DEBUG: print("TemplateFileCreator: creating file: " + self._fileComponents.getOriginalFileName())
-        return self.fileManipulator.createFile(self._fileComponents.getOriginalFileName(), content)
+        return self.fileSystem.createFile(self._fileComponents.getOriginalFileName(), content)
 
     def setBasePath(self, basePath):
         self._fileComponents.setBasePath(basePath)

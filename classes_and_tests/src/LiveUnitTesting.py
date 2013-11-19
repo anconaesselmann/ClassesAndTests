@@ -4,12 +4,12 @@ import os
 import fileinput
 
 try:
-    from FileManipulator import FileManipulator
+    from FileSystem import FileSystem
     from SublimeFunctions import SublimeFunctions
     from MirroredDirectory import MirroredDirectory
     from TemplateFileCreator import TemplateFileCreator
 except ImportError:
-    from .FileManipulator import FileManipulator
+    from .FileSystem import FileSystem
     from .SublimeFunctions import SublimeFunctions
     from .MirroredDirectory import MirroredDirectory
     from .TemplateFileCreator import TemplateFileCreator
@@ -26,10 +26,7 @@ class LiveUnitTesting():
         if self._activeFile.getExtension() in self._commandFolders:
             lastModTempFile = os.stat(self._activeFile.getTestFileName()).st_mtime
             if lastModTempFile != self._lastModTempFile:
-                # only save copy of test file, if it has been modified and saved
-                currentTestFileContent = FileManipulator.getFileContent(self._activeFile.getTestFileName())
-                #print("currentTestFileContent:")
-                #print(currentTestFileContent)
+                currentTestFileContent = FileSystem.getFileContent(self._activeFile.getTestFileName())
                 self._saveToTempTestFile(currentTestFileContent)
                 self._lastModTempFile = lastModTempFile
 
@@ -64,10 +61,10 @@ class LiveUnitTesting():
 
     def _saveToTempClassFile(self, curentViewContent):
         classFileContent = self._replacePyClassFileLoadingStatements(curentViewContent)
-        FileManipulator.replaceFile(self._getTempFileDir(), classFileContent)
+        FileSystem.replaceFile(self._getTempFileDir(), classFileContent)
 
     def _saveToTempTestFile(self, testFileContent):
-        FileManipulator.replaceFile(self._getTempTestFileDir(), testFileContent)
+        FileSystem.replaceFile(self._getTempTestFileDir(), testFileContent)
 
         extension = self._activeFile.getExtension()
         if extension == "php":
@@ -90,7 +87,6 @@ class LiveUnitTesting():
     def _replacePyClassFileLoadingStatements(self, text):
         fileName = self._activeFile.getFileName()
         result = str.replace(str(text), "__file__", "\"" + fileName + "\"")
-
         # import Class dependencies
         classDependencies  = "from os import sys, path\n"
         classDependencies += "sys.path.append(\"" + os.path.abspath(os.path.join(fileName, "..")) +"\")\n"
@@ -99,21 +95,8 @@ class LiveUnitTesting():
 
     def _replacePyTestFileLoadingStatements(self):
         injected = False
-        #print "active file: " + self._activeFile.getFile()
-        #
         fileName = self._activeFile.getFileName()
-        #print("fileName: " + fileName)
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
-
-            # import Class dependencies
-            #classDependencies  = "from os import sys, path\n"
-            #classDependencies +=
-
-            """
-            from os import sys, path
-            sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "..", "..", "ClassesAndTests", "classes_and_tests")))
-            """
-
             if not injected and "sys.path.append(" in line:
                 parentToPyPath = "    sys.path.append(" + "\"" + self._getTestingDir() + "\"" + ")\n"
                 includeTempClass = "    from classFiles.TemporaryClass import *\n"
@@ -121,8 +104,6 @@ class LiveUnitTesting():
                 injected = True
             if "__file__" in line:
                 line = str.replace(str(line), "__file__", "\"" + fileName + "\"")
-
-
             if "import " + self._activeFile.getFile() in line:
                 pass
             else:

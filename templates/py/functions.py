@@ -9,15 +9,15 @@ sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "classes_and_
 try:
     from src.Std import Std
     from src.MirroredDirectory import *
-    from src.FileManipulator import FileManipulator
+    from src.FileSystem import FileSystem
 except ImportError:
     from .src.Std import Std
     from .src.MirroredDirectory import *
-    from .src.FileManipulator import FileManipulator
+    from .src.FileSystem import FileSystem
 
 class FunctionCollection(object):
     def __init__(self):
-        self.fileManipulator = FileManipulator()
+        self.fileSystem = FileSystem()
     
     def get_doc_block_tag(self, args):
         settings = eval(args["settings"])
@@ -48,7 +48,7 @@ class FunctionCollection(object):
     def get_py_package_name(self, args):
         result = None
         md = MirroredDirectory("")
-        md.fileManipulator = self.fileManipulator
+        md.fileSystem = self.fileSystem
         md.set(args["dir"])
         relativeFileName = md.getRelativeFileName()
         basePath = md.getBasePath()

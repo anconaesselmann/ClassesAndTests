@@ -6,7 +6,7 @@ if __name__ == '__main__' and __package__ is None:
 
 from classes_and_tests.ClassesAndTests import ClassesAndTestsCommand
 from classes_and_tests.src.mocking.sublime import *
-from classes_and_tests.src.mocking.MockFileManipulator import MockFileManipulator
+from classes_and_tests.src.mocking.MockFileSystem import MockFileSystem
 from classes_and_tests.src.mocking.MockTemplateFileCreator import MockTemplateFileCreator
 from classes_and_tests.src.mocking.MockMirroredDirectory import MockMirroredDirectory
 
@@ -58,25 +58,25 @@ class ClassesAndTestsTest(unittest.TestCase):
         
         self._getCurrentPath_helper(fileName, expected)
 
-    def _getFileManipulatorWithTestDir_helper(self):
+    def _getFileSystemWithTestDir_helper(self):
         testDir = os.path.join(os.sep, "MyProject", "library", "aaeTest")
-        mockFileManipulator = MockFileManipulator()
-        mockFileManipulator.createFile(os.path.join(testDir, "someTest.php")) #TODO: simplify once directories can be mocked
+        mockFileSystem = MockFileSystem()
+        mockFileSystem.createFile(os.path.join(testDir, "someTest.php")) #TODO: simplify once directories can be mocked
 
-        return mockFileManipulator
+        return mockFileSystem
 
     def _getrInstanceWithMockedDependencies(self):
         fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         mockFileCreatorReturns = {
             fileName: ([(11, 15)], True)
         }
-        mockFileManipulator = self._getFileManipulatorWithTestDir_helper()
+        mockFileSystem = self._getFileSystemWithTestDir_helper()
 
         cats = ClassesAndTestsCommand()
-        cats.fileManipulator = mockFileManipulator
+        cats.fileSystem = mockFileSystem
         cats.mirroredDirectory = MockMirroredDirectory()
         cats.templateFileCreator = MockTemplateFileCreator(mockFileCreatorReturns)
-        #cats.templateFileCreator.fileManipulator = mockFileManipulator
+        #cats.templateFileCreator.fileSystem = mockFileSystem
         cats.settings = self._getMockSettings_helper()
 
         return cats
@@ -110,7 +110,7 @@ class ClassesAndTestsTest(unittest.TestCase):
             fileName: ([(11, 15)], False)
         }
         resultFileDir, resultCursor = cats._getTemplateFile(fileName)
-        resultFileCreated = cats.fileManipulator.isfile(fileName)
+        resultFileCreated = cats.fileSystem.isfile(fileName)
 
         self.assertEqual(fileName, resultFileDir)
         self.assertEqual(cursors, resultCursor)
@@ -121,7 +121,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         cursors = [(0, 0)]
 
         cats = self._getrInstanceWithMockedDependencies()
-        cats.fileManipulator.createFile(fileName)
+        cats.fileSystem.createFile(fileName)
         returnFileDir, returnCursor = cats._getTemplateFile(fileName)
 
         self.assertEqual(fileName, returnFileDir)
@@ -195,9 +195,9 @@ class ClassesAndTestsTest(unittest.TestCase):
 
         cats._createPythonPackageFiles(fileName)
 
-        result1 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
-        result2 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
-        result3 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
+        result1 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
+        result2 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
+        result3 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
 
         self.assertEqual(True, result1)
         self.assertEqual(True, result2)
@@ -215,9 +215,9 @@ class ClassesAndTestsTest(unittest.TestCase):
         
         cats._createPythonPackageFiles(fileName)
 
-        result1 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
-        result2 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
-        result3 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
+        result1 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
+        result2 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "__init__.py"))
+        result3 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "__init__.py"))
 
         self.assertEqual(False, result1)
         self.assertEqual(False, result2)
@@ -236,9 +236,9 @@ class ClassesAndTestsTest(unittest.TestCase):
 
         cats._createPythonPackageFiles(fileName)
 
-        result1 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "aae", "mvc", "__init__.py"))
-        result2 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "aae", "__init__.py"))
-        result3 = cats.fileManipulator.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "__init__.py"))
+        result1 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "aae", "mvc", "__init__.py"))
+        result2 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "aae", "__init__.py"))
+        result3 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "libraryTest", "__init__.py"))
 
         self.assertEqual(False, result1)
         self.assertEqual(False, result2)

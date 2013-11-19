@@ -1,7 +1,6 @@
 import os
 
 import sys
-print sys.version_info
 if sys.version_info < (3, ):
     from orderedDict import OrderedDict
 else:
@@ -12,11 +11,11 @@ DEBUG = False
 try:
     from FileComponents import FileComponents
     from Std import Std
-    from FileManipulator import FileManipulator
+    from FileSystem import FileSystem
 except ImportError:
     from .FileComponents import FileComponents
     from .Std import Std
-    from .FileManipulator import FileManipulator
+    from .FileSystem import FileSystem
 
 
 class MirroredDirectory():
@@ -25,7 +24,7 @@ class MirroredDirectory():
     KIND_IS_DB_TEST = "db_Test"
 
     def _initializeDependencies(self):
-        self.fileManipulator = FileManipulator()
+        self.fileSystem = FileSystem()
         self.fileComponents = FileComponents(None)
 
     def __init__(self, fileName=None):
@@ -49,11 +48,11 @@ class MirroredDirectory():
     
     # returns the file name without extension or path
     def getFile(self):
-        return self.fileComponents.getFile() + "." + self.getExtension()
+        return self.fileComponents.getFile()
 
     # returns the Test file name without extension or path
     def getTestFile(self):
-        return self.fileComponents.getFile() + "Test" + "." + self.getExtension()
+        return self.fileComponents.getFile() + "Test"
 
     # returns the file extension without leading period
     def getExtension(self):
@@ -162,7 +161,7 @@ class MirroredDirectory():
         result = False
         while len(folders) > 0:
             tempDir = Std.dirImplode(folders) + searchTerm
-            if self.fileManipulator.isdir(tempDir):
+            if self.fileSystem.isdir(tempDir):
                 if DEBUG: print("MirroredDirectory: directory '" + tempDir + "' exists")
                 result = Std.dirImplode(folders)
                 break

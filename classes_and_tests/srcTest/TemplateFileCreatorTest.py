@@ -6,7 +6,7 @@ if __name__ == '__main__' and __package__ is None:
 
 from src.MirroredDirectory import MirroredDirectory
 from src.TemplateFileCreator import TemplateFileCreator
-from src.mocking.MockFileManipulator import MockFileManipulator
+from src.mocking.MockFileSystem import MockFileSystem
 from src.mocking.sublime import MockSettings
 
 class UnitTestHelpers:
@@ -285,9 +285,9 @@ class TemplateFileCreatorTest(unittest.TestCase):
         fc.setBasePath(basePath)
         fc.setSettings(self._getSettings())
         fc.setTemplateDir(templateDir)
-        fc.fileManipulator = MockFileManipulator()
-        fc.fileManipulator.createFile(templateFileDir, templateContent)
-        fc.fileManipulator.createFile(variableFileDir, variableContent)
+        fc.fileSystem = MockFileSystem()
+        fc.fileSystem.createFile(templateFileDir, templateContent)
+        fc.fileSystem.createFile(variableFileDir, variableContent)
         fc.importer = MockImporter()
         fc.importer.setObjectInstance(functionFileDir, "FunctionCollection", functionCollectionObject)
         result = fc.createFromTemplate()
@@ -310,7 +310,7 @@ class TemplateFileCreatorTest(unittest.TestCase):
         aPath = "/MyProject1/library/aae/mvc/Controller.php"
         expectedPath = "/MyProject1/library/aae/mvc/ControllerTest.php"
         fc = TemplateFileCreator(aPath)
-        fc._fileComponents.fileManipulator = MockFileManipulator()
+        fc._fileComponents.fileSystem = MockFileSystem()
         fc.setKind(MirroredDirectory.KIND_IS_TEST)
         result = fc.getFileName()
 

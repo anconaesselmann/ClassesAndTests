@@ -7,7 +7,7 @@ if __name__ == '__main__' and __package__ is None:
 
 
 from py.functions import *
-from src.mocking.MockFileManipulator import MockFileManipulator
+from src.mocking.MockFileSystem import MockFileSystem
 
 
 class PhpFunctionsTest(unittest.TestCase):
@@ -39,10 +39,10 @@ class PhpFunctionsTest(unittest.TestCase):
     def test_get_py_package_name(self):
     	args = {"dir" : path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")}
         expected = path.join("library.aae.mvc.Controller")
-        mockFileManipulator = MockFileManipulator()
-        mockFileManipulator.createFile(path.join(os.sep, "MyProject", "libraryTest", "SomeFileTest.php"))
+        mockFileSystem = MockFileSystem()
+        mockFileSystem.createFile(path.join(os.sep, "MyProject", "libraryTest", "SomeFileTest.php"))
         fc = FunctionCollection()
-        fc.fileManipulator = mockFileManipulator
+        fc.fileSystem = mockFileSystem
         result = fc.get_py_package_name(args)
 
         self.assertEqual(expected, result)
