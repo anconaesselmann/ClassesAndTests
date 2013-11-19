@@ -69,7 +69,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         self.templateFileCreator.fileSystem = self.fileSystem
         self.templateFileCreator.setSettings(self.settings)
         self.templateFileCreator.setDefaultExtension(self.settings.get('default_file_extension'))
-        self.templateFileCreator.setTemplateDir(TEMPLATES_DIR
+        self.templateFileCreator.setTemplateDir(TEMPLATES_DIR)
         #self.templateFileCreator.setBasePath(self.settings.get('base_path')))
 
     def run(self):

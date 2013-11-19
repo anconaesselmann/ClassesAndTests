@@ -49,13 +49,13 @@ class ClassesAndTestsTest(unittest.TestCase):
     def test_getCurrentPath_file_not_saved(self):
         fileName = None
         expected = os.path.join(os.sep, "Default", "path") + os.sep
-        
+
         self._getCurrentPath_helper(fileName, expected)
 
     def test_getCurrentPath_empty_input(self):
         fileName = ""
         expected = os.path.join(os.sep, "Default", "path") + os.sep
-        
+
         self._getCurrentPath_helper(fileName, expected)
 
     def _getFileSystemWithTestDir_helper(self):
@@ -168,7 +168,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         cats = self._getrInstanceWithMockedDependencies()
         cats.mirroredDirectory.setMockKind(fileName, "class")
         cats.mirroredDirectory.setMockOriginalFileName(correspondingFileName)
-        
+
         result = cats._getCorrespondingTemplateFilePath(fileName)
         self.assertEqual(correspondingFileName, result)
 
@@ -178,7 +178,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         cats = self._getrInstanceWithMockedDependencies()
         cats.mirroredDirectory.setMockKind(fileName, "test")
         cats.mirroredDirectory.setMockOriginalFileName(correspondingFileName)
-        
+
         result = cats._getCorrespondingTemplateFilePath(fileName)
         self.assertEqual(correspondingFileName, result)
 
@@ -187,7 +187,7 @@ class ClassesAndTestsTest(unittest.TestCase):
         fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.py")
         baseDir = os.path.join(os.sep, "MyProject", "library")
         relativeFileName = os.path.join("aae", "mvc", "Controller.py")
-        
+
         cats = self._getrInstanceWithMockedDependencies()
         cats.mirroredDirectory.setMockBasePath(fileName, baseDir)
         cats.mirroredDirectory.setMockRelativeFileName(fileName, relativeFileName)
@@ -207,12 +207,12 @@ class ClassesAndTestsTest(unittest.TestCase):
         fileName = os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "Controller.php")
         baseDir = os.path.join(os.sep, "MyProject", "library")
         relativeFileName = os.path.join("aae", "mvc", "Controller.php")
-        
+
         cats = self._getrInstanceWithMockedDependencies()
         cats.mirroredDirectory.setMockBasePath(fileName, baseDir)
         cats.mirroredDirectory.setMockRelativeFileName(fileName, relativeFileName)
         cats.mirroredDirectory.setMockKind(fileName, "class")
-        
+
         cats._createPythonPackageFiles(fileName)
 
         result1 = cats.fileSystem.isfile(os.path.join(os.sep, "MyProject", "library", "aae", "mvc", "__init__.py"))
@@ -222,13 +222,13 @@ class ClassesAndTestsTest(unittest.TestCase):
         self.assertEqual(False, result1)
         self.assertEqual(False, result2)
         self.assertEqual(False, result3)
-    
+
     # should only create package files when creating a class.
     def test__createPythonPackageFiles_test_file(self):
         fileName = os.path.join(os.sep, "MyProject", "libraryTest", "aae", "mvc", "ControllerTest.py")
         baseDir = os.path.join(os.sep, "MyProject", "libraryTest")
         relativeFileName = os.path.join("aae", "mvc", "ControllerTest.py")
-        
+
         cats = self._getrInstanceWithMockedDependencies()
         cats.mirroredDirectory.setMockBasePath(fileName, baseDir)
         cats.mirroredDirectory.setMockRelativeFileName(fileName, relativeFileName)
