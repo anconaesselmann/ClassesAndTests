@@ -60,8 +60,15 @@ class LiveUnitTesting():
         return os.path.join(self._getTestingDir(), "testFiles", "TemporaryClassTest." + self._activeFile.getExtension())
 
     def _saveToTempClassFile(self, curentViewContent):
-        classFileContent = self._replacePyClassFileLoadingStatements(curentViewContent)
-        FileSystem.replaceFile(self._getTempFileDir(), classFileContent)
+        extension = self._activeFile.getExtension()
+        if extension == "php":
+            pass
+        elif extension == "py":
+            curentViewContent = self._replacePyClassFileLoadingStatements(curentViewContent)
+        else:
+            pass
+
+        FileSystem.replaceFile(self._getTempFileDir(), curentViewContent)
 
     def _saveToTempTestFile(self, testFileContent):
         FileSystem.replaceFile(self._getTempTestFileDir(), testFileContent)

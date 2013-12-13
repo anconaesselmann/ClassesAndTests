@@ -11,7 +11,7 @@ try:
 except ImportError:
     from src.mocking.sublime import sublime
     from src.mocking import sublime_plugin
-    if UNIT_TEST_DEBUG: 
+    if UNIT_TEST_DEBUG:
         DEBUG = True
         print("ClassesAndTestsCommand: sublime and sublime_plugin not imported in " + __file__)
     else:
@@ -46,8 +46,8 @@ except ImportError:
 else:
     plugin_loaded()
 
-USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path"]
-USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter default directory:"]
+USER_SETTINGS_TO_BE_INITIALIZED = ["author", "base_path", "php_autoloader_path"]
+USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS = ["Enter author name:", "Enter default directory:", "If auto-loading php classes, provide path to autoloader class file:"]
 
 class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def __init__(self, *args, **kwargs):
@@ -63,9 +63,9 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def _initializeDependencies(self):
         self.mirroredDirectory.fileSystem = self.fileSystem
         self.mirroredDirectory.setDefaultExtension(self.settings.get('default_file_extension'))
-        
+
         self.splitView = self.settings.get("seperate_tests_and_sources_by_split_view")
-        
+
         self.templateFileCreator.fileSystem = self.fileSystem
         self.templateFileCreator.setSettings(self.settings)
         self.templateFileCreator.setDefaultExtension(self.settings.get('default_file_extension'))
@@ -85,7 +85,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def setUserSettings(self):
         userSettingsDir = os.path.join(os.path.normpath(sublime.packages_path()), "User", PACKAGE_NAME + ".sublime-settings")
         userSettingsSetter = UserSettingsSetter(self.window,
-                                                userSettingsDir, 
+                                                userSettingsDir,
                                                 USER_SETTINGS_TO_BE_INITIALIZED,
                                                 USER_SETTINGS_TO_BE_INITIALIZED_PROMPTS)
         userSettingsSetter.setCallbackWhenFinished(self.displayNewFilePannel)
@@ -101,7 +101,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
         else:
             currentPath, fileName = os.path.split(currentPath)
             result = currentPath + os.sep
-            
+
         return result
 
     def displayNewFilePannel(self):
@@ -283,4 +283,3 @@ class ReplaceInputPanelContentCommand(sublime_plugin.TextCommand):
         ip = InputPanel(self.view, edit)
         ip.replaceAllText(replacementString)
 
-    
