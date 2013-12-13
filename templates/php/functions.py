@@ -7,45 +7,35 @@ sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "classes_and_
 
 try:
     from src.Std import Std
-    from src.FileComponents import FileComponents
-    from src.MirroredDirectory import MirroredDirectory
+    from src.MirroredDirectory import *
+    from src.FileSystem import FileSystem
 except ImportError:
     from .src.Std import Std
-    from .src.FileComponents import FileComponents
-    from .src.MirroredDirectory import MirroredDirectory
+    from .src.MirroredDirectory import *
+    from .src.FileSystem import FileSystem
 
 class FunctionCollection(object):
-    @staticmethod
-    def getSettingNameValuePair(settings):
-        if not isinstance(settings, dict): # I could check for string, but I would break x-compatibility between python 2 and 3
-            settings = eval(settings)
-        for key, value in Std.getIterItems(settings):
-            if value is not None:
-                return key, value
-        return None, None
 
-    @staticmethod
-    def get_doc_block_tag(args):
+
+    def __init__(self):
+        self.fileSystem = FileSystem()
+
+    def get_doc_block_tag(self, args):
         settings = eval(args["settings"])
-        tagName, tagValue = FunctionCollection.getSettingNameValuePair(settings)
+        tagName, tagValue = Std.getSettingNameValuePair(settings)
         if tagValue is not None:
             result = "@" + tagName + " " + tagValue
         else:
             result = None
         return result
 
-    @staticmethod
-    def get_class_name(args):
+    def get_class_name(self, args):
         result = MirroredDirectory(args["dir"]).getFile()
         return result
 
 
 
-
-
-        
-    @staticmethod
-    def get_php_autoloader(args):
+    def get_php_autoloader(self, args):
         settings = eval(args["settings"])
         result = None
         #for key, value in settings.iteritems():
@@ -59,24 +49,16 @@ class FunctionCollection(object):
 
         return result
 
-    @staticmethod
-    def get_php_namespace(args):
-        settings = eval(args["settings"])
+
+    def get_php_namespace(self, args):
         result = None
-        base_dir = ""
-        #for key, value in settings.iteritems():
-        for key, value in Std.getIterItems(settings):
-            if value is not None:
-                base_dir = value
-            break
-
-        # TODO: make this part of MirroredDirecotry
-        rc = FileComponents(MirroredDirectory(args["dir"]).getFileDir())
-        rc.setBasePath(base_dir)
-        relPath = rc.getRelativePath()
-
-        result = relPath.replace(sep, "\\")
-        if result[0:1] == "\\":
-            result = result[1:]
-
+        md = MirroredDirectory("")
+        md.fileSystem = self.fileSystem
+        md.set(args["dir"])
+        relativeFileName = md.getRelativeFileName()
+        basePath = md.getBasePath()
+        if DEBUG: print("functions.py: relative path: " + relativeFileName)
+        untreatedNamespace, ext = path.split(relativeFileName)
+        result = untreatedNamespace.replace(sep, "\\")
+        if DEBUG: print("functions.py: package name: " + result)
         return result
