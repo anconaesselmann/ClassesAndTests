@@ -1,9 +1,6 @@
 [
-	{ 	"keys": ["f2"], "command": "classes_and_tests" },
-	{ 	"keys": ["ctrl+shift+t"], "command": "toggle_sources_tests" },
-
 	{
-        "keys": [",", "c"],
+        "keys": ["super+alt+shift+c"],
         "command": "create_missing_functions",
         "context":
             [
@@ -11,8 +8,17 @@
 				{ "key": "setting.is_widget", "operand":false}
 			]
     },
+    {
+        "keys": ["super+alt+shift+c"],
+        "command": "create_missing_functions",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
 	{
-		"keys": [",", "n"],
+		"keys": ["super+alt+n"],
 		"command": "classes_and_tests",
 		"context":
 			[
@@ -21,66 +27,7 @@
 			]
 	},
 	{
-		"keys": [",", "t"],
-		"command": "toggle_sources_tests",
-		"context":
-			[
-				{ "key": "setting.command_mode", "operand":false},
-				{ "key": "setting.is_widget", "operand":false}
-			]
-	},
-	{
-		"keys": [",", "r"],
-		"command": "run_unit_tests",
-		"context":
-			[
-				{ "key": "setting.command_mode", "operand":false},
-				{ "key": "setting.is_widget", "operand":false}
-			]
-	},
-	{
-		"keys": [",", ",", "r"],
-		"command": "run_unit_tests", "args": {"run_test_suite": true},
-		"context":
-			[
-				{ "key": "setting.command_mode", "operand":false},
-				{ "key": "setting.is_widget", "operand":false}
-			]
-	},
-	{
-		"keys": [",", ",", ",", "r"],
-		"command": "continuous_unit_testing",
-		"context":
-			[
-				{ "key": "setting.command_mode", "operand":false},
-				{ "key": "setting.is_widget", "operand":false}
-			]
-	},
-	{
-		"keys": [",", "r", "r"],
-		"command": "hide_panel", "args": {"cancel": true},
-		"context":
-		[
-			{ "key": "panel_visible", "operator": "equal", "operand": true }/*,
-			{ "key": "setting.php_unit_output_panel", "operator": "equal"}*/
-		]
-	}
-
-/* 	copy these into user
-	"Sublime Text 2"->"Preferences"->"Key Bindings - User"
-	to work in vintage mode
-
-	{
-        "keys": [",", "c"],
-        "command": "create_missing_functions",
-        "context":
-            [
-                {"key": "setting.vintage_ctrl_keys"},
-                {"key": "setting.command_mode"}
-            ]
-    },
-	{
-        "keys": [",", "n"],
+        "keys": ["super+alt+n"],
         "command": "classes_and_tests",
         "context":
             [
@@ -89,7 +36,16 @@
             ]
     },
     {
-        "keys": [",", "t"],
+		"keys": ["super+alt+tab"],
+		"command": "toggle_sources_tests",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+        "keys": ["super+alt+tab"],
         "command": "toggle_sources_tests",
         "context":
             [
@@ -98,7 +54,16 @@
             ]
     },
     {
-        "keys": [",", "r"],
+		"keys": ["super+alt+u"],
+		"command": "run_unit_tests",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+        "keys": ["super+alt+u"],
         "command": "run_unit_tests",
         "context":
             [
@@ -107,7 +72,16 @@
             ]
     },
     {
-        "keys": [",", ",", "r"],
+		"keys": ["super+alt+shift+u"],
+		"command": "run_unit_tests", "args": {"run_test_suite": true},
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+        "keys": ["super+alt+shift+u"],
         "command": "run_unit_tests", "args": {"run_test_suite": true},
         "context":
             [
@@ -116,24 +90,21 @@
             ]
     },
     {
-		"keys": [",", ",", ",", "r"],
+		"keys": ["super+alt+c"],
+		"command": "continuous_unit_testing",
+		"context":
+			[
+				{ "key": "setting.command_mode", "operand":false},
+				{ "key": "setting.is_widget", "operand":false}
+			]
+	},
+	{
+		"keys": ["super+alt+c"],
 		"command": "continuous_unit_testing",
 		"context":
             [
                 {"key": "setting.vintage_ctrl_keys"},
                 {"key": "setting.command_mode"}
             ]
-    },
-    {
-        "keys": [",", ",", "r"],
-        "command": "hide_panel", "args": {"cancel": true},
-        "context":
-            [
-                {"key": "setting.vintage_ctrl_keys"},
-                {"key": "setting.command_mode"},
-                { "key": "panel_visible", "operator": "equal", "operand": true }
-            ]
     }
-
-*/
 ]

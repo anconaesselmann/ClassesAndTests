@@ -53,14 +53,20 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
     def __init__(self, *args, **kwargs):
         sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
 
-        self.sublime = sublime
-        self.settings = settings
-        self.windowManipulator = SublimeWindowManipulator(self.window, settings)
-        self.fileSystem = FileSystem()
-        self.mirroredDirectory = MirroredDirectory()
-        self.templateFileCreator = TemplateFileCreator()
-
     def _initializeDependencies(self):
+        if not hasattr(self, "sublime"):
+            self.sublime = sublime
+        if not hasattr(self, "settings"):
+            self.settings = settings
+        if not hasattr(self, "windowManipulator"):
+            self.windowManipulator = SublimeWindowManipulator(self.window, self.settings)
+        if not hasattr(self, "fileSystem"):
+            self.fileSystem = FileSystem()
+        if not hasattr(self, "mirroredDirectory"):
+            self.mirroredDirectory = MirroredDirectory()
+        if not hasattr(self, "templateFileCreator"):
+            self.templateFileCreator = TemplateFileCreator()
+
         self.mirroredDirectory.fileSystem = self.fileSystem
         self.mirroredDirectory.setDefaultExtension(self.settings.get('default_file_extension'))
 
