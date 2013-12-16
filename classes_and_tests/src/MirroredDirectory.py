@@ -32,11 +32,11 @@ class MirroredDirectory():
             ("db_Test", ["_db_test", "DB_Test"]),
             ("test", ["_test", "Test"])
         ])
-        self._initializeDependencies()
         if fileName is not None:
             self.set(fileName)
 
     def set(self, fileName):
+        self._initializeDependencies()
         kind = self._determineKind(fileName)
         self.setKind(kind)
         classFileName = self._scrubPath(fileName, kind)

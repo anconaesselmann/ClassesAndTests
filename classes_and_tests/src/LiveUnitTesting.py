@@ -1,7 +1,27 @@
-import sublime
-import sublime_plugin
+DEBUG = False
+UNIT_TEST_DEBUG = False
+
 import os
 import fileinput
+import re
+import string
+import sys
+
+try:
+    import sublime
+    import sublime_plugin
+except ImportError:
+    try:
+        from src.mocking.sublime import sublime
+        from src.mocking import sublime_plugin
+    except ImportError:
+        from .src.mocking.sublime import sublime
+        from .src.mocking import sublime_plugin
+    if UNIT_TEST_DEBUG: 
+        DEBUG = True
+        print("LiveUnitTesting: sublime and sublime_plugin not imported in " + __file__)
+    else:
+        DEBUG = False
 
 try:
     from FileSystem import FileSystem
@@ -20,13 +40,14 @@ class LiveUnitTesting():
             raise Exception("CommandFolders is a dictionary")
         self._commandFolders = commandFolders
         self._lastModTempFile = None
+        self.fileSystem = FileSystem()
 
     def updateTempFiles(self, currentView):
-        self._activeFile = MirroredDirectory(currentView.file_name())
+        self._setActiveFile(currentView)
         if self._activeFile.getExtension() in self._commandFolders:
             lastModTempFile = os.stat(self._activeFile.getTestFileName()).st_mtime
             if lastModTempFile != self._lastModTempFile:
-                currentTestFileContent = FileSystem.getFileContent(self._activeFile.getTestFileName())
+                currentTestFileContent = self.fileSystem.getFileContent(self._activeFile.getTestFileName())
                 self._saveToTempTestFile(currentTestFileContent)
                 self._lastModTempFile = lastModTempFile
 
@@ -50,50 +71,65 @@ class LiveUnitTesting():
     def getActiveFile(self):
         return self._activeFile
 
-    def _getTestingDir(self):
-        return os.path.join(sublime.packages_path(), "User", "UnitTesting", "continuousTestingTemp")
+    def _setActiveFile(self, currentView):
+        md = MirroredDirectory()
+        md.fileSystem = self.fileSystem
+        md.set(currentView.file_name())
+        self._activeFile = md
 
     def _getTempFileDir(self):
-        return os.path.join(self._getTestingDir(), "classFiles", "TemporaryClass." + self._activeFile.getExtension())
+        folderName, completeFileName = os.path.split(self._activeFile.getFileName())
+        fileName, extension = os.path.splitext(completeFileName)
+        return os.path.join(folderName, "____liveUnitTesting_" + fileName + extension)
 
     def _getTempTestFileDir(self):
-        return os.path.join(self._getTestingDir(), "testFiles", "TemporaryClassTest." + self._activeFile.getExtension())
+        folderName, completeFileName = os.path.split(self._activeFile.getTestFileName())
+        fileName, extension = os.path.splitext(completeFileName)
+        return os.path.join(folderName, "____liveUnitTesting_" + fileName + extension)
 
     def _saveToTempClassFile(self, curentViewContent):
         extension = self._activeFile.getExtension()
-        if extension == "php":
-            pass
-        elif extension == "py":
-            curentViewContent = self._replacePyClassFileLoadingStatements(curentViewContent)
-        else:
-            pass
-
-        FileSystem.replaceFile(self._getTempFileDir(), curentViewContent)
+        self.fileSystem.replaceFile(self._getTempFileDir(), curentViewContent)
 
     def _saveToTempTestFile(self, testFileContent):
-        FileSystem.replaceFile(self._getTempTestFileDir(), testFileContent)
+        self.fileSystem.replaceFile(self._getTempTestFileDir(), testFileContent)
 
         extension = self._activeFile.getExtension()
         if extension == "php":
             self._replacePhpTestFileLoadingStatements()
         elif extension == "py":
             self._replacePyTestFileLoadingStatements()
-            self._createPackageFiles()
         else:
             pass
 
     def _replacePhpTestFileLoadingStatements(self):
         injected = False
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
-            if '__FILE__' in line:
-                line = line.replace('__FILE__', "'" + self._activeFile.getTestFileName() + "'")
-            if not injected and "require_once" in line:
-                # strstr(__FILE__, 'Test', true).'
-                print("\trequire_once\"" + self._getTempFileDir() + "\";\n"),
-                print(line)
-                injected = True
-            else:
-                print(line),
+            if not injected:
+                if "require_once" in line:
+                    sys.stdout.write("\trequire_once \"" + self._getTempFileDir() + "\";\n")
+                    injected = True
+            sys.stdout.write(line)
+
+    def _replacePyTestFileLoadingStatements(self):
+        folderName, completeFileName = os.path.split(self._activeFile.getFileName())
+        fileName, extension = os.path.splitext(completeFileName)
+        newModule = "____liveUnitTesting_" + fileName
+        
+        for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
+            if "import "in line:
+                if fileName in line:
+                    pos = line.find(fileName)
+                    partialString = line[:pos]
+                    regexString = "\\S+$"
+
+                    match = re.search(regexString, partialString)
+                    if match:
+                        newModule = match.group() + newModule
+                    line = "from " + newModule + " import *\n"
+            
+            sys.stdout.write(line)
+    """
 
     def _replacePyClassFileLoadingStatements(self, text):
         fileName = self._activeFile.getFileName()
@@ -104,22 +140,6 @@ class LiveUnitTesting():
         result = classDependencies + result
         return result
 
-    def _replacePyTestFileLoadingStatements(self):
-        injected = False
-        fileName = self._activeFile.getFileName()
-        for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
-            if not injected and "sys.path.append(" in line:
-                parentToPyPath = "    sys.path.append(" + "\"" + self._getTestingDir() + "\"" + ")\n"
-                includeTempClass = "    from classFiles.TemporaryClass import *\n"
-                line =  parentToPyPath + includeTempClass + line
-                injected = True
-            if "__file__" in line:
-                line = str.replace(str(line), "__file__", "\"" + fileName + "\"")
-            if "import " + self._activeFile.getFile() in line:
-                pass
-            else:
-                print(line),
-
     def _createPackageFiles(self):
         parentPackageInit = os.path.abspath(os.path.join(self._getTempTestFileDir(), "..", "..", "__init__.py"))
         classPackageInit = os.path.abspath(os.path.join(self._getTempFileDir(), "..", "__init__.py"))
@@ -127,4 +147,4 @@ class LiveUnitTesting():
         if not os.path.isfile(parentPackageInit):
             FileSystem.createFile(parentPackageInit, "")
         if not os.path.isfile(classPackageInit):
-            FileSystem.createFile(classPackageInit, "")
+            FileSystem.createFile(classPackageInit, "")"""

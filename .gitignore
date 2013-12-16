@@ -12,6 +12,7 @@
 *.cache
 *.sublime-project
 *.sublime-workspace
+____liveUnitTesting_*
 
 # Packages #
 ############
