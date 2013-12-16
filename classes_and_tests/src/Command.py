@@ -18,10 +18,13 @@ class Command():
             print(line.rstrip())
 
     def runAndGetOutputString(self):
-        process = subprocess.Popen([self.command, self.argument], stdout=subprocess.PIPE,
-                                                                  stderr=subprocess.PIPE)
-        scriptResponse, scriptError = process.communicate()
-        return scriptResponse.decode('utf-8') + "\n" + scriptError.decode('utf-8')
+        try:
+            process = subprocess.Popen([self.command, self.argument], stdout=subprocess.PIPE,
+                                                                      stderr=subprocess.PIPE)
+            scriptResponse, scriptError = process.communicate()
+            return scriptResponse.decode('utf-8') + "\n" + scriptError.decode('utf-8')
+        except Exception:
+            return False
 
     def runAndPrintAllOutput(self):
         print(self.runAndGetOutputString())

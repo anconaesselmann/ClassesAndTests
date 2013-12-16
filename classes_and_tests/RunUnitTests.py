@@ -71,6 +71,8 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
 
     def getPhpCommand(self):
         phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir"))
+        if phpUnitDir[-7:] == "phpunit":
+            phpUnitDir = phpUnitDir[:-7]
         return os.path.join(phpUnitDir, "phpunit")
 
     def getOutputPanel(self, commandString):
@@ -86,4 +88,7 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
         if thread.is_alive():
             sublime.set_timeout(lambda: self.handleCommandThread(thread), 100)
         else:
-            self.outputPanel.printToPanel( thread.result )
+            if thread.result != False:
+                self.outputPanel.printToPanel( thread.result )
+            else:
+                self.outputPanel.printToPanel( "A problem occured executing the unit tests. Make sure you supplied the correct path the unit testing program." )
