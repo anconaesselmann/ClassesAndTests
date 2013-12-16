@@ -2,7 +2,7 @@ DEBUG = False
 UNIT_TEST_DEBUG = False
 
 PACKAGE_NAME = "ClassesAndTests"
-PACKAGE_VERSION = "0.2.0"
+PACKAGE_VERSION = "0.5.0"
 
 import os
 try:
