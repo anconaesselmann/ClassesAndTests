@@ -33,7 +33,15 @@ continuousUnitTestingThread = None
 
 
 class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
+
+    def _initializeDependencies(self):
+        if not hasattr(self, "settings"):
+            self.settings = settings
+
     def run(self):
+        self._initializeDependencies()
         view = self.window.active_view()
         self.outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
         if not UnitTestFunctions.classHasTest(view):
@@ -41,7 +49,8 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
             return
         UnitTestFunctions.bringViewsToFront(self.window, view)
 
-        self.liveUnitTest = LiveUnitTesting(UnitTestFunctions.getCommandFolders(settings))
+        commandFolders = UnitTestFunctions.getCommandFolders(self.settings)
+        self.liveUnitTest = LiveUnitTesting(commandFolders)
 
         self.initCommandThread()
         self.liveUnitTest.updateTempFiles(self.window.active_view())
@@ -68,7 +77,7 @@ class ContinuousUnitTestingCommand(sublime_plugin.WindowCommand):
         continuousUnitTestingThread.setArgument(self.liveUnitTest.getArgument())
 
     def outputProgramStart(self):
-        if settings.get("show_executed_command") == True:
+        if self.settings.get("show_executed_command") == True:
             credits = PACKAGE_NAME + " " + PACKAGE_VERSION + " by Axel Ancona Esselmann"
             import datetime
             ts = datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p")

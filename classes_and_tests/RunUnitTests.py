@@ -13,10 +13,12 @@ try:
     from src.MirroredDirectory import MirroredDirectory
     from src.OutputPanel import OutputPanel
     from src.CommandExecutionThread import CommandExecutionThread
+    from src.UnitTestFunctions import UnitTestFunctions
 except ImportError:
     from .src.MirroredDirectory import MirroredDirectory
     from .src.OutputPanel import OutputPanel
     from .src.CommandExecutionThread import CommandExecutionThread
+    from .src.UnitTestFunctions import UnitTestFunctions
     def plugin_loaded():
         global settings
         settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
@@ -61,19 +63,12 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
         self.handleCommandThread(thread)
 
     def getPyCommand(self):
-        pythonDir = settings.get("python_dir")
-        if pythonDir is not None:
-            pythonDir = os.path.normpath(pythonDir)
-        else:
-            pythonDir = ""
-        pythonDir = os.path.join(pythonDir, "python")
-        return pythonDir
+        commandFolders = UnitTestFunctions.getCommandFolders(settings)
+        return os.path.join(commandFolders["py"], "python")
 
     def getPhpCommand(self):
-        phpUnitDir = os.path.normpath(settings.get("php_unit_binary_dir"))
-        if phpUnitDir[-7:] == "phpunit":
-            phpUnitDir = phpUnitDir[:-7]
-        return os.path.join(phpUnitDir, "phpunit")
+        commandFolders = UnitTestFunctions.getCommandFolders(settings)
+        return os.path.join(commandFolders["php"], "phpunit")
 
     def getOutputPanel(self, commandString):
         outputPanel = OutputPanel(self.window, "php_unit_output_panel", PACKAGE_NAME)
@@ -91,4 +86,4 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
             if thread.result != False:
                 self.outputPanel.printToPanel( thread.result )
             else:
-                self.outputPanel.printToPanel( "A problem occured executing the unit tests. Make sure you supplied the correct path the unit testing program." )
+                self.outputPanel.printToPanel( "A problem occured executing the unit tests. Make sure you supplied the correct path to the unit testing program." )

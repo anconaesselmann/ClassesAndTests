@@ -22,9 +22,20 @@ except ImportError:
 class UnitTestFunctions:
     @staticmethod
     def getCommandFolders(settingsFile):
+        phpUnitDir = path.normpath(settingsFile.get("php_unit_binary_dir"))
+        if phpUnitDir[-7:] == "phpunit":
+            phpUnitDir = phpUnitDir[:-7]
+
+
+        pythonDir = settingsFile.get("python_dir")
+        if pythonDir is not None:
+            pythonDir = path.normpath(pythonDir)
+        else:
+            pythonDir = ""
+
         return {
-                    "php": path.normpath(settingsFile.get("php_unit_binary_dir")),
-                    "py": path.normpath(settingsFile.get("python_dir"))
+                    "php": phpUnitDir,
+                    "py": pythonDir
                 }
 
     @staticmethod
