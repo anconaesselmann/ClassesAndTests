@@ -1,11 +1,11 @@
+DEBUG = False
+
 import re
 import sublime
 import sublime_plugin
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
-
-DEBUG = True
 
 def plugin_loaded():
     global settings
@@ -40,8 +40,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         self._runUnitTest()
 
     def _runUnitTest(self):
-        if DEBUG:
-            print("Running tests to determine if all functions have been declared:")
+        if DEBUG: print("Running tests to determine if all functions have been declared:")
         classView = self.classView
         liveUnitTest = LiveUnitTesting(UnitTestFunctions.getCommandFolders(settings))
         liveUnitTest.updateTempFiles(classView)
@@ -60,8 +59,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             if functionName is not None:
                 self._insertFunction(functionName)
             else:
-                if DEBUG:
-                    print("No functions have to be declared.")
+                if DEBUG: print("No functions have to be declared.")
 
     def _getFunctionName(self, testResult):
         result = None
@@ -115,8 +113,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         extension = FileComponents(fileName).getExtension()
         out = ""
         if extension == "php":
-            if DEBUG:
-                print("Creating php function \"" + functionName + "()\"")
+            if DEBUG: print("Creating php function \"" + functionName + "()\"")
             indent2 = indent + indent
             indent3 = indent2 + indent
 
@@ -126,8 +123,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             out += indent2 + "}\n"
             out += indent
         elif extension == "py":
-            if DEBUG:
-                print("Creating py function \"" + functionName + "()\"")
+            if DEBUG: print("Creating py function \"" + functionName + "()\"")
             indent = "    " # ignoring the indentation passed with indent
             indent2 = indent + indent
             indent3 = indent2 + indent

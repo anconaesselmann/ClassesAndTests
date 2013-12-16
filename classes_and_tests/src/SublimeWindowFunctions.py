@@ -1,6 +1,7 @@
-import os
-DEBUG = True
+DEBUG = False
 UNIT_TEST_DEBUG = False
+
+import os
 
 try:
     import sublime

@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 UNIT_TEST_DEBUG = False
 
 from os import path
@@ -36,10 +36,10 @@ class UnitTestFunctions:
                 md = MirroredDirectory(viewFileName)
                 classFileName = md.getFileName()
                 testFileName = md.getTestFileName()
-                print(classFileName)
-                print(testFileName)
-                print(path.isfile(classFileName))
-                print(path.isfile(testFileName))
+                #print(classFileName)
+                #print(testFileName)
+                #print(path.isfile(classFileName))
+                #print(path.isfile(testFileName))
                 if path.isfile(classFileName) and path.isfile(testFileName):
                     result = True
         return result
@@ -53,8 +53,8 @@ class UnitTestFunctions:
         md = MirroredDirectory(fileNameActiveView)
         classFileName = md.getFileName()
         testFileName = md.getTestFileName()
-        print(classFileName)
-        print(testFileName)
+        #print(classFileName)
+        #print(testFileName)
 
         if fileNameActiveView == classFileName:
             fileNameInactiveView = testFileName

@@ -2,7 +2,7 @@
 @author Axel Ancona Esselmann
 
 """
-DEBUG = True
+DEBUG = False
 
 import os
 try:

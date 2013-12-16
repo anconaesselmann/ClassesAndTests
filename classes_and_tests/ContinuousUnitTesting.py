@@ -1,11 +1,11 @@
+DEBUG = False
+
 import sublime
 import sublime_plugin
 from os import path
 
 PACKAGE_NAME = "ClassesAndTests"
 PACKAGE_VERSION = "0.2.0"
-
-DEBUG = True
 
 def plugin_loaded():
     global settings

@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 UNIT_TEST_DEBUG = False
 
 PACKAGE_NAME = "ClassesAndTests"
@@ -252,7 +252,7 @@ class ClassesAndTestsCommand(sublime_plugin.WindowCommand):
                 except Exception as e:
                     pass
                 fc.setDefaultExtension(settings.get("default_file_extension"))
-                print(fc.getFileName())
+                #print(fc.getFileName())
                 """if len(command_string) > len(basePath):
                     possiblyBasePath = command_string[0:len(basePath)]
                     sublime.status_message(possiblyBasePath + " " + basePath)

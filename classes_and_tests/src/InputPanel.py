@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 UNIT_TEST_DEBUG = False
 
 try:

@@ -2,10 +2,11 @@
 @author Axel Ancona Esselmann
 
 """
+DEBUG = False
+
+
 import os
 import sys
-
-DEBUG = True
 
 class FileSystem():
     def __init__(self):

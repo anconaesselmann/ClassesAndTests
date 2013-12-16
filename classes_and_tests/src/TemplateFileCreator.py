@@ -1,9 +1,9 @@
+DEBUG = False
+
 import os
 import sys
 import re
 import ast
-
-DEBUG = False
 
 try:
     from MirroredDirectory import MirroredDirectory

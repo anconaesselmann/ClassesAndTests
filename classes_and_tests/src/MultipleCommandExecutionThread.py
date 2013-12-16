@@ -1,3 +1,5 @@
+DEBUG = False
+
 import threading
 import time
 
@@ -5,8 +7,6 @@ try:
     from Command import Command
 except ImportError:
     from .Command import Command
-
-DEBUG = True
 
 class MultipleCommandExecutionThread(threading.Thread):
     def __init__(self, command=None, argument=None):
