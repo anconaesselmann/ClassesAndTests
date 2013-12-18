@@ -17,8 +17,8 @@ try:
     import sublime_plugin
 except ImportError:
     try:
-        from src.mocking.sublime  import sublime
-        from src.mocking          import sublime_plugin
+        from  src.mocking.sublime import sublime
+        from  src.mocking         import sublime_plugin
     except ImportError:
         from .src.mocking.sublime import sublime
         from .src.mocking         import sublime_plugin
@@ -29,13 +29,13 @@ except ImportError:
         DEBUG = False
 
 try:
-    from src.CommandExecutionThread  import CommandExecutionThread
-    from src.LiveUnitTesting         import LiveUnitTesting
-    from src.UnitTestFunctions       import UnitTestFunctions
-    from src.FileComponents          import FileComponents
-    from src.Std                     import Std
-    from src.FileSystem              import FileSystem
-    from src.MirroredDirectory       import MirroredDirectory
+    from  src.CommandExecutionThread import CommandExecutionThread
+    from  src.LiveUnitTesting        import LiveUnitTesting
+    from  src.UnitTestFunctions      import UnitTestFunctions
+    from  src.FileComponents         import FileComponents
+    from  src.Std                    import Std
+    from  src.FileSystem             import FileSystem
+    from  src.MirroredDirectory      import MirroredDirectory
 except ImportError:
     from .src.CommandExecutionThread import CommandExecutionThread
     from .src.LiveUnitTesting        import LiveUnitTesting
