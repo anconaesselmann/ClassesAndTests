@@ -116,8 +116,9 @@ class LiveUnitTesting():
         fileName, extension = os.path.splitext(completeFileName)
         newModule = "____liveUnitTesting_" + fileName
         
+        replacementMade = False
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
-            if "import "in line:
+            if replacementMade == False and "import "in line:
                 if fileName in line:
                     pos = line.find(fileName)
                     partialString = line[:pos]
@@ -125,8 +126,13 @@ class LiveUnitTesting():
 
                     match = re.search(regexString, partialString)
                     if match:
-                        newModule = match.group() + newModule
-                    line = "from " + newModule + " import *\n"
+                        parentPackages = match.group()
+                    else:
+                        parentPackages = ""
+                    if len(parentPackages) > 0 and parentPackages[-1] == ".":
+                        newModule = parentPackages + newModule
+                        line = "from " + newModule + " import *\n"
+                        replacementMade = True
             
             sys.stdout.write(line)
     """

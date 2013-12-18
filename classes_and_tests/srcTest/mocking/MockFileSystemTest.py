@@ -12,36 +12,36 @@ class MockFileSystemTest(unittest.TestCase):
         obj = MockFileSystem()
 
     def test__createFolderNonRecursive_insert_one_folder(self):
-    	aDict = {}
-    	aFolder = "Folder1"
-    	expected = {"Folder1": {}}
-    	mfs = MockFileSystem()
-    	created = mfs._createFolderNonRecursive(aDict, aFolder)
-    	self.assertEqual(True, created)
-    	self.assertEqual(expected, aDict)
+        aDict = {}
+        aFolder = "Folder1"
+        expected = {"Folder1": {}}
+        mfs = MockFileSystem()
+        created = mfs._createFolderNonRecursive(aDict, aFolder)
+        self.assertEqual(True, created)
+        self.assertEqual(expected, aDict)
 
     def test__createFolderNonRecursive_insert_two_folders_horizontally(self):
-    	aDict = {}
-    	aFolder1 = "Folder1"
-    	aFolder2 = "Folder2"
-    	expected = {"Folder1": {}, "Folder2": {}}
-    	mfs = MockFileSystem()
-    	created1 = mfs._createFolderNonRecursive(aDict, aFolder1)
-    	created2 = mfs._createFolderNonRecursive(aDict, aFolder2)
-    	self.assertEqual(True, created1)
-    	self.assertEqual(True, created2)
-    	self.assertEqual(expected, aDict)
+        aDict = {}
+        aFolder1 = "Folder1"
+        aFolder2 = "Folder2"
+        expected = {"Folder1": {}, "Folder2": {}}
+        mfs = MockFileSystem()
+        created1 = mfs._createFolderNonRecursive(aDict, aFolder1)
+        created2 = mfs._createFolderNonRecursive(aDict, aFolder2)
+        self.assertEqual(True, created1)
+        self.assertEqual(True, created2)
+        self.assertEqual(expected, aDict)
 
     def test__createFolderNonRecursive_insert_fail(self):
-    	aDict = {}
-    	aFolder = "Folder1"
-    	expected = {"Folder1": {}}
-    	mfs = MockFileSystem()
-    	created1 = mfs._createFolderNonRecursive(aDict, aFolder)
-    	created2 = mfs._createFolderNonRecursive(aDict, aFolder)
-    	self.assertEqual(True, created1)
-    	self.assertEqual(False, created2)
-    	self.assertEqual(expected, aDict)
+        aDict = {}
+        aFolder = "Folder1"
+        expected = {"Folder1": {}}
+        mfs = MockFileSystem()
+        created1 = mfs._createFolderNonRecursive(aDict, aFolder)
+        created2 = mfs._createFolderNonRecursive(aDict, aFolder)
+        self.assertEqual(True, created1)
+        self.assertEqual(False, created2)
+        self.assertEqual(expected, aDict)
 
     def test_isDir_root(self):
         aFolder = os.sep
@@ -65,13 +65,13 @@ class MockFileSystemTest(unittest.TestCase):
         self.assertEqual(True, result) 
 
     def test_isdir_file_provided(self):
-    	aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
-    	mfs = MockFileSystem()
-    	mfs.createFile(aFileName, "")
+        aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
+        mfs = MockFileSystem()
+        mfs.createFile(aFileName, "")
 
-    	result = mfs.isdir(aFileName)
+        result = mfs.isdir(aFileName)
 
-    	self.assertEqual(False, result)
+        self.assertEqual(False, result)
     
     def test_createFolder_one_branch(self):
         mfs = MockFileSystem()
@@ -168,58 +168,58 @@ class MockFileSystemTest(unittest.TestCase):
         self.assertEqual(True, exists16)
     
     def test_folder_is_absolute(self):
-    	aPath = path.join("Folder1", "Folder2", "Folder3")
-    	mfs = MockFileSystem()
-    	result = mfs.createFolder(aPath)
-    	self.assertEqual(False, result)
+        aPath = path.join("Folder1", "Folder2", "Folder3")
+        mfs = MockFileSystem()
+        result = mfs.createFolder(aPath)
+        self.assertEqual(False, result)
 
     def test_createFile_atRoot(self):
-    	aFileName = path.join(os.sep, "AFile.txt")
-    	mfs = MockFileSystem()
-    	result = mfs.createFile(aFileName, "")
-    	self.assertEqual(True, result)
+        aFileName = path.join(os.sep, "AFile.txt")
+        mfs = MockFileSystem()
+        result = mfs.createFile(aFileName, "")
+        self.assertEqual(True, result)
 
     def test_createFile_atRoot_file_exists(self):
-    	aFileName = path.join(os.sep, "AFile.txt")
-    	mfs = MockFileSystem()
-    	result1 = mfs.createFile(aFileName, "")
-    	result2 = mfs.createFile(aFileName, "")
-    	self.assertEqual(True, result1)
-    	self.assertEqual(False, result2)
+        aFileName = path.join(os.sep, "AFile.txt")
+        mfs = MockFileSystem()
+        result1 = mfs.createFile(aFileName, "")
+        result2 = mfs.createFile(aFileName, "")
+        self.assertEqual(True, result1)
+        self.assertEqual(False, result2)
 
     def test_createFile_not_at_root(self):
-    	aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
-    	mfs = MockFileSystem()
-    	result = mfs.createFile(aFileName, "")
-    	self.assertEqual(True, result)
+        aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
+        mfs = MockFileSystem()
+        result = mfs.createFile(aFileName, "")
+        self.assertEqual(True, result)
 
     def test_isfile_file_provided(self):
-    	aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
-    	mfs = MockFileSystem()
-    	mfs.createFile(aFileName, "")
+        aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
+        mfs = MockFileSystem()
+        mfs.createFile(aFileName, "")
 
-    	result = mfs.isfile(aFileName)
+        result = mfs.isfile(aFileName)
 
-    	self.assertEqual(True, result)
+        self.assertEqual(True, result)
 
     def test_isfile_folder_provided(self):
-    	aFolderName = path.join(os.sep, "Folder1", "Folder2", "Folder3")
-    	mfs = MockFileSystem()
-    	mfs.createFolder(aFolderName)
+        aFolderName = path.join(os.sep, "Folder1", "Folder2", "Folder3")
+        mfs = MockFileSystem()
+        mfs.createFolder(aFolderName)
 
-    	result = mfs.isfile(aFolderName)
+        result = mfs.isfile(aFolderName)
 
-    	self.assertEqual(False, result)
+        self.assertEqual(False, result)
 
     def test_getFileContent(self):
-    	aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
-    	fileContent = "File content"
-    	mfs = MockFileSystem()
-    	mfs.createFile(aFileName, fileContent)
+        aFileName = path.join(os.sep, "Folder1", "Folder2", "AFile.txt")
+        fileContent = "File content"
+        mfs = MockFileSystem()
+        mfs.createFile(aFileName, fileContent)
 
-    	result = mfs.getFileContent(aFileName)
+        result = mfs.getFileContent(aFileName)
 
-    	self.assertEqual(fileContent, result)    
+        self.assertEqual(fileContent, result)    
 
     def test_remove_removing_existing_folder(self):
         mfs = MockFileSystem()
@@ -250,5 +250,58 @@ class MockFileSystemTest(unittest.TestCase):
         removedResult = mfs.remove(aFolderToBeRemoved)
 
         self.assertEqual(False, removedResult)
+
+    def _dataProviderCreateVirtualFile(self):
+        mfs = MockFileSystem()
+        afs = MockFileSystem()
+        mfs.fileSystem = afs
+        executingFileName = os.path.join(os.sep, "Some", "Folder", "___liveUnitTesting_AClassTest.php")
+        mfs.fileSystem.createFile(executingFileName)
+        mfs.fileSystem.executingFileName = executingFileName
+        actualFileName = os.path.join(os.sep, "Some", "Folder", "AClassTestData", "test.php")
+        mfs.fileSystem.createFile(actualFileName, "testFileContent")
+        return mfs
+
+    def test_createVirtualFile(self):
+        """ A virtual file is a file in a mock file-system, 
+        that has the content of a real file.
+        """
+        # Setup
+        actualFileName = os.path.join(os.sep, "Some", "Folder", "AClassTestData", "test.php")
+        virtualFileName = os.path.join(os.sep, "A", "Completely", "Different", "Folder", "test.php")
+        mfs = self._dataProviderCreateVirtualFile()
+    
+        # Testing
+        resultVirtualFileCreated = mfs.createVirtualFile(actualFileName, virtualFileName)
+        resultVirtualFileDoesNotExistInOriginalFileSysten = mfs.fileSystem.isfile(virtualFileName)
+        resultContentVirtualFile = mfs.getFileContent(virtualFileName)
+        
+        # Verification
+        self.assertEqual(True, resultVirtualFileCreated)
+        self.assertEqual(False, resultVirtualFileDoesNotExistInOriginalFileSysten)
+        self.assertEqual("testFileContent", resultContentVirtualFile)
+
+    def test_createVirtualFile_from_TestData_directory(self):
+        """ The actual file name can be just the file plus extension, if the
+        file is in a folder with the same name as the executing test class plus the ending
+        "Data". The TestData folder must be in the same parent directory as the
+        executing file.
+        """
+        # Setup
+        abbreviatedActualFileName = "test.php"
+        actualFileName = os.path.join(os.sep, "Some", "Folder", "AClassTestData", abbreviatedActualFileName)
+        virtualFileName = os.path.join(os.sep, "A", "Completely", "Different", "Folder", "test.php")
+        mfs = self._dataProviderCreateVirtualFile()
+        mfs.fileSystem.fileContentFromTestData[abbreviatedActualFileName] = "testFileContent"
+    
+        # Testing
+        resultVirtualFileCreated = mfs.createVirtualFile(abbreviatedActualFileName, virtualFileName)
+        resultVirtualFileDoesNotExistInOriginalFileSysten = mfs.fileSystem.isfile(virtualFileName)
+        resultContentVirtualFile = mfs.getFileContent(virtualFileName)
+        
+        # Verification
+        self.assertEqual(True, resultVirtualFileCreated)
+        self.assertEqual(False, resultVirtualFileDoesNotExistInOriginalFileSysten)
+        self.assertEqual("testFileContent", resultContentVirtualFile)
 if __name__ == '__main__':
     unittest.main()

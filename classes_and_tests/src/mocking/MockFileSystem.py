@@ -2,10 +2,14 @@
 @author Axel
 """
 import os
+import re
+
 try:
     from .Std import Std
+    from .FileSystem import FileSystem
 except ImportError:
     from ..Std import Std
+    from ..FileSystem import FileSystem
 """
 class Std():
     @staticmethod
@@ -50,6 +54,8 @@ class MockFile():
 class MockFileSystem():
     def __init__(self):
         self.root = {os.sep: {}}
+        self.fileSystem = FileSystem()
+        self.fileContentFromTestData = dict()
     
     def getFileContent(self, fileName):
     	content = False
@@ -58,6 +64,27 @@ class MockFileSystem():
     		parentFolder = self._getFolder(aPath)
     		content = parentFolder[aFileName].content
         return content
+
+    def createVirtualFile(self, actualFileName, virtualFileName):
+        """ Takes the file name of an actual file and creates a
+        virtual file with file name "virtualFileName".
+    
+        @param str actualFileName The full path to a file on the file system
+                                  or just the file name to access a file in the
+                                  corresponding TestData folder, located in the
+                                  same parent directory as the actual file.
+        @param str virtualFileName The desired file name in the virtual file system
+    
+        returns: True when creation was successful, False when not.
+        """
+        directory, fileName = os.path.split(actualFileName)
+        if directory == "":
+            fileContent = self.fileSystem.getFileContentFromTestDataFile(actualFileName)
+            result = self.createFile(virtualFileName, fileContent)
+        else:
+            fileContent = self.fileSystem.getFileContent(actualFileName)
+            result = self.createFile(virtualFileName, fileContent)
+        return result
 
     def createFile(self, fileName, content=""):
     	created = False
@@ -116,6 +143,12 @@ class MockFileSystem():
         del parentFolder[aFileName]
         return not self.isfile(fileName)
 
+    def getExecutingFileName(self):
+        return self.executingFileName
+
+    def getFileContentFromTestDataFile(self, fileName):
+        return self.fileContentFromTestData[fileName]
+
     def printTree(self):
     	print(self.root)
 
@@ -150,4 +183,5 @@ class MockFileSystem():
     		newFile = MockFile(fileName, content)
     		parentFolder[fileName] = newFile
     		return True
+    
     

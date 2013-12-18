@@ -17,11 +17,11 @@ try:
     import sublime_plugin
 except ImportError:
     try:
-        from src.mocking.sublime import sublime
-        from src.mocking import sublime_plugin
+        from src.mocking.sublime  import sublime
+        from src.mocking          import sublime_plugin
     except ImportError:
         from .src.mocking.sublime import sublime
-        from .src.mocking import sublime_plugin
+        from .src.mocking         import sublime_plugin
     if UNIT_TEST_DEBUG: 
         DEBUG = True
         print("CreateMissingFunctions: sublime and sublime_plugin not imported in " + __file__)
@@ -29,21 +29,21 @@ except ImportError:
         DEBUG = False
 
 try:
-    from src.CommandExecutionThread import CommandExecutionThread
-    from src.LiveUnitTesting import LiveUnitTesting
-    from src.UnitTestFunctions import UnitTestFunctions
-    from src.FileComponents import FileComponents
-    from src.Std import Std
-    from src.FileSystem import FileSystem
-    from src.MirroredDirectory import MirroredDirectory
+    from src.CommandExecutionThread  import CommandExecutionThread
+    from src.LiveUnitTesting         import LiveUnitTesting
+    from src.UnitTestFunctions       import UnitTestFunctions
+    from src.FileComponents          import FileComponents
+    from src.Std                     import Std
+    from src.FileSystem              import FileSystem
+    from src.MirroredDirectory       import MirroredDirectory
 except ImportError:
     from .src.CommandExecutionThread import CommandExecutionThread
-    from .src.LiveUnitTesting import LiveUnitTesting
-    from .src.UnitTestFunctions import UnitTestFunctions
-    from .src.FileComponents import FileComponents
-    from .src.Std import Std
-    from .src.FileSystem import FileSystem
-    from .src.MirroredDirectory import MirroredDirectory
+    from .src.LiveUnitTesting        import LiveUnitTesting
+    from .src.UnitTestFunctions      import UnitTestFunctions
+    from .src.FileComponents         import FileComponents
+    from .src.Std                    import Std
+    from .src.FileSystem             import FileSystem
+    from .src.MirroredDirectory      import MirroredDirectory
     def plugin_loaded():
         global settings
         settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
@@ -68,11 +68,11 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
 
     def _runUnitTest(self):
         if DEBUG: print("Running tests to determine if all functions have been declared:")
-        classView = self.classView
+        classView    = self.classView
         liveUnitTest = LiveUnitTesting(UnitTestFunctions.getCommandFolders(settings))
         liveUnitTest.updateTempFiles(classView)
-        command = liveUnitTest.getCommand()
-        argument = liveUnitTest.getArgument()
+        command      = liveUnitTest.getCommand()
+        argument     = liveUnitTest.getArgument()
 
         thread = CommandExecutionThread(command, argument)
         thread.start()
@@ -121,7 +121,9 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             if self.view != self.classView:
                 sublime.active_window().run_command("toggle_sources_tests")
             extension = FileComponents(classView.file_name()).getExtension()
-            if extension != "py": # for some odd reason in .py scripts this would create multiple functions with the same name.... I might have to hook into the on_change event
+            if extension != "py": 
+                # for some odd reason in .py scripts this would create multiple functions with 
+                # the same name.... I might have to hook into the on_change event
                 sublime.set_timeout(lambda: self._runUnitTest(), 200)
         else:
             print("File is not formatted correctly. A class{} needs to be inside a namespace{}")
@@ -155,6 +157,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         out = ""
         tabCounter = 2
         if extension == "php":
+            parameterString = parameterString.replace("$", "\$")
             if DEBUG: print("Creating php function \"" + functionName + "()\"")
             indent2 = indent + indent
             if parameterString != "":
@@ -172,12 +175,12 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             out += indent + " * ${1:__functionDescription__}\n"
             out += parameterDescriptionString
             out += indent + " */\n"
-            out += indent + "public function " + functionName + "(" + re.escape(parameterString) + ") {\n"
+            out += indent + "public function " + functionName + "(" + parameterString + ") \{\n"
             out += indent2+    "${" + str(tabCounter) + "://FunctionBody};\n"
             tabCounter += 1
             out += indent2+    "return${" + str(tabCounter) + ":};\n"
             tabCounter += 1
-            out += indent + "}${" + str(tabCounter) + ":}\n"
+            out += indent + "\}${" + str(tabCounter) + ":}\n"
         elif extension == "py":
             if DEBUG: print("Creating py function \"" + functionName + "()\"")
             indent = "    " # ignoring the indentation passed with indent
@@ -188,21 +191,21 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
                 parameterDescriptionString = "\n"
                 for parameter in parameters:
                     parameterType = self._getParameterType(testFileName, functionName, parameter)
-                    parameterDescriptionString += indent2 + "@param " + parameterType + " " + parameter + " ${" + str(tabCounter) + ":__parameterDescription__}\n"
+                    parameterDescriptionString += indent + "@param " + parameterType + " " + parameter + " ${" + str(tabCounter) + ":__parameterDescription__}\n"
                     tabCounter += 1
             else:
                 parameterDescriptionString = ""
             out += "\n"
-            out += indent  + "def " + functionName + "(self" + parameterString + "):\n"
-            out += indent2 +     "\"\"\" ${1:__functionDescription__}\n"
+            out +=  "def " + functionName + "(self" + parameterString + "):\n"
+            out += indent +     "\"\"\" ${1:__functionDescription__}\n"
             out += parameterDescriptionString
             out += "\n"
-            out += indent2 +     "returns: ${" + str(tabCounter) + ":__returnTypeDescription__}\n"
+            out += indent +     "returns: ${" + str(tabCounter) + ":__returnTypeDescription__}\n"
             tabCounter += 1
-            out += indent2 +     "\"\"\"\n"
-            out += indent2 +    "${" + str(tabCounter) + ":# FunctionBody};\n"
+            out += indent +     "\"\"\"\n"
+            out += indent +    "${" + str(tabCounter) + ":# FunctionBody}\n"
             tabCounter += 1
-            out += indent2 +    "return${" + str(tabCounter) + ":}\n"
+            out += indent +    "return${" + str(tabCounter) + ":}\n"
         else:
             out = None
 

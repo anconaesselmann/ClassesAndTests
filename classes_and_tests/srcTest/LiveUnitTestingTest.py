@@ -52,7 +52,7 @@ class LiveUnitTestingTest(unittest.TestCase):
 
     def test__getTempTestFileDir_from_class_file(self):
         classFile = path.join(os.sep, "MyProject1", "library", "aae", "mvc", "Controller.php")
-        expected = path.join(os.sep, "MyProject1", "library", "aae", "mvc", "____liveUnitTesting_ControllerTest.php")
+        expected = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "____liveUnitTesting_ControllerTest.php")
         
         mockCurrentView = MockSublimeView(classFile)
         lut = self._getInstance()
@@ -63,7 +63,7 @@ class LiveUnitTestingTest(unittest.TestCase):
 
     def test__getTempTestFileDir_from_test_file(self):
         testFile = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "ControllerTest.php")
-        expected = path.join(os.sep, "MyProject1", "library", "aae", "mvc", "____liveUnitTesting_ControllerTest.php")
+        expected = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "____liveUnitTesting_ControllerTest.php")
         
         mockCurrentView = MockSublimeView(testFile)
         lut = self._getInstance()

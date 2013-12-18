@@ -7,6 +7,8 @@ DEBUG = False
 
 import os
 import sys
+import inspect
+import re
 
 class FileSystem():
     def __init__(self):
@@ -61,3 +63,30 @@ class FileSystem():
     @staticmethod
     def remove(aPath):
         return os.path.remove(aPath)
+
+    @staticmethod
+    def getExecutingFileName():
+        return inspect.stack()[-1][1]
+
+    @staticmethod
+    def _getTestDataFileName(executedFile, fileName):
+        temp, tempClassName = os.path.split(executedFile)
+        tempClassName, ext = os.path.splitext(tempClassName)
+        regExpString = '(?:___liveUnitTesting_)([\w\d]+)'
+        result = re.findall(regExpString, tempClassName)
+        if len(result) > 0:
+            className = result[0]
+        else:
+            className = tempClassName
+        testDataDirectoryName = className + "Data"
+        #print(testDataDirectoryName)
+        directory = os.path.dirname(executedFile)
+        dataFile = os.path.join(directory, testDataDirectoryName, fileName)
+        return dataFile
+
+    @staticmethod
+    def getFileContentFromTestDataFile(fileName):
+        executedFile = FileSystem.getExecutingFileName()
+        dataFile = FileSystem._getTestDataFileName(executedFile, fileName)
+        fileContent = FileSystem.getFileContent(dataFile)
+        return fileContent

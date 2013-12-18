@@ -2,6 +2,7 @@
 @author Axel Ancona Esselmann
 
 """
+DEBUG = True
 from os import sys, path, sep
 sys.path.append(path.abspath(path.join(__file__, "..", "..", "..", "classes_and_tests")))
 
@@ -56,9 +57,11 @@ class FunctionCollection(object):
         md.fileSystem = self.fileSystem
         md.set(args["dir"])
         relativeFileName = md.getRelativeFileName()
-        basePath = md.getBasePath()
-        if DEBUG: print("functions.py: relative path: " + relativeFileName)
-        untreatedNamespace, ext = path.split(relativeFileName)
-        result = untreatedNamespace.replace(sep, "\\")
-        if DEBUG: print("functions.py: package name: " + result)
+        print(relativeFileName)
+        if relativeFileName is not None:
+            basePath = md.getBasePath()
+            if DEBUG: print("functions.py: relative path: " + relativeFileName)
+            untreatedNamespace, ext = path.split(relativeFileName)
+            result = untreatedNamespace.replace(sep, "\\")
+            if DEBUG: print("functions.py: package name: " + result)
         return result
