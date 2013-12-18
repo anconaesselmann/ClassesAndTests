@@ -9,11 +9,11 @@ try:
     import sublime_plugin
 except ImportError:
     try:
-        from src.mocking.sublime import sublime
-        from src.mocking import sublime_plugin
+        from mocking.sublime import sublime
+        from mocking import sublime_plugin
     except ImportError:
-        from .src.mocking.sublime import sublime
-        from .src.mocking import sublime_plugin
+        from .mocking.sublime import sublime
+        from .mocking import sublime_plugin
     if UNIT_TEST_DEBUG: 
         DEBUG = True
         print("LiveUnitTesting: sublime and sublime_plugin not imported in " + __file__)

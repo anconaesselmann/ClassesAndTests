@@ -24,10 +24,11 @@ class MirroredDirectory():
     KIND_IS_DB_TEST = "db_Test"
 
     def _initializeDependencies(self):
-        self.fileSystem = FileSystem()
-        self.fileComponents = FileComponents(None)
+        if not hasattr(self, "fileSystem"):
+            self.fileSystem = FileSystem()
 
     def __init__(self, fileName=None):
+        self.fileComponents = FileComponents(None)
         self._kindDict = OrderedDict([
             ("db_Test", ["_db_test", "DB_Test"]),
             ("test", ["_test", "Test"])

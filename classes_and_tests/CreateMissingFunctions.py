@@ -1,28 +1,49 @@
 DEBUG = False
+UNIT_TEST_DEBUG = False
 
 import re
-import sublime
-import sublime_plugin
+import os
+import string
+from os import path
 
 PACKAGE_NAME = "ClassesAndTests"
-PACKAGE_VERSION = "0.2.0"
 
 def plugin_loaded():
     global settings
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
-    
+
+try:
+    import sublime
+    import sublime_plugin
+except ImportError:
+    try:
+        from src.mocking.sublime import sublime
+        from src.mocking import sublime_plugin
+    except ImportError:
+        from .src.mocking.sublime import sublime
+        from .src.mocking import sublime_plugin
+    if UNIT_TEST_DEBUG: 
+        DEBUG = True
+        print("CreateMissingFunctions: sublime and sublime_plugin not imported in " + __file__)
+    else:
+        DEBUG = False
+
 try:
     from src.CommandExecutionThread import CommandExecutionThread
     from src.LiveUnitTesting import LiveUnitTesting
     from src.UnitTestFunctions import UnitTestFunctions
     from src.FileComponents import FileComponents
     from src.Std import Std
+    from src.FileSystem import FileSystem
+    from src.MirroredDirectory import MirroredDirectory
 except ImportError:
     from .src.CommandExecutionThread import CommandExecutionThread
     from .src.LiveUnitTesting import LiveUnitTesting
     from .src.UnitTestFunctions import UnitTestFunctions
     from .src.FileComponents import FileComponents
     from .src.Std import Std
+    from .src.FileSystem import FileSystem
+    from .src.MirroredDirectory import MirroredDirectory
     def plugin_loaded():
         global settings
         settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
@@ -30,7 +51,13 @@ else:
     plugin_loaded()
 
 class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
+
+    def initializeDependencies(self):
+        if not hasattr(self, "fileSystem"):
+            self.fileSystem = FileSystem()
+
     def run(self, edit):
+        self.initializeDependencies()
         window = self.view.window()
         if window is None:
             return
@@ -78,17 +105,21 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if insertionPoint is not None:
             indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
             
+            classFileName = self.classView.file_name()
 
-            insertionString = self._getFunctionBody(self.classView.file_name(), functionName, indentation)
-            try:
-                #sublime2
-                classView.insert(self.edit, insertionPoint, insertionString)
-            except Exception:
-                #sublime3
-                classView.run_command('text_insert', {'insertionPoint': insertionPoint, 'string': insertionString})
+            md = MirroredDirectory()
+            md.fileSystem = self.fileSystem
+            md.set(classFileName)
 
+            testFileName = md.getTestFileName()
+            parameters = self._getParameterNames(functionName, testFileName)
+            insertionString = self._getFunctionBody(classFileName, functionName, indentation, parameters)
 
-
+            self.classView.sel().clear()
+            self.classView.sel().add(sublime.Region(insertionPoint))
+            self.classView.run_command("insert_snippet", {"contents": insertionString })
+            if self.view != self.classView:
+                sublime.active_window().run_command("toggle_sources_tests")
             extension = FileComponents(classView.file_name()).getExtension()
             if extension != "py": # for some odd reason in .py scripts this would create multiple functions with the same name.... I might have to hook into the on_change event
                 sublime.set_timeout(lambda: self._runUnitTest(), 200)
@@ -109,33 +140,122 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
 
         return insertionPoint
 
-    def _getFunctionBody(self, fileName, functionName, indent):
+    def _getFunctionBody(self, fileName, functionName, indent, parameters=[]):
+        md = MirroredDirectory()
+        md.fileSystem = self.fileSystem
+        md.set(fileName)
+
+        testFileName = md.getTestFileName()
+
         extension = FileComponents(fileName).getExtension()
+        if len(parameters) > 0:
+            parameterString = ', '.join(parameters)
+        else:
+            parameterString = ""
         out = ""
+        tabCounter = 2
         if extension == "php":
             if DEBUG: print("Creating php function \"" + functionName + "()\"")
             indent2 = indent + indent
-            indent3 = indent2 + indent
-
-            out +=  "\n"
-            out += indent2 + "public function " + functionName + "() {\n"
-            out += indent3 + "return ;\n"
-            out += indent2 + "}\n"
-            out += indent
+            if parameterString != "":
+                parameterDescriptionString = ""
+                for parameter in parameters:
+                    # TODO: parameter type detection for php types
+                    #print("parameter: " + parameter)
+                    parameterType = self._getParameterType(testFileName, functionName, parameter)
+                    parameterDescriptionString += indent + " * @param " + parameterType + " " + parameter + "${" + str(tabCounter) + ":__parameterDescription__}\n"
+                    tabCounter += 1
+            else:
+                parameterDescriptionString = ""
+            out += "\n"
+            out += indent + "/**\n"
+            out += indent + " * ${1:__functionDescription__}\n"
+            out += parameterDescriptionString
+            out += indent + " */\n"
+            out += indent + "public function " + functionName + "(" + re.escape(parameterString) + ") {\n"
+            out += indent2+    "${" + str(tabCounter) + "://FunctionBody};\n"
+            tabCounter += 1
+            out += indent2+    "return${" + str(tabCounter) + ":};\n"
+            tabCounter += 1
+            out += indent + "}${" + str(tabCounter) + ":}\n"
         elif extension == "py":
             if DEBUG: print("Creating py function \"" + functionName + "()\"")
             indent = "    " # ignoring the indentation passed with indent
             indent2 = indent + indent
-            indent3 = indent2 + indent
+            if parameterString != "":
+                parameterString = ', ' + parameterString
 
-            out +=  "\n"
-            out += indent + "def " + functionName + "(self):\n"
-            out += indent2 + "return\n"
-            out += indent
+                parameterDescriptionString = "\n"
+                for parameter in parameters:
+                    parameterType = self._getParameterType(testFileName, functionName, parameter)
+                    parameterDescriptionString += indent2 + "@param " + parameterType + " " + parameter + " ${" + str(tabCounter) + ":__parameterDescription__}\n"
+                    tabCounter += 1
+            else:
+                parameterDescriptionString = ""
+            out += "\n"
+            out += indent  + "def " + functionName + "(self" + parameterString + "):\n"
+            out += indent2 +     "\"\"\" ${1:__functionDescription__}\n"
+            out += parameterDescriptionString
+            out += "\n"
+            out += indent2 +     "returns: ${" + str(tabCounter) + ":__returnTypeDescription__}\n"
+            tabCounter += 1
+            out += indent2 +     "\"\"\"\n"
+            out += indent2 +    "${" + str(tabCounter) + ":# FunctionBody};\n"
+            tabCounter += 1
+            out += indent2 +    "return${" + str(tabCounter) + ":}\n"
         else:
             out = None
 
         return out
 
+    def _getParameterNames(self, functionName, fileDir):
+        fileName, extension = os.path.splitext(fileDir)
+        if extension == ".py":
+            testFileContent = self.fileSystem.getFileContent(fileDir)
+            regexString = "(?<=\\." + functionName + "\\()[^\\)]+"
 
+            match = re.search(regexString, testFileContent)
+            if match:
+                rawParameterString = match.group()
+                parameterString = re.sub('\\s', '', rawParameterString)
+                parameters = str.split(parameterString, ',')
+                return parameters
+            else:
+                return []
+        elif extension == ".php":
+            testFileContent = self.fileSystem.getFileContent(fileDir)
+            regexString = "(?<=->" + functionName + "\\()[^\\)]+"
+            match = re.search(regexString, testFileContent)
+            if match:
+                rawParameterString = match.group()
+                parameterString = re.sub('\\s', '', rawParameterString)
+                parameters = str.split(parameterString, ',')
+                return parameters
+            else:
+                return []
+        return
+    
 
+    def _getParameterType(self, fileDir, functionName, parameterName):
+        """ Goes through a test file and determines the parameter type of 
+        parameter "parameterName" of the function "functionName"
+
+        @param str fileDir The path to a test file
+        @param str functionName The function name who's parameter is being typed
+        @param str parameterName The parameter to be typed
+
+        returns: str The parameter type
+        """
+        parameterName = re.escape(parameterName)
+        fileData = self.fileSystem.getFileContent(fileDir)
+        temp, extension = os.path.splitext(fileDir)
+        
+        regexString = '(?:test_' + functionName + ')(?:.+)(?:' + parameterName + '\s*=\s*)([^\n|^\r|^;]+)'
+        parameterValues = re.findall(regexString, fileData, re.S)
+        try:
+            evaluatedParameterValue = eval(parameterValues[0])
+            parameterValueTypeString = type(evaluatedParameterValue).__name__
+        except Exception:
+            parameterValueTypeString = "__type__"
+        
+        return parameterValueTypeString
