@@ -17,6 +17,24 @@
                 {"key": "setting.command_mode"}
             ]
     },
+    {
+        "keys": ["super+alt+shift+d"],
+        "command": "documentation_from_unit_tests",
+        "context":
+            [
+                { "key": "setting.command_mode", "operand":false},
+                { "key": "setting.is_widget", "operand":false}
+            ]
+    },
+    {
+        "keys": ["super+alt+shift+d"],
+        "command": "documentation_from_unit_tests",
+        "context":
+            [
+                {"key": "setting.vintage_ctrl_keys"},
+                {"key": "setting.command_mode"}
+            ]
+    },
 	{
 		"keys": ["super+alt+n"],
 		"command": "classes_and_tests",

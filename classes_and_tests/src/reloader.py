@@ -50,6 +50,7 @@ mods_load_order = [
     '.SyncronizeClassAndTestTabs',
     '.OutputPanelInsert',
     '.OutputPanelClear'
+    '.DocumentationFromUnitTests'
 ]
 
 for suffix in mods_load_order:

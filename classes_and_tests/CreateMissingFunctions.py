@@ -51,7 +51,6 @@ else:
     plugin_loaded()
 
 class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
-
     def initializeDependencies(self):
         if not hasattr(self, "fileSystem"):
             self.fileSystem = FileSystem()
@@ -237,7 +236,6 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             else:
                 return []
         return
-    
 
     def _getParameterType(self, fileDir, functionName, parameterName):
         """ Goes through a test file and determines the parameter type of 
@@ -262,3 +260,4 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             parameterValueTypeString = "__type__"
         
         return parameterValueTypeString
+

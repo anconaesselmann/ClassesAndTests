@@ -155,8 +155,8 @@ class CreateMissingFunctionsTest(unittest.TestCase):
     	result = obj._getParameterType(fileDir, functionName, parameterName)
 
     	self.assertEqual("__type__", result)
-
-
+    
+    
 
 if __name__ == '__main__':
     unittest.main()

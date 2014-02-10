@@ -1,0 +1,22 @@
+{
+	"thisIsAFunction": {
+		"test_thisIsAFunction_first_test": {
+			"given": "these special conditions",
+			"when": "this specific thing happens",
+			"then": "this thing happens"
+		},
+		"test_thisIsAFunction_testing_this_other_thing": {
+			"given": "this other circumstance,\n         and when the thing can't be controlled",
+			"when": "thisIsAFunction is called,\n         but the main thing was not initialized",
+			"then": "we are in a pickle, because\n         we have no idea if this other thing happened"
+		},"test_thisIsAFunction_third_test": {
+			"given": "other one line conditions",
+			"when": "this setting is not set",
+			"then": "this other thing happens"
+		},"test_thisIsAFunction_php_fct": {
+			"given": "One Line php comment",
+			"when": "php second comment",
+			"then": "php thired comment"
+		}
+	}
+}

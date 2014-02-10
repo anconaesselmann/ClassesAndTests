@@ -26,8 +26,8 @@ if VERSION > 3000:
 	from .classes_and_tests.OutputPanelInsert import *
 	from .classes_and_tests.OutputPanelClear import *
 	from .classes_and_tests.TextInsert import *
+	from .classes_and_tests.DocumentationFromUnitTests import *
 else:
-
 	from classes_and_tests.src import reloader
 	from classes_and_tests.ClassesAndTests import *
 	from classes_and_tests.ToggleSourcesTests import *
@@ -38,3 +38,4 @@ else:
 	from classes_and_tests.OutputPanelInsert import *
 	from classes_and_tests.OutputPanelClear import *
 	from classes_and_tests.TextInsert import *
+	from classes_and_tests.DocumentationFromUnitTests import *
