@@ -105,11 +105,11 @@ class LiveUnitTesting():
     def _replacePhpTestFileLoadingStatements(self):
         injected = False
         for line in fileinput.input(self._getTempTestFileDir(), inplace=True):
+            sys.stdout.write(line)
             if not injected:
                 if "require_once" in line:
                     sys.stdout.write("\trequire_once \"" + self._getTempFileDir() + "\";\n")
                     injected = True
-            sys.stdout.write(line)
 
     def _replacePyTestFileLoadingStatements(self):
         folderName, completeFileName = os.path.split(self._activeFile.getFileName())
