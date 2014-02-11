@@ -108,7 +108,7 @@ class LiveUnitTesting():
             sys.stdout.write(line)
             if not injected:
                 if "require_once" in line:
-                    sys.stdout.write("\trequire_once \"" + self._getTempFileDir() + "\";\n")
+                    sys.stdout.write("\trequire_once \"" + self._getTempFileDir() + "\";")
                     injected = True
 
     def _replacePyTestFileLoadingStatements(self):
