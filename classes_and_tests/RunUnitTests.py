@@ -7,7 +7,11 @@ PACKAGE_VERSION = "0.2.0"
 
 def plugin_loaded():
     global settings
+    global PACKAGE_DIR
+    global TEMPLATES_DIR
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+    TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
     from src.MirroredDirectory import MirroredDirectory
@@ -19,9 +23,6 @@ except ImportError:
     from .src.OutputPanel import OutputPanel
     from .src.CommandExecutionThread import CommandExecutionThread
     from .src.UnitTestFunctions import UnitTestFunctions
-    def plugin_loaded():
-        global settings
-        settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
 else:
     plugin_loaded()
 
@@ -49,8 +50,10 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
             command = self.getPhpCommand()
         elif extension == "py":
             command = self.getPyCommand()
+        elif extension == "js":
+            command = UnitTestFunctions.getCommand(extension)
         else:
-            print("File extension not supported for running unit tests. Currently only 'php' and 'py' are allowed")
+            print("File extension not supported for running unit tests. Currently only 'php', 'py' and 'js' are allowed")
             return
 
         self.runTests(command, testsPath)
@@ -65,6 +68,13 @@ class RunUnitTestsCommand(sublime_plugin.WindowCommand):
     def getPyCommand(self):
         commandFolders = UnitTestFunctions.getCommandFolders(settings)
         return os.path.join(commandFolders["py"], "python")
+
+    #def getCommand(self, extension):
+    #    extTemplateDir = os.path.join(TEMPLATES_DIR, extension)
+    #    if os.path.exists(extTemplateDir):
+    #        return os.path.join(extTemplateDir, "testRunner");
+    #   else:
+    #       return None
 
     def getPhpCommand(self):
         commandFolders = UnitTestFunctions.getCommandFolders(settings)

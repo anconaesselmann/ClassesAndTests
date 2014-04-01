@@ -1,6 +1,8 @@
 DEBUG = False
 UNIT_TEST_DEBUG = False
 
+PACKAGE_NAME = "ClassesAndTests"
+
 from os import path
 try:
     import sublime
@@ -14,10 +16,20 @@ except ImportError:
     else:
         DEBUG = False
 
+def plugin_loaded():
+    global settings
+    global PACKAGE_DIR
+    global TEMPLATES_DIR
+    settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    PACKAGE_DIR = path.join(sublime.packages_path(), PACKAGE_NAME)
+    TEMPLATES_DIR = path.join(PACKAGE_DIR, "templates")
+
 try:
     from MirroredDirectory import MirroredDirectory
 except ImportError:
     from .MirroredDirectory import MirroredDirectory
+else:
+    plugin_loaded()
 
 class UnitTestFunctions:
     @staticmethod
@@ -35,8 +47,18 @@ class UnitTestFunctions:
 
         return {
                     "php": phpUnitDir,
-                    "py": pythonDir
+                    "py": pythonDir,
+                    "js": ""
                 }
+
+    @staticmethod
+    def getCommand(extension):
+        extTemplateDir = path.join(TEMPLATES_DIR, extension)
+        if path.exists(extTemplateDir):
+            return path.join(extTemplateDir, "testRunner");
+        else:
+            return None
+
 
     @staticmethod
     def classHasTest(view):

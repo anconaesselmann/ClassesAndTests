@@ -28,11 +28,13 @@ try:
     from SublimeFunctions import SublimeFunctions
     from MirroredDirectory import MirroredDirectory
     from TemplateFileCreator import TemplateFileCreator
+    from src.UnitTestFunctions import UnitTestFunctions
 except ImportError:
     from .FileSystem import FileSystem
     from .SublimeFunctions import SublimeFunctions
     from .MirroredDirectory import MirroredDirectory
     from .TemplateFileCreator import TemplateFileCreator
+    from .UnitTestFunctions import UnitTestFunctions
 
 class LiveUnitTesting():
     def __init__(self, commandFolders):
@@ -61,6 +63,8 @@ class LiveUnitTesting():
             result = os.path.join(os.path.normpath(self._commandFolders["php"]), "phpunit")
         elif extension == "py":
             result = os.path.join(os.path.normpath(self._commandFolders["py"]), "python")
+        elif extension == "js":
+            result = UnitTestFunctions.getCommand(extension)
         else:
             result = None
         return result

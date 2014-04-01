@@ -1,0 +1,16 @@
+[
+	{
+		"variable": "class_name",
+		"command": "get_class_name"
+	},
+	{
+		"variable": "author",
+		"command": "get_doc_block_tag",
+		"fromSettings": ["author"]
+	},
+	{
+		"variable": "license",
+		"command": "get_doc_block_tag",
+		"fromSettings": ["license"]
+	}
+]

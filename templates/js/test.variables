@@ -1,0 +1,6 @@
+[
+	{
+		"variable": "class_name",
+		"command": "get_class_name"
+	}
+]

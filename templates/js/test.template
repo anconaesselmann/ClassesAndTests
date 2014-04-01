@@ -1,0 +1,7 @@
+/* @class_name */Test = TestCase("/* @class_name */Test");
+
+/* @class_name */Test.prototype.testConstructor = function() {
+  var obj = new /* @class_name */();
+};
+
+/* @cursor */

@@ -1,0 +1,22 @@
+#!/usr/bin/python
+
+import sys
+import os.path
+import os
+
+if len(sys.argv) < 2:
+	print("Supply a path!");
+	exit(0)
+
+def runTests(pathName):
+	os.chdir(pathName)
+	os.system("java -jar /usr/bin/JsTestDriver.jar --tests all")
+
+tempPathName = sys.argv[1];
+while len(tempPathName) > 1:
+	tempFileName = os.path.join(tempPathName, "jsTestDriver.conf")
+	if os.path.isfile(tempFileName):
+		runTests(tempPathName)
+		exit(1);
+	else:
+		tempPathName = os.path.dirname(tempPathName);
