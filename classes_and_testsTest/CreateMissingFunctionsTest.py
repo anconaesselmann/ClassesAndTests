@@ -124,8 +124,8 @@ class CreateMissingFunctionsTest(unittest.TestCase):
     	self.assertEqual("float", floatResult)
 
     def test__isPhpDbTestCase(self):
-        fileDir      = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "TestDataPhpDatabaseTestCase.php")
-        data         = self._dataProvider_getParameterType_python()["dbtc"]
+        fileDir = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "TestDataPhpDatabaseTestCase.php")
+        data    = self._dataProvider_getParameterType_python()["dbtc"]
 
         obj = self._getInstance()
         obj.fileSystem.createFile(fileDir, data)
@@ -133,12 +133,13 @@ class CreateMissingFunctionsTest(unittest.TestCase):
         # When _isPhpDbTestCase is called
         result = obj._isPhpDbTestCase(fileDir)
 
-        # Then [EXPECTED CONDITIONS]
+        # Then
         self.assertEqual(True, result)
 
+    # TODO: this one doesn't really test anything....
     def test__createDbTestCaseFilesIfNotExist_do_not_exist(self):
-        fileDir      = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "MyPersistingClassTest.php")
-        data         = self._dataProvider_getParameterType_python()["dbtc"]
+        fileDir = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "MyPersistingClassTest.php")
+        data    = self._dataProvider_getParameterType_python()["dbtc"]
 
         obj = self._getInstance()
         obj.fileSystem.createFile(fileDir, data)
@@ -146,8 +147,76 @@ class CreateMissingFunctionsTest(unittest.TestCase):
         # When _isPhpDbTestCase is called
         result = obj._createDbTestCaseFilesIfNotExist(fileDir)
 
-        # Then [EXPECTED CONDITIONS]
-        self.assertEqual(True, result)
+        # Then
+        # self.assertEqual(True, result)
+
+    def test__getFunctionName_sql_function(self):
+        data = """aae\db\StorageAPIException: Database Error with message:
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION tests.doFo16_times does not exist"""
+        obj = self._getInstance()
+
+        # When _getFunctionName is called
+        functionName, functionType = obj._getFunctionName(data)
+
+        # Then
+        self.assertEqual("doFo16_times", functionName)
+        self.assertEqual("sql", functionType)
+
+    def test__getParameterNamesFromString(self):
+        data = """public function fu() {
+            $this->_db->doFo16_times(    $something,  $some34_thingElse );
+            return;
+        }"""
+        functionName = "doFo16_times";
+        obj = self._getInstance()
+
+        # When _getParameterNamesFromString is called
+        result = obj._getParameterNamesFromString(data, functionName)
+
+        # Then
+        self.assertEqual(["something", "some34_thingElse"], result)
+
+    def test__createFunctionBody(self):
+        functionName = "doFo16_times"
+        parameterList = ["something", "some34_thingElse"]
+        expected = """
+CREATE FUNCTION doFo16_times (something INT UNSIGNED, some34_thingElse INT UNSIGNED)
+    RETURNS INT UNSIGNED
+    BEGIN
+
+        RETURN something;
+    END //
+"""
+
+        obj = self._getInstance()
+
+        # When _createFunctionBody is called
+        result = obj._createFunctionBody(functionName, parameterList)
+
+        # Then
+        self.assertEqual(expected, result)
+
+    def test__replaceDelimiter(self):
+        data = """Some other stuff
+
+DELIMITER ;
+possibly other stuff
+"""
+        expected = """Some other stuff
+
+
+newStuff
+
+DELIMITER ;
+possibly other stuff
+"""
+        obj = self._getInstance()
+
+        # When _replaceDelimiter is called
+        result = obj._replaceDelimiter(data, "newStuff")
+
+        # Then
+        self.assertEqual(expected, result)
 
 
     def test__getParameterType_Determine_the_type_of_a_parameter_of_a_php_function(self):

@@ -89,9 +89,9 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if thread.is_alive():
             sublime.set_timeout(lambda: self._handleCommandThread(thread), 100)
         else:
-            functionName = self._getFunctionName(thread.result)
+            functionName, functionType = self._getFunctionName(thread.result)
             if functionName is not None:
-                self._insertFunction(functionName)
+                self._insertFunction(functionName, functionType)
             else:
                 if DEBUG: print("No functions have to be declared.")
 
@@ -99,26 +99,71 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         result = None
         phpMatches = re.findall("(?<=Fatal\\serror:)(?:[\\s\\w\\\\]+undefined\\smethod)(?:[\\s\\w\\\\]+::)([\\w]+)(?=\\(\\))", testResult)
         if len(phpMatches) > 0:
-            return phpMatches[0]
+            return phpMatches[0], "php"
         pyMatches = re.findall("(?<=AttributeError:)(?:[\\s\\w]+')(\\w+)(?=')", testResult)
         if len(pyMatches) > 0:
-            return pyMatches[0]
+            return pyMatches[0], "py"
+        sqlMatches = re.findall("(?<=StorageAPIException)(?:[:\s\w\[\]\d]+\.)([\w_\d]+)", testResult)
+        if len(sqlMatches) > 0:
+            return sqlMatches[0], "sql"
 
         return result
 
-    def _insertFunction(self, functionName):
+    # TODO: possible duplicate... merge with _getParameterNames
+    def _getParameterNamesFromString(self, string, functionName):
+        result = None
+        parameters = re.findall("(?<=->"+functionName+")(?:[\s]*\()([\w\d_,\s\$]+)(?=\))", string)
+        if len(parameters) > 0:
+            paramList = [x.strip()[1:] for x in parameters[0].split(",")]
+            return paramList
+
+    def _createFunctionBody(self, functionName, parametList):
+        parametList = "("+" INT UNSIGNED, ".join(parametList) + " INT UNSIGNED)"
+        return """
+CREATE FUNCTION """ + functionName + " " + parametList + """
+    RETURNS INT UNSIGNED
+    BEGIN
+
+        RETURN something;
+    END //
+"""
+
+    def _insertSqlFunction(self, functionName, paramList, testFileName):
+        self._setDbFiles(testFileName)
+        content = self.fileSystem.getFileContent(self.classFunctionsDir)
+        functionBody = self._createFunctionBody(functionName, paramList)
+        content = self._replaceDelimiter(content, functionBody)
+        self.fileSystem.replaceFile(self.classFunctionsDir, content)
+        return
+
+    def _replaceDelimiter(self, fileContent, newContent):
+        fileContent = re.sub(r'DELIMITER ;', "\n" + newContent + "\n\nDELIMITER ;", fileContent)
+        return fileContent
+
+
+    def _getParameterNamesFromView(self, view, functionName):
+        content = view.substr(sublime.Region(0, view.size()))
+        return self._getParameterNamesFromString(content, functionName)
+
+    def _insertFunction(self, functionName, functionType):
         classView = self.classView
+        classFileName = self.classView.file_name()
+        md = MirroredDirectory()
+        md.fileSystem = self.fileSystem
+        md.set(classFileName)
+
+        testFileName = md.getTestFileName()
+
+        if functionType == "sql":
+            print("creating sql function " + functionName)
+            paramList = self._getParameterNamesFromView(classView, functionName)
+            # print(paramList)
+            self._insertSqlFunction(functionName, paramList, testFileName)
+            return
         insertionPoint = self._getInsertPoint(classView)
         if insertionPoint is not None:
             indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
 
-            classFileName = self.classView.file_name()
-
-            md = MirroredDirectory()
-            md.fileSystem = self.fileSystem
-            md.set(classFileName)
-
-            testFileName = md.getTestFileName()
             parameters = self._getParameterNames(functionName, testFileName)
             insertionString = self._getFunctionBody(classFileName, functionName, indentation, parameters)
 
@@ -147,47 +192,36 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         if len(pyMatches) > 0: return True
         return False
 
-    def _createDbTestCaseFilesIfNotExist(self, testFile):
+    def _setDbFiles(self, testFile):
         md = MirroredDirectory()
         md.fileSystem = self.fileSystem
         md.set(testFile)
 
-        classFile = md.getFileName()
+        classFile    = md.getFileName()
+        self.testDataDir  = path.join(FileComponents(testFile).getDir(), FileComponents(testFile).getFile() + "Data")
+        self.classDataDir = path.join(FileComponents(classFile).getDir(), FileComponents(classFile).getFile() + "Data")
 
-        # RunkeeperTestData
-        print("\n\n\n" + testFile)
-        print(classFile + "\n\n\n")
+        self.testSetupDir      = path.join(self.testDataDir, "setup.sql")
+        self.classSetupDir     = path.join(self.classDataDir,"setup.json")
+        self.classFunctionsDir = path.join(self.classDataDir,"functions.sql")
+        self.classTablesDir    = path.join(self.classDataDir,"tables.sql")
+        # print(self.testDataDir)
+        # print(self.classDataDir)
 
+    def _createDbTestCaseFilesIfNotExist(self, testFile):
+        self._setDbFiles(testFile)
 
-        testDataDir = path.join(FileComponents(testFile).getDir(), FileComponents(testFile).getFile() + "Data")
-        classDataDir = path.join(FileComponents(classFile).getDir(), FileComponents(classFile).getFile() + "Data")
-
-        print(testDataDir)
-        print(classDataDir)
-
-        if self.fileSystem.isdir(classDataDir) == False:
-            self.fileSystem.createFolder(testDataDir)
-            self.fileSystem.createFolder(classDataDir)
-            testSetupDir          = path.join(testDataDir,      "setup.sql")
+        if self.fileSystem.isdir(self.classDataDir) == False:
+            self.fileSystem.createFolder(self.testDataDir)
+            self.fileSystem.createFolder(self.classDataDir)
             testSetupContent      = self._templateContentGetter("setup.sql")
-            classSetupDir         = path.join(classDataDir,     "setup.json")
             classSetupContent     = self._templateContentGetter("setup.json")
-            classFunctionsDir     = path.join(classDataDir,     "functions.sql")
             classFunctionsContent = self._templateContentGetter("functions.sql")
-            classTablesDir        = path.join(classDataDir,     "tables.sql")
             classTablesContent    = self._templateContentGetter("tables.sql")
-            print(testSetupDir)
-            print(testSetupContent)
-            print(classSetupDir)
-            print(classSetupContent)
-            print(classFunctionsDir)
-            print(classFunctionsContent)
-            print(classTablesDir)
-            print(classTablesContent)
-            self.fileSystem.createFile(testSetupDir,      testSetupContent)
-            self.fileSystem.createFile(classSetupDir,     classSetupContent)
-            self.fileSystem.createFile(classFunctionsDir, classFunctionsContent)
-            self.fileSystem.createFile(classTablesDir,    classTablesContent)
+            self.fileSystem.createFile(self.testSetupDir,      testSetupContent)
+            self.fileSystem.createFile(self.classSetupDir,     classSetupContent)
+            self.fileSystem.createFile(self.classFunctionsDir, classFunctionsContent)
+            self.fileSystem.createFile(self.classTablesDir,    classTablesContent)
             return True
 
         return False
