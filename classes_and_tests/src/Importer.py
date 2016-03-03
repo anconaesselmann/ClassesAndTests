@@ -13,6 +13,3 @@ class Importer():
         module = imp.load_source('tempObjects', filePath)
         obj = getattr(module, objectName)
         return obj
-
-
-        

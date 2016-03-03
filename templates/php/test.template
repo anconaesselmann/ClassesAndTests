@@ -1,10 +1,10 @@
 <?php
 namespace /* @namespace */ {
-	/* @php_autoloader */
-	class /* @class_name */Test extends \PHPUnit_Framework_TestCase {
-		public function test___construct() {
-			$obj = new /* @class_name */();
-		}
-		/* @cursor */
-	}
+    /* @php_autoloader */
+    class /* @class_name */Test extends \PHPUnit_Framework_TestCase {
+        public function test___construct() {
+            $obj = new /* @class_name */();
+        }
+        /* @cursor */
+    }
 }

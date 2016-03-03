@@ -17,7 +17,7 @@ class CreateMissingFunctionsTest(unittest.TestCase):
 
         pyTestFileContent  = FileSystem.getFileContentFromTestDataFile("TestData.py")
         phpTestFileContent = FileSystem.getFileContentFromTestDataFile("TestData.php")
-        
+
         obj = CreateMissingFunctionsCommand()
         obj.fileSystem = MockFileSystem()
         obj.fileSystem.createFile(pyClassFile)
@@ -99,7 +99,8 @@ class CreateMissingFunctionsTest(unittest.TestCase):
         	dataPhp = FileSystem.getFileContentFromTestDataFile("TestData.php"),
     		string  = "parameter1",
     		integer = "parameter2",
-    		float   = "parameter3"
+    		float   = "parameter3",
+            dbtc    = FileSystem.getFileContentFromTestDataFile("TestDataPhpDatabaseTestCase.php")
     	)
     def test__getParameterType_Determine_the_type_of_a_parameter_of_a_python_function(self):
     	fileDir 	 = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "ControllerTest1.py")
@@ -111,7 +112,7 @@ class CreateMissingFunctionsTest(unittest.TestCase):
 
     	parameterName = self._dataProvider_getParameterType_python()["string"]
     	stringResult  = obj._getParameterType(fileDir, functionName, parameterName)
-		
+
     	parameterName = self._dataProvider_getParameterType_python()["integer"]
     	intResult     = obj._getParameterType(fileDir, functionName, parameterName)
 
@@ -121,6 +122,33 @@ class CreateMissingFunctionsTest(unittest.TestCase):
     	self.assertEqual("str", stringResult)
     	self.assertEqual("int", intResult)
     	self.assertEqual("float", floatResult)
+
+    def test__isPhpDbTestCase(self):
+        fileDir      = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "TestDataPhpDatabaseTestCase.php")
+        data         = self._dataProvider_getParameterType_python()["dbtc"]
+
+        obj = self._getInstance()
+        obj.fileSystem.createFile(fileDir, data)
+
+        # When _isPhpDbTestCase is called
+        result = obj._isPhpDbTestCase(fileDir)
+
+        # Then [EXPECTED CONDITIONS]
+        self.assertEqual(True, result)
+
+    def test__createDbTestCaseFilesIfNotExist_do_not_exist(self):
+        fileDir      = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "MyPersistingClassTest.php")
+        data         = self._dataProvider_getParameterType_python()["dbtc"]
+
+        obj = self._getInstance()
+        obj.fileSystem.createFile(fileDir, data)
+
+        # When _isPhpDbTestCase is called
+        result = obj._createDbTestCaseFilesIfNotExist(fileDir)
+
+        # Then [EXPECTED CONDITIONS]
+        self.assertEqual(True, result)
+
 
     def test__getParameterType_Determine_the_type_of_a_parameter_of_a_php_function(self):
     	fileDir 	 = path.join(os.sep, "MyProject1", "library", "aaeTest", "mvc", "ControllerTest1.php")
@@ -132,7 +160,7 @@ class CreateMissingFunctionsTest(unittest.TestCase):
 
     	parameterName = self._dataProvider_getParameterType_python()["string"]
     	stringResult  = obj._getParameterType(fileDir, functionName, parameterName)
-		
+
     	parameterName = self._dataProvider_getParameterType_python()["integer"]
     	intResult 	  = obj._getParameterType(fileDir, functionName, parameterName)
 
@@ -155,8 +183,8 @@ class CreateMissingFunctionsTest(unittest.TestCase):
     	result = obj._getParameterType(fileDir, functionName, parameterName)
 
     	self.assertEqual("__type__", result)
-    
-    
+
+
 
 if __name__ == '__main__':
     unittest.main()

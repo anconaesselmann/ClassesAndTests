@@ -3,12 +3,12 @@
  *
  */
 namespace /* @namespace */ {
-	/**
-	 * /* @author */
-	 * /* @license */
-	 * @package /* @namespace */
-	 */
-	class /* @class_name */ {
-		/* @cursor */
-	}
+    /**
+     * /* @author */
+     * /* @license */
+     * @package /* @namespace */
+     */
+    class /* @class_name */ {
+        /* @cursor */
+    }
 }

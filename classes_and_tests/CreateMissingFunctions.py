@@ -11,6 +11,10 @@ PACKAGE_NAME = "ClassesAndTests"
 def plugin_loaded():
     global settings
     settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+    global PACKAGE_DIR
+    global TEMPLATES_DIR
+    PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+    TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 
 try:
     import sublime
@@ -22,7 +26,7 @@ except ImportError:
     except ImportError:
         from .src.mocking.sublime import sublime
         from .src.mocking         import sublime_plugin
-    if UNIT_TEST_DEBUG: 
+    if UNIT_TEST_DEBUG:
         DEBUG = True
         print("CreateMissingFunctions: sublime and sublime_plugin not imported in " + __file__)
     else:
@@ -47,6 +51,10 @@ except ImportError:
     def plugin_loaded():
         global settings
         settings = sublime.load_settings(PACKAGE_NAME+ '.sublime-settings')
+        global PACKAGE_DIR
+        global TEMPLATES_DIR
+        PACKAGE_DIR = os.path.join(sublime.packages_path(), PACKAGE_NAME)
+        TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 else:
     plugin_loaded()
 
@@ -103,7 +111,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         insertionPoint = self._getInsertPoint(classView)
         if insertionPoint is not None:
             indentation = Std.getLineIndentAsWhitespace(classView.substr(classView.line(insertionPoint)))
-            
+
             classFileName = self.classView.file_name()
 
             md = MirroredDirectory()
@@ -120,12 +128,74 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             if self.view != self.classView:
                 sublime.active_window().run_command("toggle_sources_tests")
             extension = FileComponents(classView.file_name()).getExtension()
-            if extension != "py": 
-                # for some odd reason in .py scripts this would create multiple functions with 
+            if extension != "py":
+                # for some odd reason in .py scripts this would create multiple functions with
                 # the same name.... I might have to hook into the on_change event
                 sublime.set_timeout(lambda: self._runUnitTest(), 200)
+
+            # if db test case in php, create templates for db setup
+            if self._isPhpDbTestCase(testFileName):
+                self._createDbTestCaseFilesIfNotExist(testFileName)
+
         else:
             print("File is not formatted correctly. A class{} needs to be inside a namespace{}")
+
+    def _isPhpDbTestCase(self, testFileDir):
+        result = None
+        fileContent = self.fileSystem.getFileContent(testFileDir)
+        pyMatches = re.findall("DbTestCase?\s{", fileContent)
+        if len(pyMatches) > 0: return True
+        return False
+
+    def _createDbTestCaseFilesIfNotExist(self, testFile):
+        md = MirroredDirectory()
+        md.fileSystem = self.fileSystem
+        md.set(testFile)
+
+        classFile = md.getFileName()
+
+        # RunkeeperTestData
+        print("\n\n\n" + testFile)
+        print(classFile + "\n\n\n")
+
+
+        testDataDir = path.join(FileComponents(testFile).getDir(), FileComponents(testFile).getFile() + "Data")
+        classDataDir = path.join(FileComponents(classFile).getDir(), FileComponents(classFile).getFile() + "Data")
+
+        print(testDataDir)
+        print(classDataDir)
+
+        if self.fileSystem.isdir(classDataDir) == False:
+            self.fileSystem.createFolder(testDataDir)
+            self.fileSystem.createFolder(classDataDir)
+            testSetupDir          = path.join(testDataDir,      "setup.sql")
+            testSetupContent      = self._templateContentGetter("setup.sql")
+            classSetupDir         = path.join(classDataDir,     "setup.json")
+            classSetupContent     = self._templateContentGetter("setup.json")
+            classFunctionsDir     = path.join(classDataDir,     "functions.sql")
+            classFunctionsContent = self._templateContentGetter("functions.sql")
+            classTablesDir        = path.join(classDataDir,     "tables.sql")
+            classTablesContent    = self._templateContentGetter("tables.sql")
+            print(testSetupDir)
+            print(testSetupContent)
+            print(classSetupDir)
+            print(classSetupContent)
+            print(classFunctionsDir)
+            print(classFunctionsContent)
+            print(classTablesDir)
+            print(classTablesContent)
+            self.fileSystem.createFile(testSetupDir,      testSetupContent)
+            self.fileSystem.createFile(classSetupDir,     classSetupContent)
+            self.fileSystem.createFile(classFunctionsDir, classFunctionsContent)
+            self.fileSystem.createFile(classTablesDir,    classTablesContent)
+            return True
+
+        return False
+
+    def _templateContentGetter(self, name):
+        templatePath    = os.path.join(TEMPLATES_DIR, "php", "dbTestCase", name)
+        templateContent = self.fileSystem.getFileContent(templatePath)
+        return templateContent
 
     def _getInsertPoint(self, view):
         extension = FileComponents(view.file_name()).getExtension()
@@ -238,7 +308,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         return
 
     def _getParameterType(self, fileDir, functionName, parameterName):
-        """ Goes through a test file and determines the parameter type of 
+        """ Goes through a test file and determines the parameter type of
         parameter "parameterName" of the function "functionName"
 
         @param str fileDir The path to a test file
@@ -250,7 +320,7 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
         parameterName = re.escape(parameterName)
         fileData = self.fileSystem.getFileContent(fileDir)
         temp, extension = os.path.splitext(fileDir)
-        
+
         regexString = '(?:test_' + functionName + ')(?:.+)(?:' + parameterName + '\s*=\s*)([^\n|^\r|^;]+)'
         parameterValues = re.findall(regexString, fileData, re.S)
         try:
@@ -258,6 +328,6 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             parameterValueTypeString = type(evaluatedParameterValue).__name__
         except Exception:
             parameterValueTypeString = "__type__"
-        
+
         return parameterValueTypeString
 
