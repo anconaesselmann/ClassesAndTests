@@ -150,6 +150,18 @@ class CreateMissingFunctionsTest(unittest.TestCase):
         # Then
         # self.assertEqual(True, result)
 
+    def test__getFunctionName_sql_procedure(self):
+        data = """aae\db\StorageAPIException: Database Error with message:
+        SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE tests.doFo16_times does not exist"""
+        obj = self._getInstance()
+
+        # When _getFunctionName is called
+        functionName, functionType = obj._getFunctionName(data)
+
+        # Then
+        self.assertEqual("doFo16_times", functionName)
+        self.assertEqual("sqlPro", functionType)
+
     def test__getFunctionName_sql_function(self):
         data = """aae\db\StorageAPIException: Database Error with message:
 SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION tests.doFo16_times does not exist"""
@@ -160,7 +172,7 @@ SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION tests.doFo16_ti
 
         # Then
         self.assertEqual("doFo16_times", functionName)
-        self.assertEqual("sql", functionType)
+        self.assertEqual("sqlFunc", functionType)
 
     def test__getParameterNamesFromString(self):
         data = """public function fu() {

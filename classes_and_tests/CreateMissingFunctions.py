@@ -105,7 +105,12 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             return pyMatches[0], "py"
         sqlMatches = re.findall("(?<=StorageAPIException)(?:[:\s\w\[\]\d]+\.)([\w_\d]+)", testResult)
         if len(sqlMatches) > 0:
-            return sqlMatches[0], "sql"
+            sqlType = re.findall("(?<=StorageAPIException)(?:[:\s\w\[\]\d]+)(FUNCTION)", testResult)
+            if len(sqlType) > 0:
+                if sqlType[0] == 'FUNCTION':
+                    sqlType = "sqlFunc"
+            else: sqlType = "sqlPro"
+            return sqlMatches[0], sqlType
 
         return result
 
@@ -118,13 +123,23 @@ class CreateMissingFunctionsCommand(sublime_plugin.TextCommand):
             return paramList
 
     def _createFunctionBody(self, functionName, parametList):
-        parametList = "("+" INT UNSIGNED, ".join(parametList) + " INT UNSIGNED)"
+        parametString = "("+" INT UNSIGNED, ".join(parametList) + " INT UNSIGNED)"
         return """
-CREATE FUNCTION """ + functionName + " " + parametList + """
+CREATE FUNCTION """ + functionName + " " + parametString + """
     RETURNS INT UNSIGNED
     BEGIN
 
-        RETURN something;
+        RETURN """ + parametList[0] + """;
+    END //
+"""
+
+    def _createProcedureBody(self, functionName, parametList):
+        parametString = "(in "+" INT UNSIGNED, in ".join(parametList) + " INT UNSIGNED)"
+        return """
+CREATE PROCEDURE """ + functionName + " " + parametString + """
+    BEGIN
+
+        SELECT COUNT(*) FROM users;
     END //
 """
 
@@ -132,6 +147,14 @@ CREATE FUNCTION """ + functionName + " " + parametList + """
         self._setDbFiles(testFileName)
         content = self.fileSystem.getFileContent(self.classFunctionsDir)
         functionBody = self._createFunctionBody(functionName, paramList)
+        content = self._replaceDelimiter(content, functionBody)
+        self.fileSystem.replaceFile(self.classFunctionsDir, content)
+        return
+
+    def _insertSqlProcedure(self, functionName, paramList, testFileName):
+        self._setDbFiles(testFileName)
+        content = self.fileSystem.getFileContent(self.classFunctionsDir)
+        functionBody = self._createProcedureBody(functionName, paramList)
         content = self._replaceDelimiter(content, functionBody)
         self.fileSystem.replaceFile(self.classFunctionsDir, content)
         return
@@ -154,11 +177,15 @@ CREATE FUNCTION """ + functionName + " " + parametList + """
 
         testFileName = md.getTestFileName()
 
-        if functionType == "sql":
+        if functionType == "sqlFunc":
             print("creating sql function " + functionName)
             paramList = self._getParameterNamesFromView(classView, functionName)
-            # print(paramList)
             self._insertSqlFunction(functionName, paramList, testFileName)
+            return
+        elif functionType == "sqlPro":
+            print("creating sql function " + functionName)
+            paramList = self._getParameterNamesFromView(classView, functionName)
+            self._insertSqlProcedure(functionName, paramList, testFileName)
             return
         insertionPoint = self._getInsertPoint(classView)
         if insertionPoint is not None:
