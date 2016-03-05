@@ -265,6 +265,53 @@ possibly other stuff
 
     	self.assertEqual("__type__", result)
 
+    def test__replaceDbFileVariables(self):
+        className = "FuBar"
+        string = """
+DELIMITER //
+
+CREATE PROCEDURE load{$CAMEL_CASE}FromId (in {$CAMEL_CASE_FIRST_LOWER}Id INT UNSIGNED)
+    BEGIN
+        SELECT * FROM {$SNAKE_CASE}s WHERE {$SNAKE_CASE}_id = {$CAMEL_CASE_FIRST_LOWER}Id;
+    END //
+
+CREATE FUNCTION create{$CAMEL_CASE} (userId INT UNSIGNED, FIRST_COLUMN_PARAMETER_NAME VARCHAR(255), SECON_COLUMN_PARAMETER_NAME VARCHAR(255))
+    RETURNS INT UNSIGNED
+    BEGIN
+        INSERT INTO {$SNAKE_CASE}s
+            (user_id, FIRST_COLUMN_TABLE_NAME, SECND_COLUMN_TABLE_NAME)
+            VALUES(userId, FIRST_COLUMN_PARAMETER_NAME, SECON_COLUMN_PARAMETER_NAME);
+        RETURN ROW_COUNT();
+    END //
+
+CREATE FUNCTION update{$CAMEL_CASE} ({$CAMEL_CASE_FIRST_LOWER}Id INT UNSIGNED, userId INT UNSIGNED, FIRST_COLUMN_PARAMETER_NAME VARCHAR(255), SECON_COLUMN_PARAMETER_NAME VARCHAR(255))
+    RETURNS INT UNSIGNED
+    BEGIN
+        UPDATE {$SNAKE_CASE}s
+        SET
+            FIRST_COLUMN_TABLE_NAME = COALESCE(FIRST_COLUMN_PARAMETER_NAME, FIRST_COLUMN_TABLE_NAME),
+            SECND_COLUMN_TABLE_NAME = COALESCE(SECON_COLUMN_PARAMETER_NAME, SECND_COLUMN_TABLE_NAME)
+        WHERE user_id = userId;
+        RETURN ROW_COUNT();
+    END //
+
+CREATE FUNCTION delete{$CAMEL_CASE} ({$CAMEL_CASE_FIRST_LOWER}Id INT UNSIGNED, userId INT UNSIGNED)
+    RETURNS INT UNSIGNED
+    BEGIN
+        DELETE FROM {$SNAKE_CASE}s
+            WHERE {$SNAKE_CASE}_id = {$CAMEL_CASE_FIRST_LOWER}Id
+                AND user_id = userId;
+        RETURN ROW_COUNT();
+    END //
+
+DELIMITER ;
+
+"""
+        obj = self._getInstance()
+        result = obj._replaceDbFileVariables(className, string)
+
+        # print(result)
+
 
 
 if __name__ == '__main__':

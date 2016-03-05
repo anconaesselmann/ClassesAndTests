@@ -224,7 +224,8 @@ CREATE PROCEDURE """ + functionName + " " + parametString + """
         md.fileSystem = self.fileSystem
         md.set(testFile)
 
-        classFile    = md.getFileName()
+        classFile         = md.getFileName()
+        self.className    = os.path.basename(classFile).split(".")[0]
         self.testDataDir  = path.join(FileComponents(testFile).getDir(), FileComponents(testFile).getFile() + "Data")
         self.classDataDir = path.join(FileComponents(classFile).getDir(), FileComponents(classFile).getFile() + "Data")
 
@@ -235,6 +236,27 @@ CREATE PROCEDURE """ + functionName + " " + parametString + """
         # print(self.testDataDir)
         # print(self.classDataDir)
 
+    def _replaceDbFileVariables(self, className, string):
+        replacement = "blabl"
+
+        searchString = "CAMEL_CASE"
+        replacement  = className
+        string = re.sub('\{\$'+searchString+'\}', replacement, string)
+
+        searchString = "CAMEL_CASE_FIRST_LOWER"
+        replacement  = className[:1].lower() + className[1:]
+        string = re.sub('\{\$'+searchString+'\}', replacement, string)
+
+        searchString = "SNAKE_CASE"
+        replacement  = self.camelToSnake(className)
+        string = re.sub('\{\$'+searchString+'\}', replacement, string)
+
+        return string
+
+    def camelToSnake(self, name):
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
     def _createDbTestCaseFilesIfNotExist(self, testFile):
         self._setDbFiles(testFile)
 
@@ -244,7 +266,9 @@ CREATE PROCEDURE """ + functionName + " " + parametString + """
             testSetupContent      = self._templateContentGetter("setup.sql")
             classSetupContent     = self._templateContentGetter("setup.json")
             classFunctionsContent = self._templateContentGetter("functions.sql")
+            classFunctionsContent = self._replaceDbFileVariables(self.className, classFunctionsContent)
             classTablesContent    = self._templateContentGetter("tables.sql")
+            classTablesContent    = self._replaceDbFileVariables(self.className, classTablesContent)
             self.fileSystem.createFile(self.testSetupDir,      testSetupContent)
             self.fileSystem.createFile(self.classSetupDir,     classSetupContent)
             self.fileSystem.createFile(self.classFunctionsDir, classFunctionsContent)
