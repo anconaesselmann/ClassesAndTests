@@ -1,4 +1,4 @@
-#Classes and Tests (beta) 
+#LiveUnit (beta) 
 
 ####A smart-template-based file creator and test runner for PSR-0 name-spaced class and test files
 
@@ -45,4 +45,4 @@ Currently only key-bindings for Mac exist.
 
 I am a freelance software engineer, if this plugin is useful to you, please considder supporting me with a donation!
 
-<a href='https://pledgie.com/campaigns/22419'><img alt='Click here to lend your support to: Support the software you use! and make a donation at www.pledgie.com !' src='https://github.com/anconaesselmann/ClassesAndTests/raw/master/images/donate.png' border='0' ></a>
+<a href='https://pledgie.com/campaigns/22419'><img alt='Click here to lend your support to: Support the software you use! and make a donation at www.pledgie.com !' src='https://github.com/anconaesselmann/LiveUnit/raw/master/images/donate.png' border='0' ></a>
